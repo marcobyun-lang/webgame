@@ -128,12 +128,20 @@
         /* Mobile Controls */
         .mobile-ctrl-group {
             position: absolute;
-            display: flex;
-            gap: 15px;
+            bottom: 40px;
+            left: 20px;
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left . right"
+                ". down .";
+            gap: 10px;
             z-index: 1000;
         }
-        #mobile-controls-left { bottom: 40px; left: 20px; }
-        #mobile-controls-right { bottom: 40px; right: 20px; flex-direction: column; }
+        #btn-up { grid-area: up; }
+        #btn-left { grid-area: left; }
+        #btn-right { grid-area: right; }
+        #btn-down { grid-area: down; }
 
         .control-btn {
             width: 70px;
@@ -150,6 +158,7 @@
             -webkit-tap-highlight-color: transparent;
             backdrop-filter: blur(4px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            touch-action: none;
         }
         .control-btn:active {
             background: rgba(255, 255, 255, 0.5);
@@ -225,12 +234,10 @@
             <div id="event-reward"></div>
         </div>
 
-        <div id="mobile-controls-left" class="mobile-ctrl-group">
+        <div id="mobile-controls" class="mobile-ctrl-group">
+            <div class="control-btn" id="btn-up">▲</div>
             <div class="control-btn" id="btn-left">◀</div>
             <div class="control-btn" id="btn-right">▶</div>
-        </div>
-        <div id="mobile-controls-right" class="mobile-ctrl-group">
-            <div class="control-btn" id="btn-up">▲</div>
             <div class="control-btn" id="btn-down">▼</div>
         </div>
 
