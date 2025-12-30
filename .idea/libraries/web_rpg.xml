@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="web-rpg">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/web-rpg.Zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

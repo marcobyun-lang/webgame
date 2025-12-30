@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>DUNGEON RPG - Battle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-color: #050505; 
+            --panel-bg: rgba(20, 20, 25, 0.95); 
+            --border-color: #5c4d3c; 
+            --accent-gold: #ffd700; 
+            --accent-red: #ff3333; 
+            --danger: #ff1744; 
+            --mp-color: #2979ff; 
+            --rage-color: #ff9800;
+            --text-main: #e0e0e0;
+            --font-combat: 'Black Han Sans', sans-serif;
+            --font-ui: 'Noto Serif KR', serif;
+            --font-eng: 'Cinzel', serif;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), repeating-linear-gradient(45deg, #121212 0, #121212 10px, #0a0a0a 10px, #0a0a0a 20px); 
+            color: var(--text-main); 
+            font-family: var(--font-ui); 
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; user-select: none;
+        }
+
+        #game-container { 
+            width: 960px; height: 720px; 
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('image/map.jpg') center/cover;
+            border: 2px solid #333; 
+            box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 100px rgba(0,0,0,0.8); 
+            border-radius: 8px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        }
+
+        #game-container::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 60%, black 100%); pointer-events: none; z-index: 5; }
+        
+        .battle-stage { display: flex; justify-content: space-around; align-items: center; width: 90%; margin-bottom: 20px; z-index: 20; position: relative; }
+        .unit-box { text-align: center; width: 260px; position: relative; display: flex; flex-direction: column; align-items: center; }
+        
+        .unit-frame {
+            width: 180px; height: 180px; 
+            border: 4px solid #444; border-radius: 8px; 
+            overflow: hidden; position: relative; background: #111; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1; 
+            transition: transform 0.1s;
+        }
+        .unit-img, video { width: 100% !important; height: 100% !important; object-fit: cover !important; background-color: #000; }
+        
+        .unit-info { margin-top: 15px; width: 100%; text-shadow: 2px 2px 4px #000; }
+        .unit-name { font-family: var(--font-combat); font-size: 1.5rem; color: #fff; margin: 0; letter-spacing: 1px; }
+        .unit-job { font-family: var(--font-eng); font-size: 0.8rem; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+        
+        .bar-container { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        .bar-wrap { 
+            background: #111; height: 16px; border: 1px solid #333; 
+            border-radius: 3px; overflow: hidden; position: relative; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        }
+        .bar-fill { height: 100%; transition: width 0.3s ease-out; position: relative; }
+        .bar-fill::after { content:""; position:absolute; top:0; left:0; width:100%; height:50%; background:rgba(255,255,255,0.2); }
+        .hp-bar { background: linear-gradient(90deg, #b71c1c, #ff5252); }
+        .mp-bar { background: linear-gradient(90deg, #0d47a1, #448aff); }
+        .rage-bar { background: linear-gradient(90deg, #e65100, #ff9800); }
+
+        .bar-text { 
+            position: absolute; width: 100%; top: 0; left: 0; line-height: 16px; 
+            font-size: 10px; font-family: var(--font-eng); font-weight: bold; text-align: center; 
+            text-shadow: 1px 1px 2px #000; z-index: 5; color: #fff; letter-spacing: 1px;
+        }
+
+        .status-effects { display: flex; gap: 5px; margin-top: 5px; justify-content: center; min-height: 20px; }
+        .status-icon { padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #fff; }
+        .status-poison { background: #4caf50; }
+        .status-stun { background: #ffeb3b; color: #000; }
+
+        .speech {
+            position: absolute; top: -50px; left: 50%; transform: translateX(-50%); 
+            background: rgba(255, 255, 255, 0.95); color: #000; padding: 8px 16px; border: 2px solid #000; 
+            border-radius: 8px; font-family: var(--font-ui); font-weight: bold; font-size: 0.95rem; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; z-index: 100; white-space: nowrap; 
+            animation: float 2s infinite ease-in-out;
+        }
+        .speech::after { content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); border-width:8px 8px 0; border-style:solid; border-color:rgba(255,255,255,0.95) transparent transparent transparent; }
+        @keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -5px); } }
+        
+        .vs-text { font-family: var(--font-eng); font-size: 4rem; color: rgba(255,255,255,0.1); font-style: italic; font-weight: bold; }
+
+        .log-panel {
+            width: 700px; height: 100px; 
+            background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 4px;
+            padding: 15px; overflow-y: auto; margin-bottom: 25px; 
+            font-size: 1rem; color: #ccc; z-index: 20; text-align: center; 
+            font-family: var(--font-ui); line-height: 1.6;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .log-highlight { color: var(--accent-gold); font-weight: bold; }
+        .log-dmg { color: var(--danger); font-weight: bold; }
+        .log-evade { color: var(--accent-gold); font-weight: bold; }
+
+        .btns { display: flex; gap: 20px; z-index: 20; }
+        .btn { 
+            padding: 12px 35px; border: 2px solid #333; font-family: var(--font-combat); 
+            font-size: 1.3rem; cursor: pointer; color: #ccc; transition: all 0.2s; 
+            text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-radius: 6px;
+            position: relative; overflow: hidden;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        .btn::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(255,255,255,0.1), transparent); }
+        
+        .btn-atk { background: linear-gradient(to bottom, #8b0000, #520000); border-color: #b71c1c; }
+        .btn-atk:hover { background: linear-gradient(to bottom, #d32f2f, #8b0000); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(211, 47, 47, 0.6); }
+        
+        .btn-skl { background: linear-gradient(to bottom, #1a237e, #000051); border-color: #304ffe; }
+        .btn-skl:hover { background: linear-gradient(to bottom, #304ffe, #1a237e); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(48, 79, 254, 0.6); }
+        
+        .btn-item { background: linear-gradient(to bottom, #1b5e20, #003300); border-color: #2e7d32; }
+        .btn-item:hover { background: linear-gradient(to bottom, #2e7d32, #1b5e20); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
+
+        .btn-run { background: linear-gradient(to bottom, #333, #111); border-color: #555; }
+        .btn-run:hover { background: linear-gradient(to bottom, #555, #333); transform: translateY(-3px); color: #fff; }
+
+        .btn-rage {
+            background: linear-gradient(to bottom, #e65100, #bf360c); border-color: #ff9800;
+            color: #fff; font-size: 1.5rem; padding: 15px 50px; display: none;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            animation: ragePulse 1s infinite alternate; z-index: 30;
+        }
+        @keyframes ragePulse { from { box-shadow: 0 0 10px #ff9800; transform: translateX(-50%) scale(1); } to { box-shadow: 0 0 30px #ff9800; transform: translateX(-50%) scale(1.1); } }
+
+        #loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #333; border-top: 4px solid var(--accent-gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+
+        .modal-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 520px; 
+            background: rgba(15, 15, 20, 0.98); border: 2px solid var(--accent-gold); display: none; 
+            flex-direction: column; align-items: center; padding: 40px; z-index: 1000; 
+            box-shadow: 0 0 80px rgba(0,0,0,1); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 8px; 
+        }
+        @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        
+        .modal-title { 
+            font-family: var(--font-combat); font-size: 3rem; color: var(--accent-gold); margin-bottom: 20px; 
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); letter-spacing: 2px; border-bottom: 3px solid var(--accent-red); padding-bottom: 5px; 
+        }
+        .result-content { width: 100%; text-align: center; margin-bottom: 25px; color: #eee; font-family: var(--font-ui); }
+        .result-row { margin: 12px 0; font-size: 1.2rem; display: flex; justify-content: space-between; padding: 0 40px; }
+        
+        .result-item-box {
+            margin-top: 20px; padding: 15px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); 
+            border: 1px solid #555; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 80%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .result-item-img { width: 64px; height: 64px; border: 2px solid var(--accent-gold); border-radius: 6px; object-fit: cover; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .result-item-name { font-weight: bold; color: var(--accent-gold); font-family: var(--font-ui); font-size: 1.1rem; }
+        
+        .lv-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .lv-stat { background: rgba(0,0,0,0.4); padding: 10px; border: 1px solid #333; text-align: center; border-radius: 4px; }
+        .stat-name { font-size: 0.9rem; color: #888; margin-bottom: 5px; font-family: var(--font-eng); font-weight: bold; }
+        .stat-change { font-size: 1.3rem; font-weight: bold; color: #fff; font-family: var(--font-combat); }
+        .stat-up { color: #00e676; font-size: 0.9rem; margin-left: 5px; }
+        
+        .btn-confirm { 
+            background: var(--accent-gold); color: #000; padding: 12px 50px; border: none; 
+            cursor: pointer; font-size: 1.2rem; font-family: var(--font-combat); margin-top: 10px; 
+            transition: 0.2s; border-radius: 4px; font-weight: bold;
+        }
+        .btn-confirm:hover { background: #ffea00; transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 234, 0, 0.5); }
+
+        /* GameOver Modal */
+        #gameover-modal { width: 500px; height: auto; z-index: 1000; border: 2px solid var(--danger); display: none; }
+        .gameover-title { font-family: var(--font-combat); font-size: 2.5rem; color: var(--danger); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
+        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; }
+        .go-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; color: #ccc; }
+        .go-val { color: var(--accent-gold); font-weight: bold; }
+        .go-score { font-size: 1.8rem; color: #fff; text-align: center; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; font-family: var(--font-combat); }
+
+        /* Item Modal Styles */
+        #item-modal {
+            width: 400px;
+            background: rgba(15, 15, 20, 0.98);
+            border: 2px solid #4caf50;
+        }
+        .item-list {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .battle-item-row {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .battle-item-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .battle-item-icon {
+            width: 32px; height: 32px; margin-right: 10px; border: 1px solid #444;
+        }
+        .battle-item-info {
+            flex: 1; text-align: left;
+        }
+        .battle-item-name {
+            font-weight: bold; color: #eee; font-size: 0.9rem;
+        }
+        .battle-item-desc {
+            font-size: 0.7rem; color: #aaa;
+        }
+        .battle-item-count {
+            font-weight: bold; color: var(--accent-gold); margin-left: 10px;
+        }
+
+        @keyframes shakeSmall { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-4px, 4px); } 50% { transform: translate(4px, -4px); } 75% { transform: translate(-4px, -4px); } }
+        .hit-small { animation: shakeSmall 0.3s ease-out; }
+        @keyframes shakeBig { 0% { transform: rotate(0deg); } 20% { transform: translate(-10px, 10px) rotate(-5deg); } 40% { transform: translate(10px, -10px) rotate(5deg); } 60% { transform: translate(-5px, 5px) rotate(-3deg); } 100% { transform: rotate(0deg); } }
+        .hit-big { animation: shakeBig 0.4s ease-out; }
+        @keyframes flashRed { 0% { filter: sepia(0) saturate(1); } 50% { filter: sepia(1) saturate(5) hue-rotate(-50deg); } 100% { filter: sepia(0) saturate(1); } }
+        .player-hit-anim { animation: shakeBig 0.4s ease-out, flashRed 0.3s; border-color: var(--danger) !important; }
+        
+        @keyframes critShake {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            10% { transform: translate(-15px, -15px) rotate(-10deg) scale(1.2); }
+            20% { transform: translate(15px, 15px) rotate(10deg) scale(1.3); }
+            30% { transform: translate(-20px, 10px) rotate(-15deg) scale(1.4); }
+            40% { transform: translate(20px, -10px) rotate(15deg) scale(1.3); }
+            50% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        }
+        .crit-action { animation: critShake 1.0s cubic-bezier(.36,.07,.19,.97) both; z-index: 50; }
+
+        @keyframes evasionShake {
+            0% { transform: translate(0, 0) scale(1); }
+            20% { transform: translate(40px, -20px) rotate(15deg) scale(0.9); }
+            40% { transform: translate(-10px, 10px) rotate(-5deg) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        .evasion-action { animation: evasionShake 1.0s ease-out; z-index: 50; }
+
+        /* Screen Shake Effect */
+        @keyframes screenShake {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-10px, -10px); }
+            20% { transform: translate(10px, 10px); }
+            30% { transform: translate(-10px, 10px); }
+            40% { transform: translate(10px, -10px); }
+            50% { transform: translate(-10px, -10px); }
+            60% { transform: translate(10px, 10px); }
+            70% { transform: translate(-10px, 10px); }
+            80% { transform: translate(10px, -10px); }
+            90% { transform: translate(-10px, -10px); }
+            100% { transform: translate(0, 0); }
+        }
+        .screen-shake { animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
+        .dmg-text {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+            font-family: var(--font-combat); font-weight: bold; font-size: 3.5rem; color: #fff; 
+            text-shadow: -2px -2px 0 #000, 2px 2px 0 #000, 0 0 10px rgba(0,0,0,0.5); 
+            pointer-events: none; z-index: 200; animation: damagePop 1.5s forwards;
+        }
+        .crit-text { font-size: 5rem; color: #ff3333; text-shadow: 3px 3px 0 #000, 0 0 20px #ff3333; z-index: 201; }
+        .player-dmg { color: #ff5252; font-size: 4rem; }
+        .evade-text { color: #ffd700; font-size: 4rem; text-shadow: 0 0 15px #ffd700; }
+        @keyframes damagePop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -100%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -180%); } }
+        
+        .drop-item-effect { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; object-fit: contain; z-index: 300; pointer-events: none; animation: dropItemPop 2.5s ease-out forwards; filter: drop-shadow(0 0 25px var(--accent-gold)); }
+        @keyframes dropItemPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } 100% { opacity: 0; transform: translate(-50%, -120%) scale(0.8); } }
+
+        /* Rage Kill Effect */
+        .rage-kill-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            width: 500px; z-index: 500; pointer-events: none; display: none;
+            filter: drop-shadow(0 0 30px #ff9800);
+        }
+        @keyframes rageKillPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
+        .rage-kill-anim { display: block; animation: rageKillPop 2s forwards; }
+
+        /* Poison Aura Effect */
+        .poison-aura {
+            box-shadow: 0 0 30px 10px rgba(155, 38, 182, 0.7) !important;
+            border-color: #9b26b6 !important;
+            transition: box-shadow 0.5s ease-in-out;
+        }
+        .poison-dmg {
+            color: #9b26b6 !important;
+            text-shadow: 0 0 10px #9b26b6 !important;
+        }
+
+        /* Cure Effect */
+        .cure-effect {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 230, 118, 0.3);
+            z-index: 10;
+            display: none;
+            animation: cureFlash 1s forwards;
+        }
+        @keyframes cureFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Weather UI in Battle */
+        #weather-info {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 5px 15px;
+            border-radius: 20px; display: flex; align-items: center; gap: 8px;
+            font-family: var(--font-ui); font-size: 0.8rem; color: #fff; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="weather-info">
+            <span id="weather-icon">☀️</span>
+            <span id="weather-text">맑음</span>
+        </div>
+
+        <img id="drop-item-img" class="drop-item-effect" src="" style="display:none;">
+        <img id="rage-kill-img" class="rage-kill-effect" src="image/damage_kill.Jpg">
+
+        <div id="loading-overlay"><div class="spinner"></div><h2 id="loading-text" style="color:var(--accent-red); font-family:var(--font-eng);">BATTLE START</h2></div>
+        
+        <div id="result-modal" class="modal-overlay">
+            <div class="modal-title">전투 승리!</div>
+            <div id="result-content" class="result-content"></div>
+            <button class="btn-confirm" onclick="checkLevelUpOrFinish()">확인</button>
+        </div>
+
+        <div id="levelup-modal" class="modal-overlay">
+            <div class="modal-title" style="color:#00e676; border-color:#00e676;">레벨 업!</div>
+            <div class="lv-grid">
+                <div class="lv-stat"><div class="stat-name">LEVEL</div><div class="stat-change"><span id="old-lv">1</span> ▷ <span id="new-lv" style="color:var(--accent-gold)">2</span></div></div>
+                <div class="lv-stat"><div class="stat-name">MAX HP</div><div class="stat-change" id="stat-hp"></div></div>
+                <div class="lv-stat"><div class="stat-name">MAX MP</div><div class="stat-change" id="stat-mp"></div></div>
+            </div>
+            <button id="lv-confirm-btn" class="btn-confirm" onclick="finishBattleWithLevelUp()" style="background:#00e676;">특성 분배하러 가기</button>
+        </div>
+
+        <div id="item-modal" class="modal-overlay">
+            <div class="modal-title" style="color:#4caf50; border-color:#4caf50; font-size: 2rem;">아이템 선택</div>
+            <div id="item-list" class="item-list"></div>
+            <button class="btn-confirm" onclick="closeItemModal()" style="background:#555; margin-top:20px;">닫기</button>
+        </div>
+
+        <div id="gameover-modal" class="modal-overlay">
+            <div class="gameover-title">패배</div>
+            <div class="gameover-stats">
+                <div class="go-row"><span>생존 시간</span><span id="go-time" class="go-val"></span></div>
+                <div class="go-row"><span>처치한 몬스터</span><span id="go-kills" class="go-val"></span></div>
+                <div class="go-row"><span>처치한 보스</span><span id="go-boss" class="go-val"></span></div>
+                <div class="go-row"><span>최종 레벨</span><span id="go-lv" class="go-val"></span></div>
+                <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
+            </div>
+            <button class="btn-confirm" style="width:100%;" onclick="location.href='index.html'">메인 화면으로</button>
+        </div>
+
+        <div class="battle-stage">
+            <div class="unit-box">
+                <div id="p-speech" class="speech"></div>
+                <div id="player-frame" class="unit-frame" style="border-color:#2979ff;">
+                    <div id="p-cure" class="cure-effect"></div>
+                    <img id="p-img" class="unit-img">
+                    <img id="atk-warrior" src="image/warrior_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-rogue" src="image/rogue_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-mage" src="image/mage_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="hit-warrior" src="image/warrior_hit.jpg" class="unit-img" style="display:none;">
+                    <img id="hit-rogue" src="image/rogue_hit.jpg" class="unit-img" style="display:none;">
+                    <img id="hit-mage" src="image/mage_hit.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-warrior" src="image/critical_warrior.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-rogue" src="image/critical_rogue.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-mage" src="image/critical_mage.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-warrior" src="image/warrior_evasion.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-rogue" src="image/rogue_evasion.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-mage" src="image/mage_evasion.jpg" class="unit-img" style="display:none;">
+                    <video id="v-warrior" src="image/warrior_atk.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
+                </div>
+                <div class="unit-info">
+                    <h3 id="p-name" class="unit-name">플레이어</h3>
+                    <div id="p-status" class="status-effects"></div>
+                    <div class="bar-container">
+                        <div class="bar-wrap"><div id="p-hp-bar" class="bar-fill hp-bar"></div><span id="p-hp-text" class="bar-text"></span></div>
+                        <div class="bar-wrap"><div id="p-mp-bar" class="bar-fill mp-bar"></div><span id="p-mp-text" class="bar-text"></span></div>
+                        <div class="bar-wrap"><div id="p-rage-bar" class="bar-fill rage-bar"></div><span id="p-rage-text" class="bar-text"></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vs-text">VS</div>
+            
+            <div class="unit-box">
+                <div id="e-speech" class="speech"></div>
+                <div id="enemy-frame" class="unit-frame" style="border-color:var(--danger);">
+                    <img id="e-img" class="unit-img">
+                </div>
+                <div class="unit-info">
+                    <h3 id="e-name" class="unit-name">적 이름</h3>
+                    <div id="e-status" class="status-effects"></div>
+                    <div class="bar-container">
+                        <div class="bar-wrap"><div id="e-hp-bar" class="bar-fill hp-bar"></div><span id="e-hp-text" class="bar-text"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="log" class="log-panel">전투가 곧 시작됩니다...</div>
+        
+        <div class="btns">
+            <button class="btn btn-atk" onclick="atk()">⚔️ 공격</button>
+            <button class="btn btn-skl" onclick="skl()">⚡ 스킬</button>
+            <button class="btn btn-item" onclick="openItemModal()">💊 아이템</button>
+            <button class="btn btn-run" onclick="run()">🏃 도망</button>
+        </div>
+
+        <button id="btn-rage" class="btn btn-rage" onclick="rageAtk()">🔥 분노 공격</button>
+    </div>
+
+    <script>
+        const DB_URL = "https://script.google.com/macros/s/AKfycbxcAQ048KXXkJvfDgwBOrL0jKW-TGXzPqNMARU-pwWZSJGQMjthkkgCRLH5jqffs-BOLA/exec";
+        
+        const attackSfx = new Audio('song/attack.mp3');
+        const critSfx = new Audio('song/attack_1.mp3');
+        const levelupSfx = new Audio('song/powerup.mp3');
+        const itemSfx = new Audio('song/poka.mp3');
+        const damageSfx = new Audio('song/damage1.mp3');
+        const evadeSfx = new Audio('song/swish.mp3');
+
+        const DAY_ENEMY_POOL = [
+            {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
+            {f:'image/ka2.jpg', n:'슬라임 베이비', e:50, w:3}, 
+            {f:'image/ka3.jpg', n:'겁먹은 토끼', e:30, w:4}  
+        ];
+        const NIGHT_ENEMY_POOL = [
+            {f:'image/monster1.jpg', n:'블루머쉬 가디언 (Bluemush Guardian)', e:150, w:3, poison: true},
+            {f:'image/monster2.jpg', n:'그로울 트렌트 (Growl Trent)', e:180, w:3},
+            {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true}
+        ];
+        
+        const WEAPON_IMAGES = {
+            '전사': 'weapon_warrior.jpg', '도적': 'weapon_rogue.jpg', '마법사': 'weapon_mage.jpg',
+            '버서커': 'weapon_warrior.jpg', '가디언': 'weapon_warrior.jpg',
+            '어쌔신': 'weapon_rogue.jpg', '섀도우': 'weapon_rogue.jpg',
+            '아크메이지': 'weapon_mage.jpg', '소서러': 'weapon_mage.jpg'
+        };
+        const ITEM_IMAGES = {
+            'hp_potion': 'potion_hp.jpg',
+            'mp_potion': 'potion_mp.jpg',
+            'poison_potion': 'potion_poison.jpg',
+            'exp_potion': 'potion_exp.jpg',
+            'gold': 'coin_gold.jpg'
+        };
+        
+        const DROP_TABLE = {
+            '전사': ['기사의 검', '대검', '용사의 검', '심판의 도끼'],
+            '도적': ['암살자의 단도', '쌍검', '그림자 비수'],
+            '마법사': ['마법 지팡이', '오브', '현자의 스태프'],
+            '버서커': ['광전사의 도끼', '피의 검'],
+            '가디언': ['수호자의 방패검', '성기사의 망치'],
+            '어쌔신': ['죽음의 인도자', '그림자 송곳니'],
+            '섀도우': ['공포의 비수', '심연의 칼날'],
+            '아크메이지': ['대마법사의 지팡이', '별의 조각'],
+            '소서러': ['원소의 근원', '마나의 눈']
+        };
+
+        let player, enemy, isActing = false;
+        let isBossBattle = false;
+        let isSuperBoss = false;
+        let currentWeather = "sunny";
+
+        let pStatus = { poison: 0, stun: 0 };
+        let eStatus = { poison: 0, stun: 0 };
+        let rage = 0;
+        const maxRage = 100;
+
+        window.onload = async () => {
+            const name = localStorage.getItem('rpg_player_name');
+            const temp = localStorage.getItem('rpg_temp_player');
+            try {
+                if (temp && temp !== "undefined") { player = JSON.parse(temp); if (!player || !player.job) throw new Error("Err"); init(); } 
+                else if (name) {
+                    const res = await fetch(`${DB_URL}?name=${encodeURIComponent(name)}`);
+                    player = await res.json(); if(player.error) throw new Error("Hero not found"); init();
+                } else { throw new Error("No data"); }
+            } catch (e) { alert("데이터 오류. 맵으로 돌아갑니다."); localStorage.removeItem('rpg_temp_player'); location.href = 'map.html'; }
+        };
+
+        function init() {
+            if(!player.inventory) player.inventory = [];
+            if(!player.bonusAtk) player.bonusAtk = 0;
+            if(player.gold === undefined) player.gold = 0;
+            if(player.rage === undefined) player.rage = 0;
+            rage = player.rage;
+            currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
+
+            if(!player.quests) player.quests = {
+                killCount: 0,
+                dayKillCount: 0,
+                nightKillCount: 0,
+                bossKillCount: 0,
+                enhanceCount: 0,
+                claimed: { kill: false, dayKill: false, nightKill: false, bossKill: false, enhance: false }
+            };
+
+            const jM = {
+                '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
+                '버서커': 'warrior1', '가디언': 'warrior1',
+                '어쌔신': 'rogue1', '섀도우': 'rogue1',
+                '아크메이지': 'mage1', '소서러': 'mage1'
+            };
+            document.getElementById('p-img').src = `image/${jM[player.job] || 'warrior'}.jpg`;
+            document.getElementById('p-name').innerText = player.name;
+            
+            const isBossFlag = localStorage.getItem('rpg_boss_encounter');
+            const isSuperBossFlag = localStorage.getItem('rpg_is_super_boss');
+            const isNight = localStorage.getItem('rpg_is_night') === 'true';
+
+            if (isSuperBossFlag === 'true') {
+                isBossBattle = true;
+                isSuperBoss = true;
+                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 5000);
+                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 5000);
+                enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 40 + (player.level * 4), exp: 10000, img: 'image/best_boss.jpg' };
+                localStorage.removeItem('rpg_is_super_boss');
+            } else if (isBossFlag === 'true') {
+                isBossBattle = true;
+                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
+                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 400 + (player.level * 30));
+                const bossAtk = 15 + (player.level * 2);
+                enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
+                localStorage.removeItem('rpg_boss_encounter'); 
+            } else {
+                isBossBattle = false;
+                const pool = isNight ? NIGHT_ENEMY_POOL : DAY_ENEMY_POOL;
+                let tW = pool.reduce((s, e) => s + e.w, 0);
+                let r = Math.random() * tW; let sel = pool[0];
+                for (let e of pool) { if (r < e.w) { sel = e; break; } r -= e.w; }
+
+                const avg = (player.stats.str + player.stats.int) / 2 + (player.level * 3);
+                enemy = {
+                    name: sel.n,
+                    hp: Math.floor(avg * 2.5) + 10,
+                    maxHp: Math.floor(avg * 2.5) + 10,
+                    atk: Math.floor(avg/2.2) + 2,
+                    exp: sel.e,
+                    img: sel.f,
+                    canPoison: sel.poison || false
+                };
+            }
+            
+            document.getElementById('e-img').src = enemy.img;
+            document.getElementById('e-name').innerText = enemy.name;
+            if(isBossBattle) {
+                document.getElementById('e-name').style.color = "#ff1744";
+                document.getElementById('e-name').innerText = "💀 " + enemy.name;
+            }
+            
+            updateWeatherUI();
+            addLog(`<span class='log-highlight'>[${enemy.name}]</span>이(가) 나타났습니다!`);
+            document.getElementById('loading-overlay').style.display = 'none';
+            update(); say('p', '전투 시작!');
+        }
+
+        function updateWeatherUI() {
+            const icon = document.getElementById('weather-icon');
+            const text = document.getElementById('weather-text');
+            if (currentWeather === "sunny") { icon.innerText = "☀️"; text.innerText = "맑음"; }
+            else if (currentWeather === "rain") { icon.innerText = "🌧️"; text.innerText = "비 (마법 강화)"; }
+            else if (currentWeather === "fog") { icon.innerText = "🌫️"; text.innerText = "안개 (명중 저하)"; }
+            else if (currentWeather === "thunder") { icon.innerText = "⚡"; text.innerText = "뇌우"; }
+        }
+
+        function say(target, txt) { const el = document.getElementById(target+'-speech'); el.innerText = txt; el.style.display = 'block'; setTimeout(()=>el.style.display='none', 1500); }
+        
+        function addLog(msg) {
+            const log = document.getElementById('log');
+            log.innerHTML = `<div>${msg}</div>` + log.innerHTML;
+        }
+
+        function update() {
+            document.getElementById('p-hp-bar').style.width = `${Math.max(0, Math.min(100, (player.hp/player.maxHp)*100))}%`;
+            document.getElementById('p-mp-bar').style.width = `${Math.max(0, Math.min(100, (player.mp/player.maxMp)*100))}%`;
+            document.getElementById('p-rage-bar').style.width = `${Math.min(100, (rage/maxRage)*100)}%`;
+            document.getElementById('e-hp-bar').style.width = `${Math.max(0, Math.min(100, (enemy.hp/enemy.maxHp)*100))}%`;
+            document.getElementById('p-hp-text').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
+            document.getElementById('p-mp-text').innerText = `${Math.ceil(player.mp)}/${player.maxMp}`;
+            document.getElementById('p-rage-text').innerText = `RAGE ${rage}/${maxRage}`;
+            document.getElementById('e-hp-text').innerText = `${Math.ceil(enemy.hp)}/${enemy.maxHp}`;
+
+            const pStatusEl = document.getElementById('p-status');
+            pStatusEl.innerHTML = '';
+            if(pStatus.poison > 0) {
+                pStatusEl.innerHTML += `<span class="status-icon status-poison">독(${pStatus.poison})</span>`;
+                document.getElementById('player-frame').classList.add('poison-aura');
+            } else {
+                document.getElementById('player-frame').classList.remove('poison-aura');
+            }
+            if(pStatus.stun > 0) pStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${pStatus.stun})</span>`;
+
+            const eStatusEl = document.getElementById('e-status');
+            eStatusEl.innerHTML = '';
+            if(eStatus.poison > 0) eStatusEl.innerHTML += `<span class="status-icon status-poison">독(${eStatus.poison})</span>`;
+            if(eStatus.stun > 0) eStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${eStatus.stun})</span>`;
+
+            if (rage >= maxRage) {
+                document.getElementById('btn-rage').style.display = 'block';
+            } else {
+                document.getElementById('btn-rage').style.display = 'none';
+            }
+        }
+        
+        function showDamage(targetId, dmg, type) {
+            const frame = document.getElementById(targetId); const el = document.createElement('div');
+            let cssClass = 'dmg-text'; let content = dmg;
+            if (type === 'crit') {
+                cssClass += ' crit-text';
+                content = '<div style="color: #ffeb3b; font-size: 2rem; margin-bottom: -10px;">CRITICAL!</div>' + dmg;
+                triggerScreenShake();
+            }
+            else if (type === 'player_hit') { cssClass += ' player-dmg'; }
+            else if (type === 'poison') { cssClass += ' poison-dmg'; content = 'POISON<br>' + dmg; }
+            else if (type === 'evade') { cssClass += ' evade-text'; content = 'MISS'; }
+            el.className = cssClass; el.innerHTML = content;
+            const randomX = Math.floor(Math.random()*40)-20; const randomY = Math.floor(Math.random()*20)-10;
+            el.style.transform = `translate(calc(-50% + ${randomX}px), calc(-50% + ${randomY}px))`;
+            frame.appendChild(el); setTimeout(() => el.remove(), 1500);
+        }
+
+        function triggerScreenShake() {
+            const container = document.getElementById('game-container');
+            container.classList.remove('screen-shake');
+            void container.offsetWidth;
+            container.classList.add('screen-shake');
+            setTimeout(() => container.classList.remove('screen-shake'), 500);
+        }
+        
+        function triggerHitEffect(targetId, type) {
+            const frame = document.getElementById(targetId);
+            frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evasion-action'); void frame.offsetWidth;
+            if (type === 'normal') frame.classList.add('hit-small');
+            else if (type === 'rogue') frame.classList.add('hit-rogue');
+            else if (type === 'big') frame.classList.add('hit-big');
+            else if (type === 'player_hit') frame.classList.add('player-hit-anim');
+            else if (type === 'crit') frame.classList.add('crit-action');
+            else if (type === 'evade') frame.classList.add('evasion-action');
+        }
+        
+        function playMotion(imgId, targetFrameId, effectType) {
+            const pImg = document.getElementById('p-img');
+            const motionImg = document.getElementById(imgId);
+
+            const jM = {
+                '버서커': 'warrior', '가디언': 'warrior',
+                '어쌔신': 'rogue', '섀도우': 'rogue',
+                '아크메이지': 'mage', '소서러': 'mage'
+            };
+
+            let base = jM[player.job];
+            if (base) {
+                if (imgId && imgId.includes('atk')) {
+                    pImg.src = `image/${base}2.jpg`;
+                } else if (imgId && imgId.includes('skl')) {
+                    pImg.src = `image/${base}3.jpg`;
+                }
+                triggerHitEffect(targetFrameId, effectType);
+                setTimeout(() => { pImg.src = `image/${base}1.jpg`; }, 1000);
+            } else {
+                if (effectType === 'crit') {
+                    const critMap = { '전사': 'crit-warrior', '도적': 'crit-rogue', '마법사': 'crit-mage' };
+                    const cImg = document.getElementById(critMap[player.job || '전사']);
+                    if (cImg) {
+                        pImg.style.display = 'none'; cImg.style.display = 'block';
+                        document.getElementById('player-frame').classList.add('crit-action');
+                        setTimeout(() => {
+                            cImg.style.display = 'none'; pImg.style.display = 'block';
+                            document.getElementById('player-frame').classList.remove('crit-action');
+                        }, 1000);
+                    }
+                } else if (effectType === 'evade') {
+                    const evaMap = { '전사': 'eva-warrior', '도적': 'eva-rogue', '마법사': 'eva-mage' };
+                    const eImg = document.getElementById(evaMap[player.job || '전사']);
+                    if (eImg) {
+                        pImg.style.display = 'none'; eImg.style.display = 'block';
+                        document.getElementById('player-frame').classList.add('evasion-action');
+                        setTimeout(() => {
+                            eImg.style.display = 'none'; pImg.style.display = 'block';
+                            document.getElementById('player-frame').classList.remove('evasion-action');
+                        }, 1000);
+                    }
+                } else {
+                    if(motionImg) { pImg.style.display = 'none'; motionImg.style.display = 'block'; setTimeout(() => { motionImg.style.display = 'none'; pImg.style.display = 'block'; }, 1000); }
+                }
+                triggerHitEffect(targetFrameId, effectType);
+            }
+        }
+
+        function playAttackSfx() { attackSfx.currentTime = 0; attackSfx.play().catch(e => {}); }
+        function playCritSfx() { critSfx.currentTime = 0; critSfx.play().catch(e => {}); }
+        function playLevelupSfx() { levelupSfx.currentTime = 0; levelupSfx.play().catch(e => {}); }
+        function playItemSfx() { itemSfx.currentTime = 0; itemSfx.play().catch(e => {}); }
+        function playDamageSfx() { damageSfx.currentTime = 0; damageSfx.play().catch(e => {}); }
+        function playEvadeSfx() { evadeSfx.currentTime = 0; evadeSfx.play().catch(e => {}); }
+
+        function atk() { 
+            if(isActing) return;
+            if(pStatus.stun > 0) { addLog("기절 상태라 공격할 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
+
+            isActing = true;
+            const jobKey = player.job || '전사'; 
+            const imgMap = {
+                '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage',
+                '버서커':'atk-warrior', '가디언':'atk-warrior',
+                '어쌔신':'atk-rogue', '섀도우':'atk-rogue',
+                '아크메이지':'atk-mage', '소서러':'atk-mage'
+            };
+            
+            playAttackSfx();
+
+            setTimeout(() => {
+                let enemyEvadeChance = isBossBattle ? 0.1 : 0.05;
+                if (currentWeather === "fog") enemyEvadeChance += 0.15;
+
+                if (Math.random() < enemyEvadeChance) {
+                    addLog("<span class='log-evade'>적이 공격을 회피했습니다!</span>");
+                    playEvadeSfx();
+                    showDamage('enemy-frame', 0, 'evade');
+                    triggerHitEffect('enemy-frame', 'evade');
+                    update(); check();
+                    return;
+                }
+
+                let critChance = 0.2;
+                if (player.job === '어쌔신') critChance = 0.35;
+
+                let isCrit = Math.random() < critChance;
+                let dmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
+                if(isCrit) {
+                    dmg = Math.floor(dmg*2);
+                    playCritSfx();
+                }
+                
+                playMotion(imgMap[jobKey], 'enemy-frame', isCrit?'crit':'normal');
+                enemy.hp -= dmg; 
+                showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
+                addLog(`적에게 <span class='log-dmg'>${dmg}</span>의 피해를 입혔습니다!`);
+                update(); check();
+            }, 200);
+        }
+
+        function skl() {
+            if(isActing) return; 
+            if(pStatus.stun > 0) { addLog("기절 상태라 스킬을 쓸 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
+
+            let costRate = 0.6;
+            if (player.job === '소서러') costRate = 0.3;
+            if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.2;
+
+            const cost = Math.floor(player.maxMp * costRate);
+            if(player.mp < cost) { say('p', '마나가 부족해!'); return; }
+
+            isActing = true;
+            player.mp -= cost;
+            update();
+
+            const jobKey = player.job || '전사';
+            playAttackSfx();
+
+            setTimeout(() => {
+                let isCrit = false; let dmg = 0;
+                
+                if(player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') {
+                    say('p', `급소 찌르기!`);
+                    let baseDmg = Math.floor(player.stats.dex * 0.5) + (player.level * 2);
+                    let critChance = (player.job === '어쌔신') ? 0.55 : 0.4;
+                    isCrit = Math.random() < critChance;
+                    if (isCrit) {
+                        dmg = (baseDmg * 4) + (player.bonusAtk||0);
+                        playCritSfx();
+                    }
+                    else { dmg = baseDmg + (player.bonusAtk||0); }
+
+                    let poisonChance = (player.job === '섀도우') ? 1.0 : 0.5;
+                    if(Math.random() < poisonChance) { eStatus.poison = 3; addLog("적에게 독을 부여했습니다!"); }
+
+                    playMotion('atk-rogue', 'enemy-frame', isCrit?'crit':'rogue');
+                } else {
+                    say('p', '강력한 스킬 발동!');
+                    const vMap = {
+                        '전사':'v-warrior', '마법사':'v-mage',
+                        '버서커':'v-warrior', '가디언':'v-warrior',
+                        '아크메이지':'v-mage', '소서러':'v-mage'
+                    };
+                    const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
+                    if(v) {
+                        pImg.style.display='none'; v.style.display='block'; v.play();
+                        v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
+                    } else applySkillDmg(player.job);
+                    return;
+                }
+                enemy.hp -= dmg; 
+                showDamage('enemy-frame', dmg, isCrit?'crit':'normal'); 
+                addLog(`강력한 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 피해!`);
+                update(); check();
+            }, 200);
+        }
+
+        function applySkillDmg(job) {
+            let isCrit = Math.random() < 0.2; let dmg = 0;
+            let multiplier = 2.0;
+
+            if (job === '버서커') multiplier = 4.0;
+            else if (job === '아크메이지') multiplier = 4.5;
+            else if (job === '전사' || job === '가디언') multiplier = 2.5;
+            else if (job === '마법사' || job === '소서러') multiplier = 2.2;
+
+            if (currentWeather === "rain" && (job === '마법사' || job === '아크메이지' || job === '소서러')) {
+                multiplier *= 1.3;
+                addLog("<span style='color:#82b1ff'>비의 기운으로 마법이 강화되었습니다!</span>");
+            }
+
+            if(job === '전사' || job === '버서커' || job === '가디언') {
+                dmg = (player.stats.str * multiplier) + (player.level * 4);
+                if (job === '가디언' && Math.random() < 0.3) { eStatus.stun = 1; addLog("적을 기절시켰습니다!"); }
+            } else {
+                dmg = (player.stats.int * multiplier) + (player.level * 5);
+            }
+
+            dmg += (player.bonusAtk||0);
+            if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
+
+            triggerHitEffect('enemy-frame', isCrit?'crit':'big');
+            enemy.hp -= dmg; 
+            showDamage('enemy-frame', dmg, isCrit?'crit':'normal'); 
+            addLog(`스킬 적중! <span class='log-dmg'>${dmg}</span> 피해!`);
+            update(); check();
+        }
+
+        function rageAtk() {
+            if(isActing || rage < maxRage) return;
+            if(pStatus.stun > 0) { addLog("기절 상태라 분노 공격을 할 수 없습니다!"); return; }
+
+            isActing = true;
+            rage = 0;
+            player.rage = 0;
+            update();
+
+            say('p', '분노의 일격!!!');
+            playCritSfx();
+
+            // Show Rage Kill Effect
+            const killImg = document.getElementById('rage-kill-img');
+            killImg.classList.add('rage-kill-anim');
+            setTimeout(() => killImg.classList.remove('rage-kill-anim'), 2000);
+
+            setTimeout(() => {
+                let dmg = (Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0)) * 3;
+
+                const jobKey = player.job || '전사';
+                const imgMap = {
+                    '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage',
+                    '버서커':'atk-warrior', '가디언':'atk-warrior',
+                    '어쌔신':'atk-rogue', '섀도우':'atk-rogue',
+                    '아크메이지':'atk-mage', '소서러':'atk-mage'
+                };
+
+                playMotion(imgMap[jobKey], 'enemy-frame', 'crit');
+                enemy.hp -= dmg;
+                showDamage('enemy-frame', dmg, 'crit');
+                addLog(`분노 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 치명적인 피해를 입혔습니다!`);
+                update(); check();
+            }, 200);
+        }
+
+        function check() { 
+            if(enemy.hp <= 0) { say('e', '크윽..!'); setTimeout(win, 1000); }
+            else { setTimeout(eTurn, 1500); }
+        }
+        
+        function eTurn() { 
+            if(eStatus.stun > 0) { addLog("적이 기절 상태라 행동할 수 없습니다!"); eStatus.stun--; update(); isActing = false; return; }
+
+            if(eStatus.poison > 0) {
+                const pDmg = Math.floor(enemy.maxHp * 0.05);
+                enemy.hp -= pDmg;
+                showDamage('enemy-frame', pDmg, 'poison');
+                addLog(`적이 독으로 인해 <span style="color:#9b26b6">${pDmg}</span> 피해를 입었습니다.`);
+                eStatus.poison--;
+                update();
+                if(enemy.hp <= 0) { win(); return; }
+            }
+
+            if(pStatus.poison > 0) {
+                const pDmg = Math.floor(player.maxHp * 0.08);
+                player.hp -= pDmg;
+                showDamage('player-frame', pDmg, 'poison');
+                addLog(`독으로 인해 <span style="color:#9b26b6">${pDmg}</span> 피해를 입었습니다.`);
+                pStatus.poison--;
+                update();
+                if(player.hp <= 0) { showGameOver("독에 의해 쓰러졌습니다..."); return; }
+            }
+
+            let evadeChance = (player.stats.dex / 100) + (player.level * 0.005);
+            if (player.job === '어쌔신' || player.job === '섀도우') evadeChance += 0.1;
+            if (currentWeather === "fog") evadeChance += 0.1;
+            evadeChance = Math.min(0.4, evadeChance);
+
+            if (Math.random() < evadeChance) {
+                addLog("<span class='log-evade'>적의 공격을 회피했습니다!</span>");
+                playEvadeSfx();
+                say('p', '느려!');
+                playMotion('', 'player-frame', 'evade');
+                showDamage('player-frame', 0, 'evade');
+                update(); isActing = false;
+                return;
+            }
+
+            let dmg = Math.max(1, enemy.atk - Math.floor(player.stats.dex/3));
+            if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
+
+            player.hp -= dmg;
+            rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5));
+            player.rage = rage;
+
+            playDamageSfx();
+            const jobKey = player.job || '전사';
+            const hitMap = {
+                '전사':'hit-warrior', '도적':'hit-rogue', '마법사':'hit-mage',
+                '버서커':'hit-warrior', '가디언':'hit-warrior',
+                '어쌔신':'hit-rogue', '섀도우':'hit-rogue',
+                '아크메이지':'hit-mage', '소서러':'hit-mage'
+            };
+            playMotion(hitMap[jobKey], 'player-frame', 'player_hit'); 
+            showDamage('player-frame', dmg, 'player_hit');
+            say('e', '받아라!'); 
+            addLog(`적이 공격합니다! <span style='color:red'>${dmg}</span> 피해를 입었습니다.`);
+
+            let poisonChance = enemy.canPoison ? 0.3 : 0;
+            if(Math.random() < poisonChance) { pStatus.poison = 3; addLog("<span style='color:#9b26b6'>적의 공격에 중독되었습니다!</span>"); }
+            if(Math.random() < 0.1) { pStatus.stun = 1; addLog("기절했습니다!"); }
+
+            update(); isActing = false;
+            if(player.hp <= 0) { showGameOver("패배했습니다..."); }
+        }
+
+        function showGameOver(msg) {
+            const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
+            const survivalTime = Math.floor((Date.now() - startTime) / 1000);
+            const min = Math.floor(survivalTime / 60);
+            const sec = survivalTime % 60;
+
+            const kills = player.quests.killCount || 0;
+            const bossKills = player.quests.bossKillCount || 0;
+
+            let itemValue = 0;
+            player.inventory.forEach(item => {
+                const baseVal = item.val || 10;
+                const enh = item.enhanceCount || 0;
+                itemValue += Math.floor((baseVal * 5) + (enh * 50));
+            });
+
+            const score = (kills * 100) + (bossKills * 1000) + (survivalTime * 10) + (player.level * 500) + itemValue;
+
+            document.querySelector('.gameover-title').innerText = msg;
+            document.getElementById('go-time').innerText = `${min}분 ${sec}초`;
+            document.getElementById('go-kills').innerText = `${kills}마리`;
+            document.getElementById('go-boss').innerText = `${bossKills}마리`;
+            document.getElementById('go-lv').innerText = `LV.${player.level}`;
+            document.getElementById('go-score-val').innerText = score.toLocaleString();
+
+            localStorage.removeItem('rpg_temp_player');
+            localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
+            localStorage.removeItem('rpg_boss_death_time');
+
+            document.getElementById('gameover-modal').style.display = 'flex';
+        }
+
+        function win() {
+            const isNight = localStorage.getItem('rpg_is_night') === 'true';
+
+            if (isBossBattle) {
+                if (isSuperBoss) {
+                    localStorage.setItem('rpg_super_boss_killed', 'true');
+                } else {
+                    localStorage.setItem('rpg_boss_death_time', Date.now());
+                }
+                localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
+                player.quests.bossKillCount = (player.quests.bossKillCount || 0) + 1;
+            } else {
+                if (isNight) player.quests.nightKillCount = (player.quests.nightKillCount || 0) + 1;
+                else player.quests.dayKillCount = (player.quests.dayKillCount || 0) + 1;
+            }
+
+            player.exp += enemy.exp;
+            player.quests.killCount++;
+
+            let resultHTML = `<div class="result-row">획득 경험치 <span style="color:violet">+${enemy.exp} EXP</span></div>`;
+            let dropImg = null; let dropName = ""; let dropColor = "#fff";
+
+            const gold = Math.floor(Math.random()*50)+10 + (isBossBattle ? 500 : 0);
+            player.gold = (player.gold||0) + gold;
+            resultHTML += `<div class="result-row">획득 골드 <span style="color:gold">+${gold} G</span></div>`;
+            if(!dropImg) dropImg = ITEM_IMAGES['gold'];
+
+            if (isBossBattle && Math.random() < 0.5) {
+                const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
+                const baseName = jobList[Math.floor(Math.random() * jobList.length)];
+                let isLegendary = isSuperBoss || Math.random() < 0.3;
+                let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
+                let colorCode = isLegendary ? "#ff8000" : "#a335ee";
+                let rarityName = isLegendary ? "전설의" : "에픽";
+                const newItem = { name: `${rarityName} ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: isLegendary ? "legendary" : "epic", rarityColor: colorCode, enhanceCount: grade, options: [] };
+
+                const optCount = isLegendary ? 3 : 2;
+                const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+2}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+2}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+2}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+2}];
+                for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
+
+                player.inventory.push(newItem);
+                dropName = newItem.name; dropColor = colorCode; dropImg = WEAPON_IMAGES[player.job];
+            } 
+            else if (!isBossBattle && Math.random() < 0.05) {
+                const nameList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
+                const baseName = nameList[Math.floor(Math.random() * nameList.length)];
+                const grade = Math.floor(Math.random() * 5) + 8;
+                const newItem = { name: `에픽 ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: "epic", rarityColor: '#a335ee', enhanceCount: grade, options: [] };
+                player.inventory.push(newItem);
+                dropName = newItem.name; dropColor = '#a335ee'; dropImg = WEAPON_IMAGES[player.job];
+            }
+            else if (Math.random() < 0.6) {
+                const rand = Math.random();
+                if(rand < 0.3) { player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=ITEM_IMAGES['hp_potion']; }
+                else if(rand < 0.6) { player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=ITEM_IMAGES['mp_potion']; }
+                else if(rand < 0.8) { player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=ITEM_IMAGES['exp_potion']; }
+                else { player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=ITEM_IMAGES['poison_potion']; }
+            }
+
+            if(dropName) {
+                playItemSfx();
+                resultHTML += `<div class="result-item-box"><img src="image/${dropImg}" class="result-item-img"><div class="result-item-name" style="color:${dropColor}">${dropName}</div><div style="font-size:0.8rem; color:#aaa;">아이템을 획득했습니다!</div></div>`;
+            }
+            
+            if(dropName && dropImg) { 
+                const imgEl = document.getElementById('drop-item-img'); 
+                imgEl.src = `image/${dropImg}`; 
+                imgEl.style.display = 'block'; 
+                setTimeout(() => { imgEl.style.display = 'none'; showResultModal(resultHTML); }, 2000); 
+            } else { 
+                showResultModal(resultHTML); 
+            }
+        }
+
+        function showResultModal(html) { document.getElementById('result-content').innerHTML = html; document.getElementById('result-modal').style.display = 'flex'; }
+        
+        function checkLevelUpOrFinish() { 
+            document.getElementById('result-modal').style.display = 'none'; 
+            if(player.exp >= player.maxExp) { showLevelUpModal(); } 
+            else { finishBattle(); } 
+        }
+        
+        function showLevelUpModal() {
+            playLevelupSfx();
+            const modal = document.getElementById('levelup-modal'); const oldLv = player.level; const oldHp = player.maxHp; const oldMp = player.maxMp;
+            player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp*1.5); player.maxHp+=10; player.maxMp+=5; player.hp=player.maxHp; player.mp=player.maxMp;
+            player.traitPoints = (player.traitPoints || 0) + 2;
+            document.getElementById('old-lv').innerText = oldLv; document.getElementById('new-lv').innerText = player.level;
+            document.getElementById('stat-hp').innerHTML = `${oldHp} <span class='stat-up'>▷ ${player.maxHp} (+10)</span>`;
+            document.getElementById('stat-mp').innerHTML = `${oldMp} <span class='stat-up'>▷ ${player.maxMp} (+5)</span>`;
+
+            const btn = document.getElementById('lv-confirm-btn');
+            if (player.level >= 5 && !player.isAdvanced) {
+                btn.innerText = "전직하러 가기";
+            } else {
+                btn.innerText = "특성 분배하러 가기";
+            }
+
+            modal.style.display = 'flex';
+        }
+        
+        function finishBattle() {
+            player.rage = rage;
+            localStorage.setItem('rpg_temp_player', JSON.stringify(player));
+            location.href = 'map.html';
+        }
+
+        function finishBattleWithLevelUp() {
+            player.rage = rage;
+            localStorage.setItem('rpg_temp_player', JSON.stringify(player));
+            if (!(player.level >= 5 && !player.isAdvanced)) {
+                localStorage.setItem('rpg_open_traits', 'true');
+            }
+            location.href = 'map.html';
+        }
+        
+        function run() { 
+            if(isActing) return; isActing = true; 
+            let runChance = isBossBattle ? 0.3 : 0.4;
+            if(Math.random() < runChance) {
+                say('p', "튀어!");
+                addLog("무사히 도망쳤습니다!");
+                setTimeout(finishBattle, 1200);
+            }
+            else {
+                say('p', "실패..!");
+                addLog("도망치는데 실패했습니다!");
+                setTimeout(eTurn, 1500);
+            }
+        }
+
+        function openItemModal() {
+            if(isActing) return;
+            const modal = document.getElementById('item-modal');
+            const list = document.getElementById('item-list');
+            list.innerHTML = '';
+            const potions = player.inventory.filter(i => i.type.includes('potion'));
+            const potionGroups = {};
+            potions.forEach((p, idx) => {
+                const originalIdx = player.inventory.indexOf(p);
+                if (!potionGroups[p.name]) potionGroups[p.name] = { item: p, count: 0, indices: [] };
+                potionGroups[p.name].count++;
+                potionGroups[p.name].indices.push(originalIdx);
+            });
+
+            if (Object.keys(potionGroups).length === 0) {
+                list.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">사용 가능한 아이템이 없습니다.</p>';
+            } else {
+                for (const key in potionGroups) {
+                    const group = potionGroups[key];
+                    const item = group.item;
+                    const div = document.createElement('div');
+                    div.className = 'battle-item-row';
+                    let iconSrc = 'potion_hp.jpg';
+                    if (item.name.includes('마나')) iconSrc = 'potion_mp.jpg';
+                    else if (item.name.includes('해독')) iconSrc = 'potion_poison.jpg';
+                    else if (item.name.includes('경험치')) iconSrc = 'potion_exp.jpg';
+                    div.innerHTML = `<img src="image/${iconSrc}" class="battle-item-icon"><div class="battle-item-info"><div class="battle-item-name">${item.name}<span class="battle-item-count">x${group.count}</span></div><div class="battle-item-desc">${item.desc}</div></div>`;
+                    div.onclick = () => useBattleItem(group.indices[0]);
+                    list.appendChild(div);
+                }
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeItemModal() { document.getElementById('item-modal').style.display = 'none'; }
+
+        function useBattleItem(index) {
+            closeItemModal();
+            if(isActing) return;
+            const item = player.inventory[index];
+            if (!item) return;
+
+            if (item.name.includes('체력')) {
+                if (player.hp >= player.maxHp) { addLog("체력이 이미 가득 찼습니다."); return; }
+                isActing = true;
+                const heal = item.val;
+                player.hp = Math.min(player.hp + heal, player.maxHp);
+                addLog(`<span style="color:#ff5252">체력 물약</span>을 사용하여 HP를 <span style="color:#00e676">${heal}</span> 회복했습니다.`);
+            } else if (item.name.includes('마나')) {
+                if (player.mp >= player.maxMp) { addLog("마나가 이미 가득 찼습니다."); return; }
+                isActing = true;
+                const heal = item.val;
+                player.mp = Math.min(player.mp + heal, player.maxMp);
+                addLog(`<span style="color:#2979ff">마나 물약</span>을 사용하여 MP를 <span style="color:#2979ff">${heal}</span> 회복했습니다.`);
+            } else if (item.name.includes('경험치')) {
+                isActing = true;
+                player.exp += item.val;
+                addLog(`<span style="color:#e040fb">경험치 물약</span>을 사용하여 경험치를 <span style="color:#e040fb">${item.val}</span> 획득했습니다!`);
+            } else if (item.type === 'potion_poison') {
+                if (pStatus.poison <= 0) { addLog("독 상태가 아닙니다."); return; }
+                isActing = true;
+                pStatus.poison = 0;
+                addLog(`<span style="color:#00e676">해독 물약</span>을 사용하여 독을 치료했습니다!`);
+                const cureEl = document.getElementById('p-cure');
+                cureEl.style.display = 'block';
+                setTimeout(() => { cureEl.style.display = 'none'; }, 1000);
+            }
+
+            player.inventory.splice(index, 1);
+            playItemSfx();
+            update();
+            setTimeout(eTurn, 1500);
+        }
+    </script>
+</body>
+</html>

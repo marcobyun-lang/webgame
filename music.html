@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>배경음악 자동 재생(클릭 유도)</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden; /* 스크롤 방지 */
+        }
+
+        /* 전체 화면을 덮는 클릭 유도 화면 */
+        #cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        #content {
+            text-align: center;
+            margin-top: 50px;
+            display: none; /* 처음엔 숨김 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cover" onclick="startMusic()">
+        <h1>🎵 음악을 들으려면 화면을 클릭하세요</h1>
+        <p>(브라우저 정책상 첫 클릭이 필요합니다)</p>
+    </div>
+
+    <div id="content">
+        <h2>배경음악이 재생 중입니다.</h2>
+        <p>Song 1과 Song 2가 번갈아 가며 나옵니다.</p>
+        <br>
+        <audio id="bgm" controls></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgm');
+        const cover = document.getElementById('cover');
+        const content = document.getElementById('content');
+
+        // 노래 목록
+        const playlist = [
+            'song/song_1.mp3',
+            'song/song_2.mp3'
+        ];
+        let currentTrack = 0;
+
+        // 음악 재생 함수
+        function playTrack(index) {
+            audio.src = playlist[index];
+            audio.play();
+        }
+
+        // 3. 화면 클릭 시 실행되는 함수 (최초 1회)
+        function startMusic() {
+            // 커버 화면 숨기고 메인 내용 보여주기
+            cover.style.display = 'none';
+            content.style.display = 'block';
+
+            // 음악 시작
+            playTrack(currentTrack);
+        }
+
+        // 4. 한 곡이 끝나면 다음 곡으로
+        audio.addEventListener('ended', function() {
+            currentTrack = (currentTrack + 1) % playlist.length;
+            playTrack(currentTrack);
+        });
+
+    </script>
+</body>
+</html>
