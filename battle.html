@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DUNGEON RPG - Battle</title>
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -25,11 +26,12 @@
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), repeating-linear-gradient(45deg, #121212 0, #121212 10px, #0a0a0a 10px, #0a0a0a 20px); 
             color: var(--text-main); 
             font-family: var(--font-ui); 
-            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; user-select: none;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; user-select: none;
+            padding: 10px; box-sizing: border-box;
         }
 
         #game-container { 
-            width: 960px; height: 720px; 
+            width: 100%; max-width: 960px; height: 100vh; max-height: 720px;
             background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('image/map.jpg') center/cover;
             border: 2px solid #333; 
             box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 100px rgba(0,0,0,0.8); 
@@ -39,11 +41,11 @@
 
         #game-container::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 60%, black 100%); pointer-events: none; z-index: 5; }
         
-        .battle-stage { display: flex; justify-content: space-around; align-items: center; width: 90%; margin-bottom: 20px; z-index: 20; position: relative; }
-        .unit-box { text-align: center; width: 260px; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .battle-stage { display: flex; justify-content: space-around; align-items: center; width: 95%; margin-bottom: 10px; z-index: 20; position: relative; flex-wrap: wrap; gap: 10px; }
+        .unit-box { text-align: center; width: 45%; max-width: 260px; position: relative; display: flex; flex-direction: column; align-items: center; }
         
         .unit-frame {
-            width: 180px; height: 180px; 
+            width: 100%; aspect-ratio: 1/1; max-width: 180px;
             border: 4px solid #444; border-radius: 8px; 
             overflow: hidden; position: relative; background: #111; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1; 
@@ -51,278 +53,72 @@
         }
         .unit-img, video { width: 100% !important; height: 100% !important; object-fit: cover !important; background-color: #000; }
         
-        .unit-info { margin-top: 15px; width: 100%; text-shadow: 2px 2px 4px #000; }
-        .unit-name { font-family: var(--font-combat); font-size: 1.5rem; color: #fff; margin: 0; letter-spacing: 1px; }
-        .unit-job { font-family: var(--font-eng); font-size: 0.8rem; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+        .unit-info { margin-top: 10px; width: 100%; text-shadow: 2px 2px 4px #000; }
+        .unit-name { font-family: var(--font-combat); font-size: 1.1rem; color: #fff; margin: 0; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .unit-job { font-family: var(--font-eng); font-size: 0.7rem; color: #aaa; margin-bottom: 3px; font-weight: bold; }
         
-        .bar-container { width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        .bar-container { width: 100%; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
         .bar-wrap { 
-            background: #111; height: 16px; border: 1px solid #333; 
+            background: #111; height: 12px; border: 1px solid #333;
             border-radius: 3px; overflow: hidden; position: relative; 
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
         }
         .bar-fill { height: 100%; transition: width 0.3s ease-out; position: relative; }
-        .bar-fill::after { content:""; position:absolute; top:0; left:0; width:100%; height:50%; background:rgba(255,255,255,0.2); }
-        .hp-bar { background: linear-gradient(90deg, #b71c1c, #ff5252); }
-        .mp-bar { background: linear-gradient(90deg, #0d47a1, #448aff); }
-        .rage-bar { background: linear-gradient(90deg, #e65100, #ff9800); }
-
-        .bar-text { 
-            position: absolute; width: 100%; top: 0; left: 0; line-height: 16px; 
-            font-size: 10px; font-family: var(--font-eng); font-weight: bold; text-align: center; 
-            text-shadow: 1px 1px 2px #000; z-index: 5; color: #fff; letter-spacing: 1px;
+        .bar-text {
+            position: absolute; width: 100%; top: 0; left: 0; line-height: 12px;
+            font-size: 8px; font-family: var(--font-eng); font-weight: bold; text-align: center;
+            text-shadow: 1px 1px 1px #000; z-index: 5; color: #fff;
         }
 
-        .status-effects { display: flex; gap: 5px; margin-top: 5px; justify-content: center; min-height: 20px; }
-        .status-icon { padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #fff; }
-        .status-poison { background: #4caf50; }
-        .status-stun { background: #ffeb3b; color: #000; }
-
-        .speech {
-            position: absolute; top: -50px; left: 50%; transform: translateX(-50%); 
-            background: rgba(255, 255, 255, 0.95); color: #000; padding: 8px 16px; border: 2px solid #000; 
-            border-radius: 8px; font-family: var(--font-ui); font-weight: bold; font-size: 0.95rem; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; z-index: 100; white-space: nowrap; 
-            animation: float 2s infinite ease-in-out;
-        }
-        .speech::after { content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); border-width:8px 8px 0; border-style:solid; border-color:rgba(255,255,255,0.95) transparent transparent transparent; }
-        @keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -5px); } }
-        
-        .vs-text { font-family: var(--font-eng); font-size: 4rem; color: rgba(255,255,255,0.1); font-style: italic; font-weight: bold; }
+        .vs-text { font-family: var(--font-eng); font-size: 2rem; color: rgba(255,255,255,0.2); font-style: italic; font-weight: bold; }
 
         .log-panel {
-            width: 700px; height: 100px; 
+            width: 90%; height: 80px;
             background: rgba(0,0,0,0.7); border: 1px solid #444; border-radius: 4px;
-            padding: 15px; overflow-y: auto; margin-bottom: 25px; 
-            font-size: 1rem; color: #ccc; z-index: 20; text-align: center; 
-            font-family: var(--font-ui); line-height: 1.6;
+            padding: 10px; overflow-y: auto; margin-bottom: 15px;
+            font-size: 0.85rem; color: #ccc; z-index: 20; text-align: center;
+            font-family: var(--font-ui); line-height: 1.4;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-        .log-highlight { color: var(--accent-gold); font-weight: bold; }
-        .log-dmg { color: var(--danger); font-weight: bold; }
-        .log-evade { color: var(--accent-gold); font-weight: bold; }
 
-        .btns { display: flex; gap: 20px; z-index: 20; }
+        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 20; width: 90%; max-width: 500px; }
         .btn { 
-            padding: 12px 35px; border: 2px solid #333; font-family: var(--font-combat); 
-            font-size: 1.3rem; cursor: pointer; color: #ccc; transition: all 0.2s; 
-            text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-radius: 6px;
-            position: relative; overflow: hidden;
+            padding: 10px; border: 2px solid #333; font-family: var(--font-combat);
+            font-size: 1rem; cursor: pointer; color: #ccc; transition: all 0.2s;
+            text-transform: uppercase; border-radius: 6px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
-        .btn::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(255,255,255,0.1), transparent); }
-        
-        .btn-atk { background: linear-gradient(to bottom, #8b0000, #520000); border-color: #b71c1c; }
-        .btn-atk:hover { background: linear-gradient(to bottom, #d32f2f, #8b0000); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(211, 47, 47, 0.6); }
-        
-        .btn-skl { background: linear-gradient(to bottom, #1a237e, #000051); border-color: #304ffe; }
-        .btn-skl:hover { background: linear-gradient(to bottom, #304ffe, #1a237e); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(48, 79, 254, 0.6); }
-        
-        .btn-item { background: linear-gradient(to bottom, #1b5e20, #003300); border-color: #2e7d32; }
-        .btn-item:hover { background: linear-gradient(to bottom, #2e7d32, #1b5e20); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
-
-        .btn-run { background: linear-gradient(to bottom, #333, #111); border-color: #555; }
-        .btn-run:hover { background: linear-gradient(to bottom, #555, #333); transform: translateY(-3px); color: #fff; }
 
         .btn-rage {
             background: linear-gradient(to bottom, #e65100, #bf360c); border-color: #ff9800;
-            color: #fff; font-size: 1.5rem; padding: 15px 50px; display: none;
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            color: #fff; font-size: 1.2rem; padding: 12px; display: none;
+            width: 90%; max-width: 500px; margin-top: 10px;
             animation: ragePulse 1s infinite alternate; z-index: 30;
         }
-        @keyframes ragePulse { from { box-shadow: 0 0 10px #ff9800; transform: translateX(-50%) scale(1); } to { box-shadow: 0 0 30px #ff9800; transform: translateX(-50%) scale(1.1); } }
-
-        #loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { width: 50px; height: 50px; border: 4px solid #333; border-top: 4px solid var(--accent-gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
 
         .modal-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 520px; 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 520px;
             background: rgba(15, 15, 20, 0.98); border: 2px solid var(--accent-gold); display: none; 
-            flex-direction: column; align-items: center; padding: 40px; z-index: 1000; 
-            box-shadow: 0 0 80px rgba(0,0,0,1); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 8px; 
+            flex-direction: column; align-items: center; padding: 20px; z-index: 1000;
+            box-shadow: 0 0 80px rgba(0,0,0,1); border-radius: 8px;
         }
-        @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-        
-        .modal-title { 
-            font-family: var(--font-combat); font-size: 3rem; color: var(--accent-gold); margin-bottom: 20px; 
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); letter-spacing: 2px; border-bottom: 3px solid var(--accent-red); padding-bottom: 5px; 
-        }
-        .result-content { width: 100%; text-align: center; margin-bottom: 25px; color: #eee; font-family: var(--font-ui); }
-        .result-row { margin: 12px 0; font-size: 1.2rem; display: flex; justify-content: space-between; padding: 0 40px; }
-        
-        .result-item-box {
-            margin-top: 20px; padding: 15px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); 
-            border: 1px solid #555; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 80%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .result-item-img { width: 64px; height: 64px; border: 2px solid var(--accent-gold); border-radius: 6px; object-fit: cover; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
-        .result-item-name { font-weight: bold; color: var(--accent-gold); font-family: var(--font-ui); font-size: 1.1rem; }
-        
-        .lv-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .lv-stat { background: rgba(0,0,0,0.4); padding: 10px; border: 1px solid #333; text-align: center; border-radius: 4px; }
-        .stat-name { font-size: 0.9rem; color: #888; margin-bottom: 5px; font-family: var(--font-eng); font-weight: bold; }
-        .stat-change { font-size: 1.3rem; font-weight: bold; color: #fff; font-family: var(--font-combat); }
-        .stat-up { color: #00e676; font-size: 0.9rem; margin-left: 5px; }
-        
-        .btn-confirm { 
-            background: var(--accent-gold); color: #000; padding: 12px 50px; border: none; 
-            cursor: pointer; font-size: 1.2rem; font-family: var(--font-combat); margin-top: 10px; 
-            transition: 0.2s; border-radius: 4px; font-weight: bold;
-        }
-        .btn-confirm:hover { background: #ffea00; transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 234, 0, 0.5); }
+        .modal-title { font-size: 2rem; margin-bottom: 15px; }
 
-        /* GameOver Modal */
-        #gameover-modal { width: 500px; height: auto; z-index: 1000; border: 2px solid var(--danger); display: none; }
-        .gameover-title { font-family: var(--font-combat); font-size: 2.5rem; color: var(--danger); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
-        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; }
-        .go-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; color: #ccc; }
-        .go-val { color: var(--accent-gold); font-weight: bold; }
-        .go-score { font-size: 1.8rem; color: #fff; text-align: center; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; font-family: var(--font-combat); }
-
-        /* Item Modal Styles */
-        #item-modal {
-            width: 400px;
-            background: rgba(15, 15, 20, 0.98);
-            border: 2px solid #4caf50;
-        }
-        .item-list {
-            width: 100%;
-            max-height: 300px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .battle-item-row {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .battle-item-row:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .battle-item-icon {
-            width: 32px; height: 32px; margin-right: 10px; border: 1px solid #444;
-        }
-        .battle-item-info {
-            flex: 1; text-align: left;
-        }
-        .battle-item-name {
-            font-weight: bold; color: #eee; font-size: 0.9rem;
-        }
-        .battle-item-desc {
-            font-size: 0.7rem; color: #aaa;
-        }
-        .battle-item-count {
-            font-weight: bold; color: var(--accent-gold); margin-left: 10px;
+        @media (min-width: 600px) {
+            .unit-name { font-size: 1.5rem; }
+            .bar-wrap { height: 16px; }
+            .bar-text { line-height: 16px; font-size: 10px; }
+            .vs-text { font-size: 4rem; }
+            .log-panel { height: 100px; font-size: 1rem; }
+            .btn { font-size: 1.3rem; padding: 12px; }
+            .btns { gap: 20px; }
         }
 
-        @keyframes shakeSmall { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-4px, 4px); } 50% { transform: translate(4px, -4px); } 75% { transform: translate(-4px, -4px); } }
-        .hit-small { animation: shakeSmall 0.3s ease-out; }
-        @keyframes shakeBig { 0% { transform: rotate(0deg); } 20% { transform: translate(-10px, 10px) rotate(-5deg); } 40% { transform: translate(10px, -10px) rotate(5deg); } 60% { transform: translate(-5px, 5px) rotate(-3deg); } 100% { transform: rotate(0deg); } }
-        .hit-big { animation: shakeBig 0.4s ease-out; }
-        @keyframes flashRed { 0% { filter: sepia(0) saturate(1); } 50% { filter: sepia(1) saturate(5) hue-rotate(-50deg); } 100% { filter: sepia(0) saturate(1); } }
-        .player-hit-anim { animation: shakeBig 0.4s ease-out, flashRed 0.3s; border-color: var(--danger) !important; }
-        
-        @keyframes critShake {
-            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            10% { transform: translate(-15px, -15px) rotate(-10deg) scale(1.2); }
-            20% { transform: translate(15px, 15px) rotate(10deg) scale(1.3); }
-            30% { transform: translate(-20px, 10px) rotate(-15deg) scale(1.4); }
-            40% { transform: translate(20px, -10px) rotate(15deg) scale(1.3); }
-            50% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
-            100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-        }
-        .crit-action { animation: critShake 1.0s cubic-bezier(.36,.07,.19,.97) both; z-index: 50; }
-
-        @keyframes evasionShake {
-            0% { transform: translate(0, 0) scale(1); }
-            20% { transform: translate(40px, -20px) rotate(15deg) scale(0.9); }
-            40% { transform: translate(-10px, 10px) rotate(-5deg) scale(1.1); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-        .evasion-action { animation: evasionShake 1.0s ease-out; z-index: 50; }
-
-        /* Screen Shake Effect */
-        @keyframes screenShake {
-            0% { transform: translate(0, 0); }
-            10% { transform: translate(-10px, -10px); }
-            20% { transform: translate(10px, 10px); }
-            30% { transform: translate(-10px, 10px); }
-            40% { transform: translate(10px, -10px); }
-            50% { transform: translate(-10px, -10px); }
-            60% { transform: translate(10px, 10px); }
-            70% { transform: translate(-10px, 10px); }
-            80% { transform: translate(10px, -10px); }
-            90% { transform: translate(-10px, -10px); }
-            100% { transform: translate(0, 0); }
-        }
-        .screen-shake { animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-
-        .dmg-text {
-            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
-            font-family: var(--font-combat); font-weight: bold; font-size: 3.5rem; color: #fff; 
-            text-shadow: -2px -2px 0 #000, 2px 2px 0 #000, 0 0 10px rgba(0,0,0,0.5); 
-            pointer-events: none; z-index: 200; animation: damagePop 1.5s forwards;
-        }
-        .crit-text { font-size: 5rem; color: #ff3333; text-shadow: 3px 3px 0 #000, 0 0 20px #ff3333; z-index: 201; }
-        .player-dmg { color: #ff5252; font-size: 4rem; }
-        .evade-text { color: #ffd700; font-size: 4rem; text-shadow: 0 0 15px #ffd700; }
-        @keyframes damagePop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -100%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -180%); } }
-        
-        .drop-item-effect { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; object-fit: contain; z-index: 300; pointer-events: none; animation: dropItemPop 2.5s ease-out forwards; filter: drop-shadow(0 0 25px var(--accent-gold)); }
-        @keyframes dropItemPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } 100% { opacity: 0; transform: translate(-50%, -120%) scale(0.8); } }
-
-        /* Rage Kill Effect */
-        .rage-kill-effect {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
-            width: 500px; z-index: 500; pointer-events: none; display: none;
-            filter: drop-shadow(0 0 30px #ff9800);
-        }
-        @keyframes rageKillPop {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
-        }
-        .rage-kill-anim { display: block; animation: rageKillPop 2s forwards; }
-
-        /* Poison Aura Effect */
-        .poison-aura {
-            box-shadow: 0 0 30px 10px rgba(155, 38, 182, 0.7) !important;
-            border-color: #9b26b6 !important;
-            transition: box-shadow 0.5s ease-in-out;
-        }
-        .poison-dmg {
-            color: #9b26b6 !important;
-            text-shadow: 0 0 10px #9b26b6 !important;
-        }
-
-        /* Cure Effect */
-        .cure-effect {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 230, 118, 0.3);
-            z-index: 10;
-            display: none;
-            animation: cureFlash 1s forwards;
-        }
-        @keyframes cureFlash {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* Weather UI in Battle */
         #weather-info {
-            position: absolute; top: 20px; right: 20px;
-            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 5px 15px;
-            border-radius: 20px; display: flex; align-items: center; gap: 8px;
-            font-family: var(--font-ui); font-size: 0.8rem; color: #fff; z-index: 100;
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 3px 10px;
+            border-radius: 20px; display: flex; align-items: center; gap: 5px;
+            font-family: var(--font-ui); font-size: 0.7rem; color: #fff; z-index: 100;
         }
     </style>
 </head>
@@ -355,7 +151,7 @@
         </div>
 
         <div id="item-modal" class="modal-overlay">
-            <div class="modal-title" style="color:#4caf50; border-color:#4caf50; font-size: 2rem;">아이템 선택</div>
+            <div class="modal-title" style="color:#4caf50; border-color:#4caf50; font-size: 1.5rem;">아이템 선택</div>
             <div id="item-list" class="item-list"></div>
             <button class="btn-confirm" onclick="closeItemModal()" style="background:#555; margin-top:20px;">닫기</button>
         </div>
