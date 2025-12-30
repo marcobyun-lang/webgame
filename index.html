@@ -476,9 +476,9 @@
             document.querySelectorAll('.char-card').forEach(el => {
                 el.classList.toggle('selected', el.getAttribute('data-job') === job);
             });
-            rollCount = 5;
+
             const btn = document.getElementById('btn-dice');
-            btn.disabled = false;
+            btn.disabled = rollCount <= 0;
             btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
             checkStartCondition();
         }
