@@ -45,7 +45,7 @@
         .unit-frame {
             width: 180px; height: 180px; 
             border: 4px solid #444; border-radius: 8px; 
-            overflow: hidden; position: relative; background: #111; 
+            overflow: hidden; position: relative; background: #111;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1; 
             transition: transform 0.1s;
         }
@@ -263,6 +263,21 @@
         }
         .screen-shake { animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 
+        @keyframes screenShakeStrong {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-15px, -15px); }
+            20% { transform: translate(15px, 15px); }
+            30% { transform: translate(-15px, 15px); }
+            40% { transform: translate(15px, -15px); }
+            50% { transform: translate(-15px, -15px); }
+            60% { transform: translate(15px, 15px); }
+            70% { transform: translate(-15px, 15px); }
+            80% { transform: translate(15px, -15px); }
+            90% { transform: translate(-15px, -15px); }
+            100% { transform: translate(0, 0); }
+        }
+        .screen-shake-strong { animation: screenShakeStrong 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
         .dmg-text {
             position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
             font-family: var(--font-combat); font-weight: bold; font-size: 3.5rem; color: #fff; 
@@ -274,6 +289,66 @@
         .evade-text { color: #ffd700; font-size: 4rem; text-shadow: 0 0 15px #ffd700; }
         @keyframes damagePop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -100%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -180%); } }
         
+        /* Legendary Warrior Damage */
+        .dmg-legendary-warrior {
+            color: #ffd700 !important;
+            text-shadow: 0 0 10px #ffd700, 0 0 20px #ff8f00, 0 0 30px #ffd700 !important;
+            font-size: 4.5rem !important;
+            animation: damagePop 1.5s forwards, goldDust 1s infinite !important;
+        }
+        @keyframes goldDust {
+            0% { text-shadow: 0 0 10px #ffd700; }
+            50% { text-shadow: 0 0 20px #ffeb3b, 0 0 40px #ffd700; }
+            100% { text-shadow: 0 0 10px #ffd700; }
+        }
+
+        /* Warrior Shockwave */
+        .shockwave-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100px; height: 100px;
+            border: 5px solid #ffd700;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 250;
+            animation: shockwavePop 0.5s ease-out;
+            box-shadow: 0 0 20px #ffd700, inset 0 0 20px #ffd700;
+        }
+        @keyframes shockwavePop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; border-width: 10px; }
+            100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; border-width: 0px; }
+        }
+
+        /* Legendary Rogue Animation */
+        .rogue-legendary-action {
+            animation: rogueLegendary 0.5s ease-out !important;
+        }
+        @keyframes rogueLegendary {
+            0% { transform: scale(1); filter: none; }
+            20% { transform: scale(1.1); filter: drop-shadow(-20px 0 0 rgba(147, 51, 234, 0.6)) drop-shadow(20px 0 0 rgba(147, 51, 234, 0.6)); opacity: 0.8; }
+            40% { transform: translate(-30px, 0) scale(1); filter: drop-shadow(60px 0 0 rgba(147, 51, 234, 0.4)); opacity: 0.6; }
+            60% { transform: translate(30px, 0) scale(1); filter: drop-shadow(-60px 0 0 rgba(147, 51, 234, 0.4)); opacity: 0.6; }
+            80% { transform: scale(1.1); filter: drop-shadow(-20px 0 0 rgba(147, 51, 234, 0.6)) drop-shadow(20px 0 0 rgba(147, 51, 234, 0.6)); opacity: 0.8; }
+            100% { transform: scale(1); filter: none; opacity: 1; }
+        }
+
+        /* Legendary Mage Holy Light */
+        .holy-light-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, #fff 20%, #ffd700 50%, transparent 70%);
+            z-index: 300; pointer-events: none;
+            animation: holyLightPop 0.6s ease-out forwards;
+            mix-blend-mode: screen;
+            box-shadow: 0 0 60px 30px #ffd700;
+            border-radius: 50%;
+        }
+        @keyframes holyLightPop {
+            0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+            40% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
         .drop-item-effect { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; object-fit: contain; z-index: 300; pointer-events: none; animation: dropItemPop 2.5s ease-out forwards; filter: drop-shadow(0 0 25px var(--accent-gold)); }
         @keyframes dropItemPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } 100% { opacity: 0; transform: translate(-50%, -120%) scale(0.8); } }
 
@@ -479,7 +554,7 @@
 
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
-            {f:'image/ka2.jpg', n:'던피', e:50, w:3},
+            {f:'image/ka2.jpg', n:'슬라임 베이비', e:50, w:3},
             {f:'image/ka3.jpg', n:'겁먹은 토끼', e:30, w:4},
             {f:'image/ke1.jpg', n:'엘리트 나무 병사', e:100, w:1, mult: 1.2}
         ];
@@ -501,7 +576,9 @@
             'mp_potion': 'potion_mp.jpg',
             'poison_potion': 'potion_poison.jpg',
             'exp_potion': 'potion_exp.jpg',
-            'gold': 'coin_gold.jpg'
+            'gold': 'coin_gold.jpg',
+            'potion_atk': 'attack_10.jpg',
+            'potion_def': 'Defense_10.jpg'
         };
         
         const DROP_TABLE = {
@@ -520,6 +597,7 @@
         let isBossBattle = false;
         let isSuperBoss = false;
         let currentWeather = "sunny";
+        let isLegendary = false;
 
         let pStatus = { poison: 0, stun: 0 };
         let eStatus = { poison: 0, stun: 0 };
@@ -562,7 +640,19 @@
                 '어쌔신': 'rogue1', '섀도우': 'rogue1',
                 '아크메이지': 'mage1', '소서러': 'mage1'
             };
-            document.getElementById('p-img').src = `image/${jM[player.job] || 'warrior'}.jpg`;
+
+            let pImgSrc = `image/${jM[player.job] || 'warrior'}.jpg`;
+
+            const weapon = player.inventory.find(i => i.type === 'weapon' && i.equipped);
+            if (weapon && weapon.rarity === 'legendary') {
+                isLegendary = true;
+                const j = player.job;
+                if (j === '전사' || j === '버서커' || j === '가디언') pImgSrc = 'image/warrior4.jpg';
+                else if (j === '도적' || j === '어쌔신' || j === '섀도우') pImgSrc = 'image/rogue4.jpg';
+                else if (j === '마법사' || j === '아크메이지' || j === '소서러') pImgSrc = 'image/mage4.jpg';
+            }
+
+            document.getElementById('p-img').src = pImgSrc;
             document.getElementById('p-name').innerText = player.name;
             
             const isBossFlag = localStorage.getItem('rpg_boss_encounter');
@@ -572,9 +662,9 @@
             if (isSuperBossFlag === 'true') {
                 isBossBattle = true;
                 isSuperBoss = true;
-                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 3000);
-                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 3000);
-                enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 40 + (player.level * 4), exp: 10000, img: 'image/best_boss.jpg' };
+                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 1000);
+                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 1000);
+                enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 30 + (player.level * 3), exp: 10000, img: 'image/best_boss.jpg' };
                 localStorage.removeItem('rpg_is_super_boss');
             } else if (isBossFlag === 'true') {
                 isBossBattle = true;
@@ -677,23 +767,45 @@
             else if (type === 'player_hit') { cssClass += ' player-dmg'; }
             else if (type === 'poison') { cssClass += ' poison-dmg'; content = 'POISON<br>' + dmg; }
             else if (type === 'evade') { cssClass += ' evade-text'; content = 'MISS'; }
+
+            if (isLegendary && (player.job === '전사' || player.job === '버서커' || player.job === '가디언') && targetId === 'enemy-frame' && type !== 'evade') {
+                cssClass += ' dmg-legendary-warrior';
+            }
+
             el.className = cssClass; el.innerHTML = content;
             const randomX = Math.floor(Math.random()*40)-20; const randomY = Math.floor(Math.random()*20)-10;
             el.style.transform = `translate(calc(-50% + ${randomX}px), calc(-50% + ${randomY}px))`;
             frame.appendChild(el); setTimeout(() => el.remove(), 1500);
         }
 
-        function triggerScreenShake() {
+        function triggerScreenShake(isStrong = false) {
             const container = document.getElementById('game-container');
-            container.classList.remove('screen-shake');
+            container.classList.remove('screen-shake', 'screen-shake-strong');
             void container.offsetWidth;
-            container.classList.add('screen-shake');
-            setTimeout(() => container.classList.remove('screen-shake'), 500);
+            if (isStrong) container.classList.add('screen-shake-strong');
+            else container.classList.add('screen-shake');
+            setTimeout(() => container.classList.remove('screen-shake', 'screen-shake-strong'), 500);
         }
         
         function triggerHitEffect(targetId, type) {
             const frame = document.getElementById(targetId);
             frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evasion-action'); void frame.offsetWidth;
+
+            if (isLegendary && (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') && targetId === 'enemy-frame' && type !== 'evade') {
+                 const light = document.createElement('div');
+                 light.className = 'holy-light-effect';
+                 frame.appendChild(light);
+                 setTimeout(() => light.remove(), 800);
+                 return;
+            }
+
+            if (isLegendary && (player.job === '전사' || player.job === '버서커' || player.job === '가디언') && targetId === 'enemy-frame' && type !== 'evade') {
+                 const wave = document.createElement('div');
+                 wave.className = 'shockwave-effect';
+                 frame.appendChild(wave);
+                 setTimeout(() => wave.remove(), 600);
+            }
+
             if (type === 'normal') frame.classList.add('hit-small');
             else if (type === 'rogue') frame.classList.add('hit-rogue');
             else if (type === 'big') frame.classList.add('hit-big');
@@ -737,7 +849,16 @@
                     }
                 }
                 triggerHitEffect(targetFrameId, effectType);
-                setTimeout(() => { pImg.src = `image/${base}1.jpg`; }, 1000);
+                setTimeout(() => {
+                    if (isLegendary) {
+                        if (base === 'warrior') pImg.src = 'image/warrior4.jpg';
+                        else if (base === 'rogue') pImg.src = 'image/rogue4.jpg';
+                        else if (base === 'mage') pImg.src = 'image/mage4.jpg';
+                        else pImg.src = `image/${base}1.jpg`;
+                    } else {
+                        pImg.src = `image/${base}1.jpg`;
+                    }
+                }, 1000);
 
             } else { // 전직 안한 경우
                 if (effectType === 'crit') {
@@ -816,6 +937,12 @@
                     playCritSfx();
                 }
                 
+                if (isLegendary) {
+                    if (player.job === '전사' || player.job === '버서커' || player.job === '가디언') {
+                        triggerScreenShake(true);
+                    }
+                }
+
                 playMotion(imgMap[jobKey], 'enemy-frame', isCrit?'crit':'normal');
                 enemy.hp -= dmg; 
                 showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
@@ -858,6 +985,11 @@
 
                     let poisonChance = (player.job === '섀도우') ? 1.0 : 0.5;
                     if(Math.random() < poisonChance) { eStatus.poison = 3; addLog("적에게 독을 부여했습니다!"); }
+
+                    if (isLegendary) {
+                        document.getElementById('player-frame').classList.add('rogue-legendary-action');
+                        setTimeout(() => document.getElementById('player-frame').classList.remove('rogue-legendary-action'), 500);
+                    }
 
                     const vMap = {
                         '도적':'v-rogue', '어쌔신':'v-rogue', '섀도우':'v-rogue'
@@ -917,6 +1049,10 @@
                 if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
             }
 
+            if (isLegendary && (job === '전사' || job === '버서커' || job === '가디언')) {
+                triggerScreenShake(true);
+            }
+
             triggerHitEffect('enemy-frame', isCrit?'crit':'big');
             enemy.hp -= dmg; 
             showDamage('enemy-frame', dmg, isCrit?'crit':'normal'); 
@@ -942,6 +1078,14 @@
 
             // Show Rage Kill Effect
             const killImg = document.getElementById('rage-kill-img');
+
+            const baseJobs = ['전사', '도적', '마법사'];
+            if (!baseJobs.includes(player.job)) {
+                killImg.src = 'image/damage_kill1.jpg';
+            } else {
+                killImg.src = 'image/damage_kill.jpg';
+            }
+
             killImg.classList.add('rage-kill-anim');
             setTimeout(() => killImg.classList.remove('rage-kill-anim'), 2000);
 
@@ -955,6 +1099,10 @@
                     '어쌔신':'atk-rogue', '섀도우':'atk-rogue',
                     '아크메이지':'atk-mage', '소서러':'atk-mage'
                 };
+
+                if (isLegendary && (player.job === '전사' || player.job === '버서커' || player.job === '가디언')) {
+                    triggerScreenShake(true);
+                }
 
                 playMotion(imgMap[jobKey], 'enemy-frame', 'crit');
                 enemy.hp -= dmg;
@@ -989,7 +1137,7 @@
             }
 
             if(pStatus.poison > 0) {
-                const pDmg = Math.floor(player.maxHp * 0.08);
+                const pDmg = Math.floor(player.maxHp * 0.12);
                 player.hp -= pDmg;
                 showDamage('player-frame', pDmg, 'poison');
                 addLog(`독으로 인해 <span style="color:#9b26b6">${pDmg}</span> 피해를 입었습니다.`);
@@ -1124,7 +1272,7 @@
                 let rarityName = isLegendary ? "전설의" : "에픽";
                 const newItem = { name: `${rarityName} ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: isLegendary ? "legendary" : "epic", rarityColor: colorCode, enhanceCount: grade, options: [] };
 
-                const optCount = isLegendary ? 3 : 2;
+                const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+2}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+2}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+2}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+2}];
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
 
@@ -1136,6 +1284,12 @@
                 const baseName = nameList[Math.floor(Math.random() * nameList.length)];
                 const grade = Math.floor(Math.random() * 5) + 8;
                 const newItem = { name: `에픽 ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: "epic", rarityColor: '#a335ee', enhanceCount: grade, options: [] };
+
+                const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+1}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+1}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+1}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+1}];
+                const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)];
+                newItem.options.push(opt);
+                newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
+
                 player.inventory.push(newItem);
                 dropName = newItem.name; dropColor = '#a335ee'; dropImg = WEAPON_IMAGES[player.job];
             }
@@ -1145,6 +1299,20 @@
                 else if(rand < 0.6) { player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=ITEM_IMAGES['mp_potion']; }
                 else if(rand < 0.8) { player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=ITEM_IMAGES['exp_potion']; }
                 else { player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=ITEM_IMAGES['poison_potion']; }
+            }
+            else if (Math.random() < 0.2) {
+                const rand = Math.random();
+                if(rand < 0.5) {
+                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +10 영구 증가', val:10});
+                    dropName = "공격력 강화 물약";
+                    dropColor="#ff8a80";
+                    dropImg=ITEM_IMAGES['potion_atk'];
+                } else {
+                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +10 영구 증가', val:10});
+                    dropName = "방어력 강화 물약";
+                    dropColor="#82b1ff";
+                    dropImg=ITEM_IMAGES['potion_def'];
+                }
             }
 
             if(dropName) {

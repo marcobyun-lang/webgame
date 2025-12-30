@@ -532,7 +532,7 @@
     let playerImg = new Image();
     let mapImg = new Image();
     let boss = { x: 100, y: 100, speed: 2.2, img: new Image(), alive: true, isNightBoss: false, hp: 100, maxHp: 100 };
-    let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 3000, maxHp: 3000, name: "초강력 보스" };
+    let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 1000, maxHp: 1000, name: "초강력 보스" };
     superBoss.img.src = 'image/best_boss.jpg';
 
     const GAME_TIME_LIMIT = 15 * 60 * 1000;
@@ -551,6 +551,7 @@
     const goldSfx = new Audio('song/gold_drop-inght.wav');
     const rainThunderSfx = new Audio('song/thunder1-inght.wav');
     const rainRuinSfx = new Audio('song/ruin-inght.wav');
+    const equipSfx = new Audio('image/eqp.mp3');
 
     fieldBgm.loop = true;
     fieldBgm.volume = 0.15;
@@ -623,8 +624,20 @@
         }
     }
 
+    function getPlayerImage(job, inventory) {
+        const equippedWeapon = inventory.find(i => i.type === 'weapon' && i.equipped);
+        const isLegendary = equippedWeapon && equippedWeapon.rarity === 'legendary';
+
+        if (isLegendary) {
+            if (job === '전사' || job === '버서커' || job === '가디언') return 'image/warrior4.jpg';
+            if (job === '도적' || job === '어쌔신' || job === '섀도우') return 'image/rogue4.jpg';
+            if (job === '마법사' || job === '아크메이지' || job === '소서러') return 'image/mage4.jpg';
+        }
+        return CHAR_FILES[job] || CHAR_FILES['전사'];
+    }
+
     function initMap() {
-        playerImg.src = CHAR_FILES[player.job] || CHAR_FILES['전사'];
+        playerImg.src = getPlayerImage(player.job, player.inventory);
         mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
 
         mapImg.onload = () => {
@@ -725,7 +738,7 @@
         else if (opt.job === '아크메이지') { player.stats.int += 15; player.maxMp += 100; }
         else if (opt.job === '소서러') { player.stats.int += 10; player.stats.wis += 10; }
         player.hp = player.maxHp; player.mp = player.maxMp;
-        playerImg.src = CHAR_FILES[player.job];
+        playerImg.src = getPlayerImage(player.job, player.inventory);
         advBgm.pause(); advBgm.currentTime = 0;
 
         angelBgm.play().catch(e => console.log(e));
@@ -818,8 +831,8 @@
     function spawnSuperBoss() {
         superBoss.alive = true;
         superBoss.x = 480; superBoss.y = 320;
-        superBoss.hp = 3000 + (player.level * 200);
-        superBoss.maxHp = superBoss.hp;
+        superBoss.hp = 1000;
+        superBoss.maxHp = 1000;
 
         const warning = document.getElementById('boss-warning');
         warning.style.display = 'block';
@@ -999,7 +1012,7 @@
         };
 
         if (rarity !== "common") {
-            const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 2 : 1);
+            const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 1 : 1);
             const possibleOpts = [
                 { name: "힘", key: "str", val: Math.floor(Math.random() * 5) + 1 },
                 { name: "민첩", key: "dex", val: Math.floor(Math.random() * 5) + 1 },
@@ -1327,7 +1340,9 @@
                 item.equipped = true;
                 player.bonusAtk += item.val;
                 if (item.options) item.options.forEach(opt => player.stats[opt.key] += opt.val);
+                equipSfx.play().catch(e => {});
             }
+            playerImg.src = getPlayerImage(player.job, player.inventory);
         }
         renderInventory(); updateUI();
     }
@@ -1343,6 +1358,7 @@
         if(item.equipped) {
             player.bonusAtk -= item.val;
             if (item.options) item.options.forEach(opt => player.stats[opt.key] -= opt.val);
+            playerImg.src = getPlayerImage(player.job, player.inventory);
         }
         player.gold += price; player.inventory.splice(index, 1);
         renderInventory(); updateUI();
