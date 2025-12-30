@@ -484,7 +484,7 @@
 
         <div class="ui-bars-center">
             <div class="bar-row"><span class="bar-label">HP</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill hp-fill"></div><span id="ui-hp-text" class="bar-text"></span></div></div>
-            <div class="bar-row"><span class="bar-label">MP</span><div class="bar-bg"><div id="ui-mp-bar" class="bar-fill mp-grad"></div><span id="ui-mp-text" class="bar-text"></span></div></div>
+            <div class="bar-row"><span class="bar-label">MP</span><div class="bar-bg"><div id="ui-mp-bar" class="bar-fill mp-fill"></div><span id="ui-mp-text" class="bar-text"></span></div></div>
             <div class="bar-row"><span class="bar-label">EXP</span><div class="bar-bg"><div id="ui-exp-bar" class="bar-fill exp-fill"></div><span id="ui-exp-text" class="bar-text"></span></div></div>
         </div>
 
@@ -904,10 +904,10 @@
                     player.moveSpeed += 2;
                     showConfirm("아이템 획득", "신속의 장화를 획득했습니다! 이동 속도가 영구적으로 증가합니다.", null, true);
                 } else if (item.type === 'attack') {
-                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +10 증가', val:10});
+                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +5 증가', val:5});
                     showConfirm("아이템 획득", "공격력 강화 물약을 획득했습니다!", null, true);
                 } else if (item.type === 'defense') {
-                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +10 증가', val:10});
+                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +5 증가', val:5});
                     showConfirm("아이템 획득", "방어력 강화 물약을 획득했습니다!", null, true);
                 }
                 return false;
@@ -1527,7 +1527,10 @@
         text.innerText = ev.t; rewardText.innerText = ev.r; img.src = ev.i;
         player.gold += ev.g; player.hp = Math.min(player.hp + ev.h, player.maxHp); player.mp = Math.min(player.mp + ev.m, player.maxMp);
         if (ev.g > 0) goldSfx.play().catch(e => {});
-        overlay.style.display = 'flex'; overlay.classList.remove('event-anim'); void overlay.offsetWidth; overlay.classList.add('event-anim');
+        overlay.style.display = 'flex';
+        overlay.classList.remove('event-anim');
+        void overlay.offsetWidth;
+        overlay.classList.add('event-anim');
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
         updateUI();
     }
