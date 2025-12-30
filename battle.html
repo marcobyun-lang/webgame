@@ -565,6 +565,8 @@
         const potionSfx = new Audio('song/potion-inght.wav');
         const goldSfx = new Audio('song/gold_drop-inght.wav');
 
+        let bossBgm = null;
+
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
             {f:'image/ka2.jpg', n:'리던', e:50, w:3},
@@ -701,6 +703,7 @@
                 const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 1000);
                 enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 30 + (player.level * 3), exp: 10000, img: 'image/best_boss.jpg' };
                 localStorage.removeItem('rpg_is_super_boss');
+                playBossBgm('song/best_boss_bgm.mp3');
             } else if (isBossFlag === 'true') {
                 isBossBattle = true;
                 const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
@@ -712,8 +715,10 @@
                     const nMaxHp = Math.floor(bossMaxHp * 1.3);
                     const nAtk = Math.floor(bossAtk * 1.3);
                     enemy = { name: '어둠의 지배자', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 3000, img: 'image/monster_boss.jpg', isNightBoss: true };
+                    playBossBgm('song/monster_boss_bgm1.mp3');
                 } else {
                     enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
+                    playBossBgm('song/monster_boss_bgm.mp3');
                 }
                 localStorage.removeItem('rpg_boss_encounter'); 
             } else {
@@ -748,6 +753,25 @@
             addLog(`<span class='log-highlight'>[${enemy.name}]</span>이(가) 나타났습니다!`);
             document.getElementById('loading-overlay').style.display = 'none';
             update(); say('p', '전투 시작!');
+        }
+
+        function playBossBgm(src) {
+            if (bossBgm) {
+                bossBgm.pause();
+                bossBgm.currentTime = 0;
+            }
+            bossBgm = new Audio(src);
+            bossBgm.loop = true;
+            bossBgm.volume = 0.5;
+            bossBgm.play().catch(e => console.log("BGM play failed:", e));
+        }
+
+        function stopBossBgm() {
+            if (bossBgm) {
+                bossBgm.pause();
+                bossBgm.currentTime = 0;
+                bossBgm = null;
+            }
         }
 
         function updateSpecialTooltip() {
@@ -1438,6 +1462,7 @@
         }
 
         function showGameOver(msg) {
+            stopBossBgm();
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
             const survivalTime = Math.floor((Date.now() - startTime) / 1000);
             const min = Math.floor(survivalTime / 60);
@@ -1484,6 +1509,7 @@
         }
 
         function win() {
+            stopBossBgm();
             const isNight = localStorage.getItem('rpg_is_night') === 'true';
 
             if (isBossBattle) {
@@ -1656,6 +1682,7 @@
             if(Math.random() < runChance) {
                 say('p', "튀어!");
                 addLog("무사히 도망쳤습니다!");
+                stopBossBgm();
                 setTimeout(finishBattle, 1200);
             }
             else {
