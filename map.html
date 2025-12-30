@@ -125,48 +125,41 @@
             object-fit: contain;
         }
 
-        /* Mobile Controls - Visible on touch devices or small screens */
-        #mobile-controls {
+        /* Mobile Controls */
+        .mobile-ctrl-group {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: grid;
-            grid-template-areas:
-                ". up ."
-                "left . right"
-                ". down .";
-            gap: 10px;
-            z-index: 50;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
         }
-
-        /* Hide only on large desktop screens with a mouse */
-        @media (min-width: 1025px) and (pointer: fine) {
-            #mobile-controls { display: none; }
-        }
+        #mobile-controls-left { bottom: 40px; left: 20px; }
+        #mobile-controls-right { bottom: 40px; right: 20px; flex-direction: column; }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
+            font-size: 30px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         .control-btn:active {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.5);
             transform: scale(0.9);
         }
-        #btn-up { grid-area: up; }
-        #btn-down { grid-area: down; }
-        #btn-left { grid-area: left; }
-        #btn-right { grid-area: right; }
+
+        /* Hide on desktop */
+        @media (min-width: 1025px) {
+            .mobile-ctrl-group { display: none; }
+        }
 
         .modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -232,10 +225,12 @@
             <div id="event-reward"></div>
         </div>
 
-        <div id="mobile-controls">
-            <div class="control-btn" id="btn-up">▲</div>
+        <div id="mobile-controls-left" class="mobile-ctrl-group">
             <div class="control-btn" id="btn-left">◀</div>
             <div class="control-btn" id="btn-right">▶</div>
+        </div>
+        <div id="mobile-controls-right" class="mobile-ctrl-group">
+            <div class="control-btn" id="btn-up">▲</div>
             <div class="control-btn" id="btn-down">▼</div>
         </div>
 
@@ -404,11 +399,16 @@
             const btns = { 'btn-up': 'up', 'btn-down': 'down', 'btn-left': 'left', 'btn-right': 'right' };
             for (const id in btns) {
                 const el = document.getElementById(id);
+                if (!el) continue;
                 const dir = btns[id];
                 const start = (e) => { e.preventDefault(); moveState[dir] = true; };
                 const end = (e) => { e.preventDefault(); moveState[dir] = false; };
-                el.addEventListener('touchstart', start); el.addEventListener('touchend', end);
-                el.addEventListener('mousedown', start); el.addEventListener('mouseup', end); el.addEventListener('mouseleave', end);
+                el.addEventListener('touchstart', start, {passive: false});
+                el.addEventListener('touchend', end);
+                el.addEventListener('touchcancel', end);
+                el.addEventListener('mousedown', start);
+                el.addEventListener('mouseup', end);
+                el.addEventListener('mouseleave', end);
             }
         }
 
