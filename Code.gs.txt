@@ -12,7 +12,7 @@ function doPost(e) {
       return saveRanking(ss, params);
     }
 
-    // 일반 캐릭터 데이터 저장
+    // 일반 캐릭터 데이터 저장 (수동 저장 시에만 호출됨)
     let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
     const name = params.name;
     const jsonData = JSON.stringify(params);
@@ -54,13 +54,15 @@ function saveRanking(ss, params) {
 
   // 기존 데이터 파싱 (헤더 제외)
   for (let i = 1; i < data.length; i++) {
-    rankings.push({
-      name: data[i][0],
-      score: parseInt(data[i][1]),
-      job: data[i][2],
-      level: data[i][3],
-      date: data[i][4]
-    });
+    if (data[i][0]) { // 이름이 있는 행만 처리
+      rankings.push({
+        name: data[i][0],
+        score: parseInt(data[i][1]),
+        job: data[i][2],
+        level: data[i][3],
+        date: data[i][4]
+      });
+    }
   }
 
   // 새 점수 추가
@@ -79,7 +81,7 @@ function saveRanking(ss, params) {
   rankings = rankings.slice(0, 10);
 
   // 시트 초기화 및 다시 쓰기
-  rankSheet.clearContents();
+  rankSheet.clear(); // 서식까지 모두 삭제
   rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt']);
   rankings.forEach(r => {
     rankSheet.appendRow([r.name, r.score, r.job, r.level, r.date]);
@@ -101,12 +103,14 @@ function doGet(e) {
       const data = rankSheet.getDataRange().getValues();
       let rankings = [];
       for (let i = 1; i < data.length; i++) {
-        rankings.push({
-          name: data[i][0],
-          score: data[i][1],
-          job: data[i][2],
-          level: data[i][3]
-        });
+        if (data[i][0]) {
+          rankings.push({
+            name: data[i][0],
+            score: data[i][1],
+            job: data[i][2],
+            level: data[i][3]
+          });
+        }
       }
       return ContentService.createTextOutput(JSON.stringify(rankings)).setMimeType(ContentService.MimeType.JSON);
     }
