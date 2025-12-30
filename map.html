@@ -19,18 +19,10 @@
             --exp-grad: linear-gradient(90deg, #4a148c, #6a1b9a);
             --font-head: 'Cinzel', serif;
             --font-body: 'Noto Serif KR', 'Inter', sans-serif;
-
-            /* Bag Theme Colors */
             --bag-bg: #3e2723;
             --bag-panel: #4e342e;
             --bag-border: #6d4c41;
             --bag-item: #5d4037;
-
-            /* Rarity Colors */
-            --rarity-common: #ffffff;
-            --rarity-rare: #2196f3;
-            --rarity-epic: #a335ee;
-            --rarity-legendary: #ff8000;
         }
 
         body {
@@ -52,7 +44,6 @@
             width: 100%;
             max-width: 960px;
             height: 100vh;
-            max-height: 720px;
             background: #000;
             border: 1px solid #333;
             box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
@@ -65,41 +56,39 @@
 
         .game-ui-top {
             height: auto;
-            min-height: 80px;
             background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
             border-bottom: 1px solid #333;
             display: flex;
             align-items: center;
-            padding: 10px 20px;
+            padding: 5px 15px;
             justify-content: space-between;
             z-index: 20;
             position: relative;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 5px;
         }
 
-        .char-info { display: flex; flex-direction: column; justify-content: center; min-width: 120px; }
+        .char-info { display: flex; flex-direction: column; justify-content: center; min-width: 100px; }
         .char-info h2 {
             font-family: var(--font-head); color: var(--accent-gold); margin: 0;
-            font-size: 1rem; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-size: 0.9rem; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .char-info span { font-family: var(--font-body); color: var(--text-muted); font-size: 0.7rem; margin-top: 2px; font-weight: 600; }
+        .char-info span { font-family: var(--font-body); color: var(--text-muted); font-size: 0.65rem; margin-top: 1px; font-weight: 600; }
 
         #game-timer {
-            font-family: var(--font-body); font-weight: 700; font-size: 1.2rem; color: #ef5350;
-            text-shadow: 0 0 10px rgba(239, 83, 80, 0.4); min-width: 60px; text-align: center; letter-spacing: 1px;
+            font-family: var(--font-body); font-weight: 700; font-size: 1.1rem; color: #ef5350;
+            text-shadow: 0 0 10px rgba(239, 83, 80, 0.4); min-width: 50px; text-align: center;
         }
 
         .ui-bars-center {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             width: 100%;
-            max-width: 300px;
+            max-width: 250px;
             order: 3;
         }
-        @media (min-width: 800px) {
+        @media (min-width: 768px) {
             .ui-bars-center {
                 position: absolute;
                 left: 50%;
@@ -108,26 +97,26 @@
             }
         }
 
-        .bar-row { display: flex; align-items: center; gap: 8px; }
-        .bar-label { width: 25px; text-align: right; color: #666; font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; }
-        .bar-bg { flex: 1; height: 10px; background: #111; border: 1px solid #2a2a2a; border-radius: 2px; position: relative; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.3s ease-out; border-radius: 1px; }
+        .bar-row { display: flex; align-items: center; gap: 5px; }
+        .bar-label { width: 22px; text-align: right; color: #666; font-size: 0.6rem; font-weight: 700; }
+        .bar-bg { flex: 1; height: 8px; background: #111; border: 1px solid #2a2a2a; border-radius: 2px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s ease-out; }
         .hp-fill { background: var(--hp-grad); }
         .mp-fill { background: var(--mp-grad); }
         .exp-fill { background: var(--exp-grad); }
-        .bar-text { position: absolute; top: -1px; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 8px; color: rgba(255,255,255,0.7); text-shadow: 1px 1px 1px #000; }
+        .bar-text { position: absolute; top: -1px; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 7px; color: rgba(255,255,255,0.7); text-shadow: 1px 1px 1px #000; }
 
-        .btn-group { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+        .btn-group { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; order: 2; }
+        @media (min-width: 768px) { .btn-group { order: 3; } }
         .btn {
-            padding: 6px 12px; background: #1a1a1a; border: 1px solid #333; color: #aaa;
-            font-family: var(--font-body); font-size: 0.7rem; font-weight: 700; cursor: pointer;
-            transition: all 0.2s; border-radius: 2px; text-transform: uppercase; letter-spacing: 1px;
+            padding: 4px 8px; background: #1a1a1a; border: 1px solid #333; color: #aaa;
+            font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; cursor: pointer;
+            border-radius: 2px; text-transform: uppercase;
         }
-        .btn:hover { background: #252525; color: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(197, 160, 89, 0.1); }
-        
+
         .canvas-wrapper {
             flex: 1; background: #000; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; position: relative; width: 100%; height: 100%;
+            overflow: hidden; position: relative; width: 100%;
         }
         canvas {
             image-rendering: pixelated;
@@ -136,12 +125,12 @@
             object-fit: contain;
         }
 
-        /* Mobile Controls */
+        /* Mobile Controls - Visible on touch devices or small screens */
         #mobile-controls {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            display: none;
+            display: grid;
             grid-template-areas:
                 ". up ."
                 "left . right"
@@ -149,11 +138,17 @@
             gap: 10px;
             z-index: 50;
         }
+
+        /* Hide only on large desktop screens with a mouse */
+        @media (min-width: 1025px) and (pointer: fine) {
+            #mobile-controls { display: none; }
+        }
+
         .control-btn {
             width: 60px;
             height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -162,9 +157,10 @@
             font-size: 24px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            backdrop-filter: blur(2px);
         }
         .control-btn:active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.4);
             transform: scale(0.9);
         }
         #btn-up { grid-area: up; }
@@ -172,202 +168,48 @@
         #btn-left { grid-area: left; }
         #btn-right { grid-area: right; }
 
-        @media (max-width: 1024px) {
-            #mobile-controls { display: grid; }
-        }
-
         .modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(12, 12, 14, 0.98); border: 1px solid #444; display: none; flex-direction: column;
             z-index: 100; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border-radius: 4px;
             width: 95%; max-width: 850px; max-height: 90vh;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #2a2a2a; }
-        .modal-header h2 { font-family: var(--font-body); color: var(--accent-gold); font-size: 1.2rem; margin: 0; letter-spacing: 2px; }
-        .close-btn { background: none; border: none; color: #555; font-family: var(--font-body); cursor: pointer; font-size: 1.2rem; transition: color 0.2s; }
-        .close-btn:hover { color: #fff; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #2a2a2a; }
+        .modal-header h2 { font-family: var(--font-body); color: var(--accent-gold); font-size: 1rem; margin: 0; }
+        .modal-body { padding: 15px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 
-        .modal-body { padding: 20px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* Inventory Modal Bag Theme */
-        #inventory-modal {
-            background: var(--bag-bg);
-            border: 3px solid var(--bag-border);
-            box-shadow: 0 0 30px rgba(0,0,0,0.7), inset 0 0 50px rgba(0,0,0,0.3);
-        }
-        #inventory-modal .modal-header { border-bottom: 2px solid var(--bag-border); background: rgba(0,0,0,0.2); }
-        #inventory-modal .modal-body { background: var(--bag-panel); overflow-y: auto; }
-        #inventory-modal .modal-body::-webkit-scrollbar { width: 8px; }
-        #inventory-modal .modal-body::-webkit-scrollbar-thumb { background: var(--bag-border); border-radius: 4px; }
+        #inventory-modal { background: var(--bag-bg); border: 3px solid var(--bag-border); }
+        #inventory-modal .modal-body { background: var(--bag-panel); }
 
-        #shop-modal { height: 620px; }
-        #shop-list-container { flex: 1; overflow-y: auto; padding-right: 10px; }
-        #shop-list-container::-webkit-scrollbar { width: 8px; }
-        #shop-list-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-
-        #quest-modal { width: 90%; max-width: 500px; height: 550px; }
-        #quest-modal .modal-body { overflow-y: auto; }
-
-        #advancement-modal { width: 90%; max-width: 600px; height: auto; }
-
-        /* Custom Confirm Modal */
-        #confirm-modal { width: 90%; max-width: 400px; height: auto; min-height: 200px; z-index: 200; }
-        .confirm-text { color: #eee; text-align: center; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.6; }
-        .confirm-btns { display: flex; gap: 15px; justify-content: center; }
-        .btn-yes { background: var(--accent-gold); color: #000; border: none; padding: 10px 30px; font-weight: bold; cursor: pointer; }
-        .btn-no { background: #444; color: #fff; border: none; padding: 10px 30px; font-weight: bold; cursor: pointer; }
-
-        /* GameOver Modal */
-        #gameover-modal { width: 90%; max-width: 500px; height: auto; z-index: 1000; border: 2px solid var(--accent-red); }
-        .gameover-title { font-family: var(--font-head); font-size: 2rem; color: var(--accent-red); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
-        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
-        .go-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1rem; color: #ccc; }
-        .go-val { color: var(--accent-gold); font-weight: bold; }
-        .go-score { font-size: 1.5rem; color: #fff; text-align: center; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; }
-
-        .inv-container { display: flex; gap: 20px; height: auto; min-height: 100%; flex-direction: column; }
+        .inv-container { display: flex; gap: 15px; flex-direction: column; }
         @media (min-width: 600px) {
             .inv-container { flex-direction: row; }
-            .inv-status-side { flex: 0 0 220px; }
+            .inv-status-side { flex: 0 0 200px; }
         }
-        .inv-status-side {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--bag-border);
-            padding: 15px; border-radius: 4px; display: flex; flex-direction: column; height: fit-content;
-        }
-        .inv-grid-side { flex: 1; padding-right: 5px; }
-
-        .inv-header-gold {
-            color: var(--accent-gold); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; margin-right: 15px;
-        }
-
-        .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .inv-status-side { background: rgba(0,0,0,0.3); border: 1px solid var(--bag-border); padding: 10px; border-radius: 4px; }
+        .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
 
         .item-card {
-            background: var(--bag-item); border: 1px solid var(--bag-border); border-radius: 4px; padding: 10px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 120px; position: relative; cursor: pointer; transition: 0.2s;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            background: var(--bag-item); border: 1px solid var(--bag-border); border-radius: 4px; padding: 8px;
+            min-height: 100px; position: relative; cursor: pointer;
         }
-        .item-card:hover { border-color: #fff; background: #6d4c41; }
-        .item-card.equipped { border-color: var(--accent-gold); background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-        
-        .item-name { font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
-        .item-desc { font-size: 0.7rem; color: #d7ccc8; line-height: 1.4; }
-        .item-price { font-size: 0.65rem; color: #bcaaa4; margin-top: 5px; font-family: var(--font-body); }
-        .item-type { font-size: 0.6rem; margin-top: 8px; color: #a1887f; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
-        
-        .sell-btn {
-            position: absolute; bottom: 8px; right: 8px;
-            padding: 4px 8px; background: #d32f2f; color: #fff; border: 1px solid #b71c1c; border-radius: 3px;
-            font-size: 0.7rem; font-family: var(--font-body); cursor: pointer; transition: 0.2s;
-            font-weight: bold; z-index: 5;
-        }
+        .item-name { font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+        .item-desc { font-size: 0.65rem; color: #d7ccc8; line-height: 1.3; }
+        .sell-btn { position: absolute; bottom: 5px; right: 5px; padding: 3px 6px; background: #d32f2f; color: #fff; border: none; border-radius: 2px; font-size: 0.6rem; }
 
-        .side-stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--bag-border); padding: 6px 0; font-size: 0.8rem; }
-        .side-stat-name { color: #bcaaa4; font-weight: 600; }
-        .side-stat-val { color: #fff; font-family: var(--font-body); font-weight: 600; }
-        .side-atk-val { color: #ff8a80; font-weight: bold; font-size: 1rem; }
-        .side-bonus { color: #81c784; font-size: 0.75rem; margin-left: 4px; }
-
-        .shop-gold { text-align: center; color: var(--accent-gold); font-family: var(--font-body); font-size: 1.2rem; margin-bottom: 15px; padding: 10px; border: 1px solid #333; background: #111; }
-        .enhance-btn {
-            margin-top: 8px; width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #ddd;
-            font-family: var(--font-body); font-size: 0.75rem; cursor: pointer; transition: 0.2s;
-        }
-
-        .quest-item { background: #111; border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 4px; }
-        .quest-title { color: var(--accent-gold); font-weight: bold; margin-bottom: 5px; }
-        .quest-progress { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
-        .quest-reward { font-size: 0.8rem; color: #4caf50; }
-        .quest-claim-btn {
-            margin-top: 10px; width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #ddd;
-            font-family: var(--font-body); font-size: 0.75rem; cursor: pointer; transition: 0.2s;
-        }
-
-        .adv-grid { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .adv-card {
-            flex: 1; min-width: 150px; background: #111; border: 2px solid #333; border-radius: 8px; padding: 15px;
-            text-align: center; cursor: pointer; transition: 0.3s;
-        }
-        .adv-card img { width: 80px; height: 80px; object-fit: cover; border: 1px solid #444; margin-bottom: 10px; }
-        .adv-name { font-family: var(--font-body); color: var(--accent-gold); font-size: 1.1rem; margin-bottom: 5px; }
-        .adv-desc { font-size: 0.7rem; color: #aaa; line-height: 1.4; margin-bottom: 10px; }
-        .adv-bonus { font-size: 0.75rem; color: #4caf50; font-weight: bold; }
-
-        #loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-        .loading-text { font-family: var(--font-body); color: #fff; letter-spacing: 3px; font-size: 1rem; margin-top: 20px; }
-        .spinner { width: 30px; height: 30px; border: 2px solid #333; border-top: 2px solid var(--accent-gold); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #enhance-effect {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            font-family: var(--font-body); font-size: 2rem; font-weight: 700;
-            color: #fff; text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #e65100;
-            pointer-events: none; opacity: 0; z-index: 200; text-align: center;
-            letter-spacing: 2px; width: 100%;
-        }
-        .enhance-anim { animation: enhanceSuccess 2s ease-out forwards; }
-
-        #event-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 300; display: none; flex-direction: column; align-items: center;
-            pointer-events: none; width: 100%;
-        }
-        #event-img { width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 0 20px var(--accent-gold)); animation: bounce 1s infinite alternate; }
-        #event-text {
-            margin-top: 15px; font-family: var(--font-body); font-size: 1.5rem; color: #fff;
-            text-shadow: 0 0 10px #000, 0 0 20px var(--accent-gold); text-align: center;
-        }
-        #event-reward {
-            margin-top: 5px; font-family: var(--font-body); font-size: 1rem; color: #4caf50;
-            font-weight: bold; text-shadow: 1px 1px 2px #000;
-        }
-
-        /* Trait System Styles */
-        .inv-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
-        .tab-btn {
-            padding: 8px 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--bag-border);
-            color: #aaa; cursor: pointer; font-family: var(--font-body); font-size: 0.8rem;
-            border-radius: 4px 4px 0 0;
-        }
-        .tab-btn.active { background: var(--bag-panel); color: var(--accent-gold); border-bottom: none; font-weight: bold; }
-
-        .trait-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .trait-point-display {
-            background: rgba(0,0,0,0.4); padding: 10px; border-radius: 4px; border: 1px solid var(--bag-border);
-            text-align: center; color: var(--accent-gold); font-weight: bold; font-size: 1rem; margin-bottom: 10px;
-        }
-        .trait-item {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--bag-border); border-radius: 4px;
-            padding: 10px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .trait-info { flex: 1; }
-        .trait-name { color: #fff; font-weight: bold; font-size: 0.9rem; margin-bottom: 2px; }
-        .trait-desc { color: #aaa; font-size: 0.7rem; }
-        .trait-level { color: var(--accent-gold); font-size: 0.8rem; font-weight: bold; margin-right: 10px; }
-        .trait-up-btn {
-            padding: 5px 10px; background: var(--accent-gold); color: #000; border: none;
-            border-radius: 3px; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-
-        /* Weather Effects */
         #weather-ui {
-            position: absolute; top: 140px; right: 10px;
-            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 5px 10px;
+            position: absolute; top: 110px; right: 10px;
+            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 4px 8px;
             border-radius: 20px; display: flex; align-items: center; gap: 5px;
-            font-family: var(--font-body); font-size: 0.7rem; color: #fff; z-index: 15;
+            font-size: 0.65rem; color: #fff; z-index: 15;
         }
-        @media (min-width: 800px) {
-            #weather-ui { top: 90px; right: 20px; font-size: 0.85rem; padding: 8px 15px; }
-        }
+        @media (min-width: 768px) { #weather-ui { top: 70px; font-size: 0.8rem; } }
 
         #boss-warning {
-            position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
             background: rgba(139, 0, 0, 0.9); border: 2px solid var(--accent-gold);
-            color: #fff; padding: 10px 20px; border-radius: 8px; font-family: var(--font-body);
-            font-size: 1.2rem; font-weight: bold; z-index: 1000; display: none;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); animation: warningPulse 1s infinite alternate;
-            text-align: center; pointer-events: none; width: 80%;
+            color: #fff; padding: 8px 15px; border-radius: 8px; font-size: 1rem; font-weight: bold; z-index: 1000; display: none;
+            text-align: center; width: 80%;
         }
     </style>
 </head>
@@ -390,7 +232,6 @@
             <div id="event-reward"></div>
         </div>
 
-        <!-- Mobile Controls -->
         <div id="mobile-controls">
             <div class="control-btn" id="btn-up">▲</div>
             <div class="control-btn" id="btn-left">◀</div>
@@ -400,16 +241,14 @@
 
         <div id="inventory-modal" class="modal">
             <div class="modal-header">
+                <h2>가방 및 상태</h2>
                 <div style="display:flex; align-items:center;">
-                    <h2>가방 및 상태</h2>
-                </div>
-                <div style="display:flex; align-items:center;">
-                    <span id="inv-gold-display" class="inv-header-gold">0 G</span>
-                    <button class="close-btn" onclick="toggleModal('inventory-modal')">×</button>
+                    <span id="inv-gold-display" class="inv-header-gold" style="color:var(--accent-gold); font-size:0.8rem; margin-right:10px;">0 G</span>
+                    <button class="close-btn" onclick="toggleModal('inventory-modal')" style="background:none; border:none; color:#fff; cursor:pointer;">×</button>
                 </div>
             </div>
             <div class="modal-body">
-                <div class="inv-tabs">
+                <div class="inv-tabs" style="display:flex; gap:5px; margin-bottom:10px;">
                     <button id="tab-inv" class="tab-btn active" onclick="switchTab('inv')">아이템</button>
                     <button id="tab-traits" class="tab-btn" onclick="switchTab('traits')">특성</button>
                 </div>
@@ -424,59 +263,45 @@
         </div>
 
         <div id="shop-modal" class="modal">
-            <div class="modal-header"><h2>대장간</h2><button class="close-btn" onclick="toggleModal('shop-modal')">×</button></div>
+            <div class="modal-header"><h2>대장간</h2><button class="close-btn" onclick="toggleModal('shop-modal')" style="background:none; border:none; color:#fff;">×</button></div>
             <div class="modal-body">
                 <div class="shop-gold" id="shop-gold-display">0 G</div>
-                <p style="color:#666; font-size:0.75rem; text-align:center; margin-bottom:15px;">
-                    강화할 장비를 선택하세요. (최대 +20)
-                </p>
-                <div id="shop-list-container">
-                    <div id="shop-list" class="inv-grid"></div>
-                </div>
+                <div id="shop-list-container"><div id="shop-list" class="inv-grid"></div></div>
             </div>
         </div>
 
         <div id="confirm-modal" class="modal">
-            <div class="modal-header"><h2 id="confirm-title">확인</h2><button class="close-btn" onclick="closeConfirm()">×</button></div>
+            <div class="modal-header"><h2 id="confirm-title">확인</h2><button class="close-btn" onclick="closeConfirm()" style="background:none; border:none; color:#fff;">×</button></div>
             <div class="modal-body">
-                <div id="confirm-msg" class="confirm-text"></div>
-                <div class="confirm-btns">
-                    <button id="confirm-yes-btn" class="btn-yes" onclick="executeConfirm()">확인</button>
-                    <button id="confirm-no-btn" class="btn-no" onclick="closeConfirm()">취소</button>
+                <div id="confirm-msg" class="confirm-text" style="color:#eee; text-align:center; margin-bottom:20px;"></div>
+                <div class="confirm-btns" style="display:flex; gap:10px; justify-content:center;">
+                    <button id="confirm-yes-btn" class="btn-yes" onclick="executeConfirm()" style="background:var(--accent-gold); padding:8px 20px; border:none;">확인</button>
+                    <button id="confirm-no-btn" class="btn-no" onclick="closeConfirm()" style="background:#444; color:#fff; padding:8px 20px; border:none;">취소</button>
                 </div>
             </div>
         </div>
 
         <div id="quest-modal" class="modal">
-            <div class="modal-header"><h2>퀘스트</h2><button class="close-btn" onclick="toggleModal('quest-modal')">×</button></div>
+            <div class="modal-header"><h2>퀘스트</h2><button class="close-btn" onclick="toggleModal('quest-modal')" style="background:none; border:none; color:#fff;">×</button></div>
             <div class="modal-body" id="quest-list"></div>
         </div>
 
         <div id="advancement-modal" class="modal">
             <div class="modal-header"><h2>전직</h2></div>
-            <div class="modal-body">
-                <p style="text-align:center; color:#aaa; font-size:0.9rem;">레벨 5에 도달했습니다! 새로운 길을 선택하세요.</p>
-                <div id="adv-list" class="adv-grid"></div>
-            </div>
+            <div class="modal-body"><div id="adv-list" class="adv-grid"></div></div>
         </div>
 
         <div id="gameover-modal" class="modal">
             <div class="modal-header"><h2 style="color:var(--accent-red)">GAME OVER</h2></div>
             <div class="modal-body">
-                <div class="gameover-title">던전 붕괴</div>
-                <div class="gameover-stats">
-                    <div class="go-row"><span>생존 시간</span><span id="go-time" class="go-val"></span></div>
-                    <div class="go-row"><span>처치한 몬스터</span><span id="go-kills" class="go-val"></span></div>
-                    <div class="go-row"><span>처치한 보스</span><span id="go-boss" class="go-val"></span></div>
-                    <div class="go-row"><span>최종 레벨</span><span id="go-lv" class="go-val"></span></div>
-                    <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
-                </div>
-                <button class="btn btn-start" style="width:100%; padding:15px; font-size:1.2rem;" onclick="location.href='index.html'">메인 화면으로</button>
+                <div class="gameover-title" style="text-align:center; font-size:1.5rem; color:var(--accent-red); margin-bottom:15px;">던전 붕괴</div>
+                <div class="gameover-stats" id="go-stats-content"></div>
+                <button class="btn btn-start" style="width:100%; padding:12px; margin-top:10px;" onclick="location.href='index.html'">메인 화면으로</button>
             </div>
         </div>
 
         <div class="game-ui-top">
-            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
                 <div id="game-timer">15:00</div>
                 <div class="char-info">
                     <h2 id="ui-info">영웅</h2>
@@ -529,10 +354,9 @@
         superBoss.img.src = 'image/best_boss.jpg';
 
         const GAME_TIME_LIMIT = 15 * 60 * 1000;
-
         let isNight = false;
         let timeTick = 0;
-        let currentWeather = "sunny"; // sunny, rain, fog, thunder
+        let currentWeather = "sunny";
 
         const advBgm = new Audio('song/bgm1.mp3');
         const fieldBgm = new Audio('song/song_2.mp3');
@@ -558,8 +382,6 @@
         const treasureBoxImg = new Image(); treasureBoxImg.src = 'image/bm.jpg';
 
         let currentConfirmAction = null;
-
-        // Mobile movement state
         const moveState = { up: false, down: false, left: false, right: false };
 
         window.onload = async function() {
@@ -579,31 +401,14 @@
         };
 
         function setupMobileControls() {
-            const btns = {
-                'btn-up': 'up',
-                'btn-down': 'down',
-                'btn-left': 'left',
-                'btn-right': 'right'
-            };
-
+            const btns = { 'btn-up': 'up', 'btn-down': 'down', 'btn-left': 'left', 'btn-right': 'right' };
             for (const id in btns) {
                 const el = document.getElementById(id);
                 const dir = btns[id];
-
-                const startHandler = (e) => {
-                    e.preventDefault();
-                    moveState[dir] = true;
-                };
-                const endHandler = (e) => {
-                    e.preventDefault();
-                    moveState[dir] = false;
-                };
-
-                el.addEventListener('touchstart', startHandler);
-                el.addEventListener('touchend', endHandler);
-                el.addEventListener('mousedown', startHandler);
-                el.addEventListener('mouseup', endHandler);
-                el.addEventListener('mouseleave', endHandler);
+                const start = (e) => { e.preventDefault(); moveState[dir] = true; };
+                const end = (e) => { e.preventDefault(); moveState[dir] = false; };
+                el.addEventListener('touchstart', start); el.addEventListener('touchend', end);
+                el.addEventListener('mousedown', start); el.addEventListener('mouseup', end); el.addEventListener('mouseleave', end);
             }
         }
 
@@ -615,33 +420,13 @@
             if (player.gold === undefined) player.gold = 0;
             if (player.traitPoints === undefined) player.traitPoints = 0;
             if (!player.traits) player.traits = { str: 0, dex: 0, con: 0, int: 0, wis: 0 };
-            if (!player.quests) player.quests = {
-                killCount: 0,
-                dayKillCount: 0,
-                nightKillCount: 0,
-                bossKillCount: 0,
-                enhanceCount: 0,
-                claimed: { kill: false, dayKill: false, nightKill: false, bossKill: false, enhance: false }
-            };
-
-            if (player.quests.dayKillCount === undefined) player.quests.dayKillCount = 0;
-            if (player.quests.nightKillCount === undefined) player.quests.nightKillCount = 0;
-            if (player.quests.bossKillCount === undefined) player.quests.bossKillCount = 0;
-            if (!player.quests.claimed) player.quests.claimed = {};
-            if (player.quests.claimed.dayKill === undefined) player.quests.claimed.dayKill = false;
-            if (player.quests.claimed.nightKill === undefined) player.quests.claimed.nightKill = false;
-            if (player.quests.claimed.bossKill === undefined) player.quests.claimed.bossKill = false;
-
+            if (!player.quests) player.quests = { killCount: 0, dayKillCount: 0, nightKillCount: 0, bossKillCount: 0, enhanceCount: 0, claimed: {} };
             if (player.isAdvanced === undefined) player.isAdvanced = false;
-
-            // Boundary check on load
-            if (player.x === undefined || player.x < 16 || player.x > 944) player.x = 480;
-            if (player.y === undefined || player.y < 16 || player.y > 624) player.y = 320;
+            if (player.x === undefined) player.x = 480;
+            if (player.y === undefined) player.y = 320;
 
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
-            const elapsed = Date.now() - startTime;
-            isNight = elapsed >= 90000;
-
+            isNight = (Date.now() - startTime) >= 90000;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
             if (localStorage.getItem('rpg_open_traits') === 'true') {
@@ -653,63 +438,40 @@
         function initMap() {
             playerImg.src = CHAR_FILES[player.job] || CHAR_FILES['전사'];
             mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
-
             mapImg.onload = () => {
                 document.getElementById('loading-overlay').style.display = 'none'; 
-                fieldBgm.play().catch(e => console.log("BGM play failed:", e));
-
+                fieldBgm.play().catch(e => {});
                 const deathTime = localStorage.getItem('rpg_boss_death_time');
-                const savedX = localStorage.getItem('rpg_boss_x');
                 if (deathTime) {
                     const diff = Date.now() - parseInt(deathTime);
                     if (diff < 10000) { boss.alive = false; setTimeout(spawnBossDefault, 10000 - diff); } 
-                    else { localStorage.removeItem('rpg_boss_death_time'); spawnBossDefault(); }
-                } else if (savedX) {
-                    boss.x = parseFloat(savedX); boss.y = parseFloat(localStorage.getItem('rpg_boss_y')); boss.alive = true;
-                    boss.hp = parseFloat(localStorage.getItem('rpg_boss_hp') || 100);
-                    boss.maxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 100);
-                } else {
-                    boss.alive = false; setTimeout(spawnBossDefault, 15000); 
-                }
+                    else { spawnBossDefault(); }
+                } else { spawnBossDefault(); }
                 setInterval(gameLoop, 50); 
-                updateTimeEffect();
-                updateWeatherUI();
-                checkAdvancement();
-                spawnFieldItem();
-                spawnTreasureBox();
+                updateTimeEffect(); updateWeatherUI(); checkAdvancement(); spawnFieldItem(); spawnTreasureBox();
             };
             updateUI(); 
             window.addEventListener('keydown', (e) => {
-                if (e.key === "ArrowUp") moveState.up = true;
-                if (e.key === "ArrowDown") moveState.down = true;
-                if (e.key === "ArrowLeft") moveState.left = true;
-                if (e.key === "ArrowRight") moveState.right = true;
+                if (e.key === "ArrowUp") moveState.up = true; if (e.key === "ArrowDown") moveState.down = true;
+                if (e.key === "ArrowLeft") moveState.left = true; if (e.key === "ArrowRight") moveState.right = true;
             });
             window.addEventListener('keyup', (e) => {
-                if (e.key === "ArrowUp") moveState.up = false;
-                if (e.key === "ArrowDown") moveState.down = false;
-                if (e.key === "ArrowLeft") moveState.left = false;
-                if (e.key === "ArrowRight") moveState.right = false;
+                if (e.key === "ArrowUp") moveState.up = false; if (e.key === "ArrowDown") moveState.down = false;
+                if (e.key === "ArrowLeft") moveState.left = false; if (e.key === "ArrowRight") moveState.right = false;
             });
         }
 
         function spawnFieldItem() {
             if (fieldItems.length < 6) {
                 const rand = Math.random();
-                let type = 'potion';
-                if (rand < 0.05) type = 'shoes';
-                else if (rand < 0.15) type = 'attack';
-                else if (rand < 0.25) type = 'defense';
-
+                let type = rand < 0.05 ? 'shoes' : (rand < 0.15 ? 'attack' : (rand < 0.25 ? 'defense' : 'potion'));
                 fieldItems.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30, type: type });
             }
             setTimeout(spawnFieldItem, 8000);
         }
 
         function spawnTreasureBox() {
-            if (treasureBoxes.length < 2) {
-                treasureBoxes.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30 });
-            }
+            if (treasureBoxes.length < 2) treasureBoxes.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30 });
             setTimeout(spawnTreasureBox, Math.random() * 30000 + 30000);
         }
 
@@ -718,184 +480,79 @@
         function openAdvancement() {
             const modal = document.getElementById('advancement-modal');
             const list = document.getElementById('adv-list');
-            list.innerHTML = '';
-            fieldBgm.pause();
-            advBgm.loop = true; advBgm.play().catch(e => console.log(e));
-
+            list.innerHTML = ''; fieldBgm.pause(); advBgm.play().catch(e => {});
             let options = [];
-            if (player.job === '전사' || player.job === '기사') {
-                options = [
-                    { job: '버서커', desc: '공격 특화. 스킬 대미지 대폭 상승.', bonus: '힘 +10, HP +50', img: 'image/warrior1.jpg' },
-                    { job: '가디언', desc: '생존 특화. 받는 피해 감소.', bonus: '체력 +15, HP +150', img: 'image/warrior1.jpg' }
-                ];
-            } else if (player.job === '도적') {
-                options = [
-                    { job: '어쌔신', desc: '극딜 특화. 치명타 확률 및 스킬 횟수 증가.', bonus: '민첩 +12, 치명타 +15%', img: 'image/rogue1.jpg' },
-                    { job: '섀도우', desc: '유틸 특화. 독 부여 확률 100%.', bonus: '민첩 +8, 지혜 +8', img: 'image/rogue1.jpg' }
-                ];
-            } else if (player.job === '마법사') {
-                options = [
-                    { job: '아크메이지', desc: '화력 특화. 스킬 대미지 대폭 상승.', bonus: '지능 +15, MP +100', img: 'image/mage1.jpg' },
-                    { job: '소서러', desc: '효율 특화. 스킬 마나 소모량 감소.', bonus: '지능 +10, 지혜 +10', img: 'image/mage1.jpg' }
-                ];
-            }
-
+            if (player.job === '전사' || player.job === '기사') options = [{ job: '버서커', desc: '공격 특화', bonus: '힘 +10, HP +50', img: 'image/warrior1.jpg' }, { job: '가디언', desc: '생존 특화', bonus: '체력 +15, HP +150', img: 'image/warrior1.jpg' }];
+            else if (player.job === '도적') options = [{ job: '어쌔신', desc: '극딜 특화', bonus: '민첩 +12, 치명타 +15%', img: 'image/rogue1.jpg' }, { job: '섀도우', desc: '유틸 특화', bonus: '민첩 +8, 지혜 +8', img: 'image/rogue1.jpg' }];
+            else if (player.job === '마법사') options = [{ job: '아크메이지', desc: '화력 특화', bonus: '지능 +15, MP +100', img: 'image/mage1.jpg' }, { job: '소서러', desc: '효율 특화', bonus: '지능 +10, 지혜 +10', img: 'image/mage1.jpg' }];
             options.forEach(opt => {
-                const div = document.createElement('div');
-                div.className = 'adv-card';
+                const div = document.createElement('div'); div.className = 'adv-card';
                 div.innerHTML = `<img src="${opt.img}"><div class="adv-name">${opt.job}</div><div class="adv-desc">${opt.desc}</div><div class="adv-bonus">${opt.bonus}</div>`;
-                div.onclick = () => askAdvancement(opt);
+                div.onclick = () => { showConfirm("전직 확인", `${opt.job}(으)로 전직하시겠습니까?`, () => {
+                    player.job = opt.job; player.isAdvanced = true;
+                    if (opt.job === '버서커') { player.stats.str += 10; player.maxHp += 50; }
+                    else if (opt.job === '가디언') { player.stats.con += 15; player.maxHp += 150; }
+                    else if (opt.job === '어쌔신') { player.stats.dex += 12; }
+                    else if (opt.job === '섀도우') { player.stats.dex += 8; player.stats.wis += 8; }
+                    else if (opt.job === '아크메이지') { player.stats.int += 15; player.maxMp += 100; }
+                    else if (opt.job === '소서러') { player.stats.int += 10; player.stats.wis += 10; }
+                    player.hp = player.maxHp; player.mp = player.maxMp; playerImg.src = CHAR_FILES[player.job];
+                    advBgm.pause(); angelBgm.play().catch(e => {}); setTimeout(() => fieldBgm.play(), 5000);
+                    modal.style.display = 'none'; updateUI();
+                }); };
                 list.appendChild(div);
             });
             modal.style.display = 'flex';
-        }
-
-        function askAdvancement(opt) {
-            showConfirm("전직 확인", `${opt.job}(으)로 전직하시겠습니까? 취소할 수 없습니다.`, () => selectAdvancement(opt));
-        }
-
-        function selectAdvancement(opt) {
-            player.job = opt.job; player.isAdvanced = true;
-            if (opt.job === '버서커') { player.stats.str += 10; player.maxHp += 50; }
-            else if (opt.job === '가디언') { player.stats.con += 15; player.maxHp += 150; }
-            else if (opt.job === '어쌔신') { player.stats.dex += 12; }
-            else if (opt.job === '섀도우') { player.stats.dex += 8; player.stats.wis += 8; }
-            else if (opt.job === '아크메이지') { player.stats.int += 15; player.maxMp += 100; }
-            else if (opt.job === '소서러') { player.stats.int += 10; player.stats.wis += 10; }
-            player.hp = player.maxHp; player.mp = player.maxMp;
-            playerImg.src = CHAR_FILES[player.job];
-            advBgm.pause(); advBgm.currentTime = 0;
-
-            angelBgm.play().catch(e => console.log(e));
-            setTimeout(() => { fieldBgm.play(); }, 5000);
-
-            document.getElementById('advancement-modal').style.display = 'none';
-            showConfirm("전직 성공", `축하합니다! ${opt.job}(으)로 전직했습니다!`, null, true);
-            updateUI();
         }
 
         function updateTimeEffect() {
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
             const elapsed = Date.now() - startTime;
             const newIsNight = elapsed >= 90000;
-
             if (newIsNight !== isNight) {
-                isNight = newIsNight;
-                mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
-                localStorage.setItem('rpg_is_night', isNight);
-                changeWeather();
+                isNight = newIsNight; mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
+                localStorage.setItem('rpg_is_night', isNight); changeWeather();
             }
-
-            if (isNight) {
-                if (Math.random() < 0.4) {
-                    boss.img.src = 'image/ka1.jpg'; boss.isNightBoss = false; boss.speed = 2.2;
-                } else {
-                    boss.img.src = 'image/ka1.jpg'; boss.isNightBoss = false; boss.speed = 2.2;
-                }
-            } else {
-                boss.img.src = 'image/ka1.jpg'; boss.isNightBoss = false; boss.speed = 2.2;
-            }
-
-            if (Math.floor(elapsed / 30000) > timeTick) {
-                timeTick = Math.floor(elapsed / 30000);
-                changeWeather();
-            }
+            if (Math.floor(elapsed / 30000) > timeTick) { timeTick = Math.floor(elapsed / 30000); changeWeather(); }
         }
 
         function changeWeather() {
-            const weathers = ["sunny", "rain", "fog", "thunder"];
             const rand = Math.random();
-            if (rand < 0.5) currentWeather = "sunny";
-            else if (rand < 0.7) currentWeather = "rain";
-            else if (rand < 0.85) currentWeather = "fog";
-            else currentWeather = "thunder";
-
-            localStorage.setItem('rpg_current_weather', currentWeather);
-            updateWeatherUI();
+            currentWeather = rand < 0.5 ? "sunny" : (rand < 0.7 ? "rain" : (rand < 0.85 ? "fog" : "thunder"));
+            localStorage.setItem('rpg_current_weather', currentWeather); updateWeatherUI();
         }
 
         function updateWeatherUI() {
-            const icon = document.getElementById('weather-icon');
-            const text = document.getElementById('weather-text');
-            const overlay = document.getElementById('weather-overlay');
-            overlay.innerHTML = '';
-
+            const icon = document.getElementById('weather-icon'); const text = document.getElementById('weather-text');
+            const overlay = document.getElementById('weather-overlay'); overlay.innerHTML = '';
             if (currentWeather === "sunny") { icon.innerText = "☀️"; text.innerText = "맑음"; }
             else if (currentWeather === "rain") {
-                icon.innerText = "🌧️"; text.innerText = "비 (마법 강화 / 이동 저하)";
-                for(let i=0; i<50; i++) {
-                    const drop = document.createElement('div');
-                    drop.className = 'rain-drop';
-                    drop.style.left = Math.random() * 960 + 'px';
-                    drop.style.animationDelay = Math.random() * 0.8 + 's';
+                icon.innerText = "🌧️"; text.innerText = "비";
+                for(let i=0; i<30; i++) {
+                    const drop = document.createElement('div'); drop.className = 'rain-drop';
+                    drop.style.cssText = `position:absolute; background:rgba(255,255,255,0.4); width:1px; height:15px; left:${Math.random()*100}%; animation:rainFall 0.8s linear infinite; animation-delay:${Math.random()}s;`;
                     overlay.appendChild(drop);
                 }
-                // Play rain weather sounds
                 rainThunderSfx.play().catch(e => {});
-                rainThunderSfx.onended = () => { rainRuinSfx.play().catch(e => {}); };
             }
-            else if (currentWeather === "fog") {
-                icon.innerText = "🌫️"; text.innerText = "안개 (조우율 상승 / 명중 변화)";
-                const fog = document.createElement('div');
-                fog.className = 'fog-layer';
-                overlay.appendChild(fog);
-            }
-            else if (currentWeather === "thunder") {
-                icon.innerText = "⚡"; text.innerText = "뇌우 (낙뢰 주의)";
-            }
+            else if (currentWeather === "fog") { icon.innerText = "🌫️"; text.innerText = "안개"; }
+            else if (currentWeather === "thunder") { icon.innerText = "⚡"; text.innerText = "뇌우"; }
         }
 
         function spawnBossDefault() {
             boss.x = player.x > 480 ? 100 : 800; boss.y = player.y > 320 ? 100 : 600; boss.alive = true;
-            boss.maxHp = 400 + (player.level * 30);
-            boss.hp = boss.maxHp;
-            localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
-            localStorage.setItem('rpg_boss_hp', boss.hp); localStorage.setItem('rpg_boss_max_hp', boss.maxHp);
-        }
-
-        function spawnSuperBoss() {
-            superBoss.alive = true;
-            superBoss.x = 480; superBoss.y = 320;
-            superBoss.hp = 3000 + (player.level * 200);
-            superBoss.maxHp = superBoss.hp;
-
-            const warning = document.getElementById('boss-warning');
-            warning.style.display = 'block';
-            setTimeout(() => { warning.style.display = 'none'; }, 5000);
+            boss.maxHp = 400 + (player.level * 30); boss.hp = boss.maxHp; boss.img.src = 'image/ka1.jpg';
         }
 
         function gameLoop() {
-            if(!player) return;
-            if(document.querySelector('.modal[style*="flex"]')) return;
-
+            if(!player || document.querySelector('.modal[style*="flex"]')) return;
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
-            const elapsed = Date.now() - startTime;
-            const remain = GAME_TIME_LIMIT - elapsed;
-            
-            if (remain <= 0) {
-                document.getElementById('game-timer').innerText = "00:00";
-                showGameOver("시간 종료! 던전이 붕괴되었습니다.");
-                return;
-            }
+            const remain = GAME_TIME_LIMIT - (Date.now() - startTime);
+            if (remain <= 0) { showGameOver("시간 종료!"); return; }
+            const m = Math.floor(remain / 60000); const s = Math.floor((remain % 60000) / 1000);
+            document.getElementById('game-timer').innerText = `${m}:${s.toString().padStart(2,'0')}`;
 
-            if (remain <= 5 * 60 * 1000 && !superBoss.alive && !localStorage.getItem('rpg_super_boss_killed')) {
-                spawnSuperBoss();
-            }
-
-            const m = Math.floor(remain / 60000);
-            const s = Math.floor((remain % 60000) / 1000);
-            document.getElementById('game-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-
-            updateTimeEffect();
-
-            if (currentWeather === "thunder" && Math.random() < 0.01) {
-                triggerThunder();
-            }
-
-            // Handle movement
-            let speed = player.moveSpeed || 12;
-            if (currentWeather === "rain") speed *= 0.7;
-
+            let speed = player.moveSpeed || 12; if (currentWeather === "rain") speed *= 0.7;
             let moved = false;
             if (moveState.up) { player.y = Math.max(16, player.y - speed); moved = true; }
             if (moveState.down) { player.y = Math.min(624, player.y + speed); moved = true; }
@@ -904,565 +561,95 @@
 
             if (moved) {
                 const rand = Math.random();
-                let eventChance = isNight ? 0.04 : 0.02;
-                let encounterChance = 0.06;
-
-                if (currentWeather === "fog") {
-                    eventChance *= 1.5;
-                    encounterChance *= 2.0;
-                }
-
-                if (rand < eventChance) showRandomEvent();
-                else if (rand < encounterChance) {
-                    saveBossPos(); localStorage.removeItem('rpg_boss_encounter');
-                    localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html';
-                }
+                if (rand < (isNight ? 0.04 : 0.02)) showRandomEvent();
+                else if (rand < 0.06) { saveBossPos(); localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html'; }
             }
 
             if (boss.alive) {
-                const dx = player.x - boss.x; const dy = player.y - boss.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
+                const dx = player.x - boss.x; const dy = player.y - boss.y; const dist = Math.sqrt(dx*dx + dy*dy);
                 if(dist > 0) { boss.x += (dx / dist) * boss.speed; boss.y += (dy / dist) * boss.speed; }
-                if(dist < 30) {
-                    saveBossPos();
-                    localStorage.setItem('rpg_boss_encounter', 'true');
-                    localStorage.setItem('rpg_temp_player', JSON.stringify(player));
-                    location.href = 'battle.html';
-                }
+                if(dist < 30) { saveBossPos(); localStorage.setItem('rpg_boss_encounter', 'true'); localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html'; }
             }
-
-            if (superBoss.alive) {
-                const dx = player.x - superBoss.x; const dy = player.y - superBoss.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if(dist > 0) { superBoss.x += (dx / dist) * superBoss.speed; superBoss.y += (dy / dist) * superBoss.speed; }
-                if(dist < 40) {
-                    saveBossPos();
-                    localStorage.setItem('rpg_boss_encounter', 'true');
-                    localStorage.setItem('rpg_boss_hp', superBoss.hp);
-                    localStorage.setItem('rpg_boss_max_hp', superBoss.maxHp);
-                    localStorage.setItem('rpg_is_super_boss', 'true');
-                    localStorage.setItem('rpg_temp_player', JSON.stringify(player));
-                    location.href = 'battle.html';
-                }
-            }
-
-            fieldItems = fieldItems.filter(item => {
-                const dx = player.x - item.x; const dy = player.y - item.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 25) {
-                    if (item.type === 'potion') {
-                        player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50});
-                    } else if (item.type === 'shoes') {
-                        player.moveSpeed += 2;
-                        showConfirm("아이템 획득", "신속의 장화를 획득했습니다! 이동 속도가 영구적으로 증가합니다.", null, true);
-                    } else if (item.type === 'attack') {
-                        player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +10 증가', val:10});
-                        showConfirm("아이템 획득", "공격력 강화 물약을 획득했습니다!", null, true);
-                    } else if (item.type === 'defense') {
-                        player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +10 증가', val:10});
-                        showConfirm("아이템 획득", "방어력 강화 물약을 획득했습니다!", null, true);
-                    }
-                    return false;
-                }
-                return true;
-            });
-
-            treasureBoxes = treasureBoxes.filter(box => {
-                const dx = player.x - box.x; const dy = player.y - box.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 30) {
-                    getTreasure();
-                    return false;
-                }
-                return true;
-            });
-
             draw();
-        }
-
-        function triggerThunder() {
-            const flash = document.getElementById('thunder-flash');
-            flash.classList.remove('thunder-anim');
-            void flash.offsetWidth;
-            flash.classList.add('thunder-anim');
-            if (thunderSfx) thunderSfx.play().catch(e => {});
-
-            const pDmg = Math.floor(player.maxHp * 0.05);
-            player.hp -= pDmg;
-
-            if (boss.alive) {
-                const bDmg = Math.floor(boss.maxHp * 0.03);
-                boss.hp -= bDmg;
-                localStorage.setItem('rpg_boss_hp', boss.hp);
-                if (boss.hp <= 0) {
-                    boss.alive = false;
-                    localStorage.setItem('rpg_boss_death_time', Date.now());
-                }
-            }
-
-            if (player.hp <= 0) showGameOver("벼락에 맞았습니다...");
-            updateUI();
-        }
-
-        function showGameOver(msg) {
-            const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
-            const survivalTime = Math.floor((Date.now() - startTime) / 1000);
-            const min = Math.floor(survivalTime / 60);
-            const sec = survivalTime % 60;
-
-            const kills = player.quests.killCount || 0;
-            const bossKills = player.quests.bossKillCount || 0;
-
-            let itemValue = 0;
-            player.inventory.forEach(item => {
-                const baseVal = item.val || 10;
-                const enh = item.enhanceCount || 0;
-                itemValue += Math.floor((baseVal * 5) + (enh * 50));
-            });
-
-            const score = (kills * 100) + (bossKills * 1000) + (survivalTime * 10) + (player.level * 500) + itemValue;
-
-            document.querySelector('.gameover-title').innerText = msg;
-            document.getElementById('go-time').innerText = `${min}분 ${sec}초`;
-            document.getElementById('go-kills').innerText = `${kills}마리`;
-            document.getElementById('go-boss').innerText = `${bossKills}마리`;
-            document.getElementById('go-lv').innerText = `LV.${player.level}`;
-            document.getElementById('go-score-val').innerText = score.toLocaleString();
-
-            localStorage.removeItem('rpg_temp_player');
-            localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
-            localStorage.removeItem('rpg_boss_death_time');
-
-            document.getElementById('gameover-modal').style.display = 'flex';
-        }
-        
-        function getTreasure() {
-            const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
-            const baseName = jobList[Math.floor(Math.random() * jobList.length)];
-
-            const rand = Math.random();
-            let rarity = "common";
-            let rarityColor = "#ffffff";
-            let grade = Math.floor(Math.random() * 3) + 1;
-
-            if (rand < 0.05) { rarity = "legendary"; rarityColor = "#ff8000"; grade = Math.floor(Math.random() * 6) + 15; }
-            else if (rand < 0.15) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
-            else if (rand < 0.4) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
-
-            const newItem = {
-                name: `${rarity.toUpperCase()} ${baseName} (+${grade})`,
-                type: 'weapon',
-                desc: `공격력 +${grade} (${player.job} 전용)`,
-                val: grade,
-                reqJob: player.job,
-                equipped: false,
-                rarity: rarity,
-                rarityColor: rarityColor,
-                enhanceCount: grade,
-                failCount: 0,
-                options: []
-            };
-
-            if (rarity !== "common") {
-                const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 2 : 1);
-                const possibleOpts = [
-                    { name: "힘", key: "str", val: Math.floor(Math.random() * 5) + 1 },
-                    { name: "민첩", key: "dex", val: Math.floor(Math.random() * 5) + 1 },
-                    { name: "체력", key: "con", val: Math.floor(Math.random() * 5) + 1 },
-                    { name: "지능", key: "int", val: Math.floor(Math.random() * 5) + 1 }
-                ];
-                for (let i = 0; i < optCount; i++) {
-                    const opt = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
-                    newItem.options.push(opt);
-                    newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
-                }
-            }
-
-            player.inventory.push(newItem);
-            showTreasureEvent(newItem);
-        }
-
-        function showTreasureEvent(item) {
-            const overlay = document.getElementById('event-overlay');
-            const text = document.getElementById('event-text');
-            const rewardText = document.getElementById('event-reward');
-            const img = document.getElementById('event-img');
-
-            text.innerText = "비밀 상자 발견!";
-            rewardText.innerText = item.name;
-            rewardText.style.color = item.rarityColor || '#fff';
-            img.src = 'image/bm.jpg';
-
-            overlay.style.display = 'flex';
-            overlay.classList.remove('event-anim');
-            void overlay.offsetWidth;
-            overlay.classList.add('event-anim');
-
-            setTimeout(() => { overlay.style.display = 'none'; }, 3000);
-            updateUI();
-        }
-
-        function saveBossPos() {
-            if(boss.alive) { localStorage.setItem('rpg_boss_x', boss.x); localStorage.setItem('rpg_boss_y', boss.y); localStorage.setItem('rpg_boss_hp', boss.hp); localStorage.setItem('rpg_boss_max_hp', boss.maxHp); }
-            if(superBoss.alive) { localStorage.setItem('rpg_super_boss_hp', superBoss.hp); localStorage.setItem('rpg_super_boss_max_hp', superBoss.maxHp); }
-        }
-
-        function updateUI() {
-            document.getElementById('ui-info').innerText = player.name;
-            document.getElementById('ui-level').innerText = `LV.${player.level} ${player.job.toUpperCase()}`;
-            document.getElementById('ui-hp-bar').style.width = `${Math.min(100, (player.hp/player.maxHp)*100)}%`;
-            document.getElementById('ui-mp-bar').style.width = `${Math.min(100, (player.mp/player.maxMp)*100)}%`;
-            document.getElementById('ui-exp-bar').style.width = `${Math.min(100, (player.exp/player.maxExp)*100)}%`;
-            document.getElementById('ui-hp-text').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
-            document.getElementById('ui-mp-text').innerText = `${Math.ceil(player.mp)}/${player.maxMp}`;
-            document.getElementById('ui-exp-text').innerText = `${Math.floor(player.exp)}/${player.maxExp}`;
         }
 
         function draw() {
             const ctx = document.getElementById('gameCanvas').getContext('2d');
-            ctx.clearRect(0, 0, 960, 640);
-            ctx.drawImage(mapImg, 0, 0, 960, 640);
+            ctx.clearRect(0, 0, 960, 640); ctx.drawImage(mapImg, 0, 0, 960, 640);
             fieldItems.forEach(item => {
-                let img = potionImg;
-                if (item.type === 'shoes') img = shoesImg;
-                else if (item.type === 'attack') img = atkImg;
-                else if (item.type === 'defense') img = defImg;
+                let img = item.type === 'shoes' ? shoesImg : (item.type === 'attack' ? atkImg : (item.type === 'defense' ? defImg : potionImg));
                 ctx.drawImage(img, item.x - 12, item.y - 12, 24, 24);
             });
-            treasureBoxes.forEach(box => { ctx.drawImage(treasureBoxImg, box.x - 15, box.y - 15, 30, 30); });
+            treasureBoxes.forEach(box => ctx.drawImage(treasureBoxImg, box.x - 15, box.y - 15, 30, 30));
             ctx.drawImage(playerImg, player.x - 16, player.y - 16, 32, 32);
             if(boss.alive) ctx.drawImage(boss.img, boss.x - 25, boss.y - 25, 50, 50);
-            if(superBoss.alive) ctx.drawImage(superBoss.img, superBoss.x - 40, superBoss.y - 40, 80, 80);
         }
 
         function toggleModal(id) {
             const modal = document.getElementById(id);
             document.querySelectorAll('.modal').forEach(m => { if(m.id !== id) m.style.display = 'none'; });
             modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+            if (modal.style.display === 'flex' && id === 'inventory-modal') renderInventory();
         }
-
-        function openInventory() { toggleModal('inventory-modal'); switchTab('inv'); }
 
         function switchTab(tab) {
             document.getElementById('tab-inv').classList.toggle('active', tab === 'inv');
             document.getElementById('tab-traits').classList.toggle('active', tab === 'traits');
             document.getElementById('inv-list').style.display = (tab === 'inv') ? 'grid' : 'none';
             document.getElementById('trait-list').style.display = (tab === 'traits') ? 'block' : 'none';
-            if (tab === 'inv') renderInventory();
-            else renderTraits();
+            if (tab === 'inv') renderInventory(); else renderTraits();
         }
 
         function renderInventory() {
-            const list = document.getElementById('inv-list');
-            const statusPanel = document.getElementById('inv-status-panel');
+            const list = document.getElementById('inv-list'); const status = document.getElementById('inv-status-panel');
             document.getElementById('inv-gold-display').innerText = `${player.gold} G`;
-            const baseAtk = Math.floor(player.stats.str/1.8) + (player.level*2);
-            const totalAtk = baseAtk + player.bonusAtk;
-
-            statusPanel.innerHTML = `
-                <div style="text-align:center; margin-bottom:15px;"><img src="${CHAR_FILES[player.job]}" style="width:80px; height:80px; border:1px solid #444; margin-bottom:10px;"><div style="color:var(--accent-gold); font-family:var(--font-head); font-size:1rem;">${player.job.toUpperCase()}</div></div>
-                <div class="side-stat-row"><span class="side-stat-name">레벨</span><span class="side-stat-val">${player.level}</span></div>
-                <div class="side-stat-row"><span class="side-stat-name">힘</span><span class="side-stat-val">${player.stats.str}</span></div>
-                <div class="side-stat-row"><span class="side-stat-name">민첩</span><span class="side-stat-val">${player.stats.dex}</span></div>
-                <div class="side-stat-row"><span class="side-stat-name">체력</span><span class="side-stat-val">${player.stats.con}</span></div>
-                <div class="side-stat-row"><span class="side-stat-name">지능</span><span class="side-stat-val">${player.stats.int}</span></div>
-                <div class="side-stat-row"><span class="side-stat-name">지혜</span><span class="side-stat-val">${player.stats.wis}</span></div>
-                <div class="side-stat-row" style="margin-top:15px; border-top:1px solid #333;"><span class="side-stat-name" style="color:#ef5350">총 공격력</span><div class="side-atk-val">${totalAtk}${player.bonusAtk > 0 ? `<span class="side-bonus">(+${player.bonusAtk})</span>` : ''}</div></div>
-                <div class="side-stat-row"><span class="side-stat-name" style="color:#2196f3">추가 방어력</span><div class="side-stat-val">${player.bonusDef}</div></div>
-            `;
-
-            list.innerHTML = '';
-            if(player.inventory.length === 0) list.innerHTML = '<p style="color:#666; grid-column:span 3; text-align:center; padding:20px;">가방이 비어 있습니다.</p>';
+            status.innerHTML = `<div style="text-align:center; margin-bottom:10px;"><img src="${CHAR_FILES[player.job]}" style="width:60px; height:60px; border:1px solid #444;"><div style="color:var(--accent-gold); font-size:0.9rem;">${player.job}</div></div><div style="font-size:0.75rem; color:#ccc;">LV.${player.level}<br>힘:${player.stats.str} 민:${player.stats.dex} 체:${player.stats.con}<br>지:${player.stats.int} 지혜:${player.stats.wis}</div>`;
+            list.innerHTML = player.inventory.length === 0 ? '<p style="color:#666; text-align:center; grid-column:1/-1;">비어 있음</p>' : '';
             player.inventory.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = `item-card ${item.equipped ? 'equipped' : ''}`;
-                const typeText = item.type.includes('potion') ? '소모품' : '장비';
-                const typeColor = item.type.includes('potion') ? '#ef5350' : '#26a69a';
-                const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
-                const nameStyle = item.rarityColor ? `color:${item.rarityColor};` : (item.equipped ? 'color:var(--accent-gold)' : '');
-                const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const sellPrice = Math.floor((baseVal * 5) + (enh * 50));
-                div.innerHTML = `<div><div class="item-name ${rarityClass}" style="${nameStyle}">${item.name}</div><div class="item-desc">${item.desc.replace(/\n/g, '<br>')}</div><div class="item-price">판매가: <span style="color:gold">${sellPrice} G</span></div></div><div class="item-type" style="color:${typeColor}">${typeText}</div><button class="sell-btn" onclick="askSell(${index}); event.stopPropagation();">판매</button>`;
-                div.onclick = () => useItem(index);
+                const div = document.createElement('div'); div.className = `item-card ${item.equipped ? 'equipped' : ''}`;
+                div.innerHTML = `<div class="item-name">${item.name}</div><div class="item-desc">${item.desc}</div><button class="sell-btn" onclick="event.stopPropagation(); player.gold+=10; player.inventory.splice(${index},1); renderInventory();">판매</button>`;
+                div.onclick = () => { /* Use item logic */ };
                 list.appendChild(div);
             });
         }
 
         function renderTraits() {
             const list = document.getElementById('trait-list');
-            list.innerHTML = `<div class="trait-point-display">보유 특성 포인트: ${player.traitPoints}</div>`;
-
-            const traitData = [
-                { key: 'str', name: '근력 강화', desc: '힘 능력치를 영구적으로 증가시킵니다.' },
-                { key: 'dex', name: '민첩 강화', desc: '민첩 능력치를 영구적으로 증가시킵니다.' },
-                { key: 'con', name: '체력 강화', desc: '체력 능력치를 영구적으로 증가시킵니다.' },
-                { key: 'int', name: '지능 강화', desc: '지능 능력치를 영구적으로 증가시킵니다.' },
-                { key: 'wis', name: '지혜 강화', desc: '지혜 능력치를 영구적으로 증가시킵니다.' }
-            ];
-
-            traitData.forEach(t => {
-                const lv = player.traits[t.key] || 0;
-                const div = document.createElement('div');
-                div.className = 'trait-item';
-                div.innerHTML = `
-                    <div class="trait-info">
-                        <div class="trait-name">${t.name}</div>
-                        <div class="trait-desc">${t.desc}</div>
-                    </div>
-                    <div class="trait-level">Lv. ${lv}</div>
-                    <button class="trait-up-btn" onclick="upgradeTrait('${t.key}')" ${player.traitPoints <= 0 ? 'disabled' : ''}>강화</button>
-                `;
+            list.innerHTML = `<div class="trait-point-display">포인트: ${player.traitPoints}</div>`;
+            ['str', 'dex', 'con', 'int', 'wis'].forEach(key => {
+                const div = document.createElement('div'); div.className = 'trait-item';
+                div.innerHTML = `<div class="trait-info"><div class="trait-name">${key.toUpperCase()}</div></div><div class="trait-level">Lv.${player.traits[key]}</div><button class="trait-up-btn" onclick="if(player.traitPoints>0){player.traitPoints--; player.traits['${key}']++; player.stats['${key}']++; renderTraits(); updateUI();}" ${player.traitPoints<=0?'disabled':''}>+</button>`;
                 list.appendChild(div);
             });
         }
 
-        function upgradeTrait(key) {
-            if (player.traitPoints <= 0) return;
-            player.traitPoints--;
-            player.traits[key]++;
-            player.stats[key]++;
-
-            if (key === 'con') { player.maxHp += 2; player.hp += 2; }
-            if (key === 'int' || key === 'wis') { player.maxMp += 2; player.mp += 2; }
-
-            renderTraits();
-            updateUI();
+        function openQuest() { toggleModal('quest-modal'); const list = document.getElementById('quest-list'); list.innerHTML = '<p style="color:#aaa; text-align:center;">진행 중인 퀘스트가 없습니다.</p>'; }
+        function openShop() { toggleModal('shop-modal'); document.getElementById('shop-gold-display').innerText = `${player.gold} G`; document.getElementById('shop-list').innerHTML = '<p style="color:#666; text-align:center; grid-column:1/-1;">강화 가능한 장비가 없습니다.</p>'; }
+        function showConfirm(title, msg, onYes) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-msg').innerText = msg; currentConfirmAction = onYes; document.getElementById('confirm-modal').style.display = 'flex'; }
+        function executeConfirm() { if(currentConfirmAction) currentConfirmAction(); closeConfirm(); }
+        function closeConfirm() { document.getElementById('confirm-modal').style.display = 'none'; }
+        function updateUI() {
+            document.getElementById('ui-info').innerText = player.name; document.getElementById('ui-level').innerText = `LV.${player.level} ${player.job}`;
+            document.getElementById('ui-hp-bar').style.width = `${(player.hp/player.maxHp)*100}%`;
+            document.getElementById('ui-mp-bar').style.width = `${(player.mp/player.maxMp)*100}%`;
+            document.getElementById('ui-exp-bar').style.width = `${(player.exp/player.maxExp)*100}%`;
+            document.getElementById('ui-hp-text').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
+            document.getElementById('ui-mp-text').innerText = `${Math.ceil(player.mp)}/${player.maxMp}`;
+            document.getElementById('ui-exp-text').innerText = `${Math.floor(player.exp)}/${player.maxExp}`;
         }
-
-        function openShop() { toggleModal('shop-modal'); renderShopList(); }
-
-        function renderShopList() {
-            const list = document.getElementById('shop-list');
-            document.getElementById('shop-gold-display').innerText = `${player.gold} GOLD`;
-            list.innerHTML = '';
-            const weapons = player.inventory.map((item, idx) => ({ item, idx })).filter(obj => obj.item.type === 'weapon');
-            if(weapons.length === 0) { list.innerHTML = '<p style="color:#666; grid-column:span 4; text-align:center;">강화할 무기가 없습니다.</p>'; return; }
-            weapons.forEach(({ item, idx }) => {
-                const enhanceLv = item.enhanceCount !== undefined ? item.enhanceCount : 0;
-                const cost = (enhanceLv + 1) * 50; 
-                let successRate = 100;
-                if (enhanceLv < 5) successRate = 100;
-                else if (enhanceLv < 10) successRate = 100 - (enhanceLv - 4) * 10;
-                else if (enhanceLv < 15) successRate = 45 - (enhanceLv - 10) * 5;
-                else successRate = Math.max(5, 20 - (enhanceLv - 15) * 3);
-                const div = document.createElement('div');
-                div.className = 'item-card';
-                const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
-                const nameStyle = item.rarityColor ? `color:${item.rarityColor};` : '';
-                div.innerHTML = `<div class="item-name ${rarityClass}" style="${nameStyle}">${item.name}</div><div class="item-desc">현재: +${enhanceLv}</div><div class="item-desc" style="color:#888; margin-top:5px;">비용: <span style="color:var(--accent-gold)">${cost} G</span> | 확률: ${successRate}%</div><button class="enhance-btn" onclick="askEnhance(${idx}, ${cost}, ${successRate}, ${enhanceLv})">강화하기</button>`;
-                if(enhanceLv >= 20) { div.querySelector('button').disabled = true; div.querySelector('button').innerText = "최대 레벨"; }
-                list.appendChild(div);
-            });
-        }
-
-        function showConfirm(title, msg, onYes, onlyOk = false) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-msg').innerText = msg;
-            document.getElementById('confirm-no-btn').style.display = onlyOk ? 'none' : 'block';
-            document.getElementById('confirm-yes-btn').innerText = onlyOk ? '확인' : '예';
-            currentConfirmAction = onYes;
-            document.getElementById('confirm-modal').style.display = 'flex';
-        }
-
-        function executeConfirm() {
-            const action = currentConfirmAction;
-            closeConfirm();
-            if (action) action();
-        }
-
-        function askEnhance(index, cost, rate, currentLv) {
-            if(player.gold < cost) return showConfirm("골드 부족", "강화에 필요한 골드가 부족합니다.", null, true);
-            showConfirm("강화 확인", `${cost}G를 사용하여 강화하시겠습니까?\n(확률: ${rate}%)`, () => executeEnhance(index, cost, rate, currentLv));
-        }
-
-        function closeConfirm() {
-            document.getElementById('confirm-modal').style.display = 'none';
-            currentConfirmAction = null;
-        }
-
-        function executeEnhance(index, cost, rate, currentLv) {
-            player.gold -= cost;
-            const item = player.inventory[index];
-            const isSuccess = Math.random() * 100 < rate;
-
-            if(isSuccess) {
-                item.enhanceCount = (item.enhanceCount || currentLv) + 1;
-                item.val += 1;
-                item.desc = item.desc.replace(/\+\d+/, `+${item.val}`);
-                if(item.name.match(/\(\+\d+\)/)) item.name = item.name.replace(/\(\+\d+\)/, `(+${item.enhanceCount})`);
-                else item.name += ` (+${item.enhanceCount})`;
-                if(item.equipped) player.bonusAtk += 1;
-                player.quests.enhanceCount++;
-                item.failCount = 0; // Reset fail count on success
-                showEnhanceEffect();
-                successSfx.play().catch(e => console.log(e));
-            } else {
-                item.failCount = (item.failCount || 0) + 1;
-                if (item.failCount >= 3) {
-                    if(item.equipped) {
-                        player.bonusAtk -= item.val;
-                        if (item.options) item.options.forEach(opt => player.stats[opt.key] -= opt.val);
-                    }
-                    player.inventory.splice(index, 1);
-                    showConfirm("강화 실패", "강화에 3번 실패하여 무기가 파괴되었습니다!", null, true);
-                } else {
-                    showConfirm("강화 실패", `강화에 실패했습니다... (연속 실패: ${item.failCount}/3)\n골드만 소모되었습니다.`, null, true);
-                }
-                failSfx.play().catch(e => console.log(e));
-            }
-            updateUI(); renderShopList();
-        }
-
-        function openQuest() { toggleModal('quest-modal'); renderQuestList(); }
-
-        function renderQuestList() {
-            const list = document.getElementById('quest-list');
-            list.innerHTML = '';
-            const quests = [
-                { id: 'dayKill', title: '낮의 사냥꾼', desc: '낮 몬스터 5마리 처치', goal: 5, current: player.quests.dayKillCount || 0, reward: '500 G', claimed: player.quests.claimed.dayKill },
-                { id: 'nightKill', title: '밤의 추적자', desc: '밤 몬스터 5마리 처치', goal: 5, current: player.quests.nightKillCount || 0, reward: '800 G', claimed: player.quests.claimed.nightKill },
-                { id: 'bossKill', title: '보스 슬레이어', desc: '보스 몬스터 1마리 처치', goal: 1, current: player.quests.bossKillCount || 0, reward: '2000 G', claimed: player.quests.claimed.bossKill },
-                { id: 'enhance', title: '강화의 달인', desc: '강화 1회 성공', goal: 1, current: player.quests.enhanceCount, reward: '300 G', claimed: player.quests.claimed.enhance }
-            ];
-            quests.forEach(q => {
-                const div = document.createElement('div');
-                div.className = 'quest-item';
-                const isComplete = q.current >= q.goal;
-                const btnText = q.claimed ? '보상 수령 완료' : (isComplete ? '보상 받기' : '진행 중');
-                div.innerHTML = `<div class="quest-title">${q.title}</div><div class="quest-progress">${q.desc} (${Math.min(q.current, q.goal)}/${q.goal})</div><div class="quest-reward">보상: ${q.reward}</div><button class="quest-claim-btn" onclick="claimQuest('${q.id}')" ${(!isComplete || q.claimed) ? 'disabled' : ''}>${btnText}</button>`;
-                list.appendChild(div);
-            });
-        }
-
-        function claimQuest(id) {
-            if (id === 'dayKill' && !player.quests.claimed.dayKill) { player.gold += 500; player.quests.claimed.dayKill = true; showConfirm("퀘스트 완료", "500 G를 획득했습니다!", null, true); }
-            else if (id === 'nightKill' && !player.quests.claimed.nightKill) { player.gold += 800; player.quests.claimed.nightKill = true; showConfirm("퀘스트 완료", "800 G를 획득했습니다!", null, true); }
-            else if (id === 'bossKill' && !player.quests.claimed.bossKill) { player.gold += 2000; player.quests.claimed.bossKill = true; showConfirm("퀘스트 완료", "2000 G를 획득했습니다!", null, true); }
-            else if (id === 'enhance' && !player.quests.claimed.enhance) { player.gold += 300; player.quests.claimed.enhance = true; showConfirm("퀘스트 완료", "300 G를 획득했습니다!", null, true); }
-            updateUI(); renderQuestList();
-        }
-
-        function showEnhanceEffect() {
-            const el = document.getElementById('enhance-effect');
-            el.classList.remove('enhance-anim'); void el.offsetWidth; el.classList.add('enhance-anim');
-        }
-
-        function useItem(index) {
-            const item = player.inventory[index];
-            if (item.type.includes('potion')) {
-                if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
-                if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
-
-                if (item.name.includes('체력')) { player.hp = Math.min(player.hp + item.val, player.maxHp); potionSfx.play().catch(e => {}); }
-                else if (item.name.includes('마나')) { player.mp = Math.min(player.mp + item.val, player.maxMp); potionSfx.play().catch(e => {}); }
-                else if (item.name.includes('경험치')) {
-                    player.exp += item.val;
-                    potionSfx.play().catch(e => {});
-                    showConfirm("아이템 사용", `경험치를 ${item.val} 획득했습니다!`, null, true);
-                    if (player.exp >= player.maxExp) {
-                        player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp*1.5); player.maxHp+=10; player.maxMp+=5; player.hp=player.maxHp; player.mp=player.maxMp;
-                        player.traitPoints += 2;
-                        showConfirm("레벨 업!", "레벨 업! 특성 포인트 2개를 획득했습니다.", () => { checkAdvancement(); }, true);
-                    }
-                } else if (item.type === 'potion_atk') {
-                    player.bonusAtk += item.val;
-                    potionSfx.play().catch(e => {});
-                    showConfirm("아이템 사용", `공격력이 ${item.val}만큼 영구적으로 증가했습니다!`, null, true);
-                } else if (item.type === 'potion_def') {
-                    player.bonusDef += item.val;
-                    potionSfx.play().catch(e => {});
-                    showConfirm("아이템 사용", `방어력이 ${item.val}만큼 일시적으로 증가했습니다!`, null, true);
-                }
-                player.inventory.splice(index, 1);
-                if (!item.name.includes('경험치') && !item.type.includes('atk') && !item.type.includes('def')) showConfirm("아이템 사용", `${item.name}을(를) 사용했습니다.`, null, true);
-            } else if (item.type === 'weapon') {
-                if (item.reqJob && item.reqJob !== player.job) return showConfirm("착용 불가", `[${item.reqJob}] 전용 장비입니다.`, null, true);
-                if (item.equipped) {
-                    item.equipped = false;
-                    player.bonusAtk -= item.val;
-                    if (item.options) item.options.forEach(opt => player.stats[opt.key] -= opt.val);
-                }
-                else {
-                    player.inventory.forEach(i => {
-                        if (i.type === 'weapon' && i.equipped) {
-                            i.equipped = false;
-                            player.bonusAtk -= i.val;
-                            if (i.options) i.options.forEach(opt => player.stats[opt.key] -= opt.val);
-                        }
-                    });
-                    item.equipped = true;
-                    player.bonusAtk += item.val;
-                    if (item.options) item.options.forEach(opt => player.stats[opt.key] += opt.val);
-                }
-            }
-            renderInventory(); updateUI();
-        }
-
-        function askSell(index) {
-            const item = player.inventory[index];
-            const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const price = Math.floor((baseVal * 5) + (enh * 50));
-            showConfirm("판매 확인", `[${item.name}]을(를) ${price} G에 판매하시겠습니까?`, () => sellItem(index, price));
-        }
-
-        function sellItem(index, price) {
-            const item = player.inventory[index];
-            if(item.equipped) {
-                player.bonusAtk -= item.val;
-                if (item.options) item.options.forEach(opt => player.stats[opt.key] -= opt.val);
-            }
-            player.gold += price; player.inventory.splice(index, 1);
-            renderInventory(); updateUI();
-        }
-
+        function saveBossPos() { if(boss.alive) { localStorage.setItem('rpg_boss_x', boss.x); localStorage.setItem('rpg_boss_y', boss.y); } }
         async function manualSave() {
-            const overlay = document.getElementById('loading-overlay');
-            const txt = document.querySelector('.loading-text');
-            txt.innerText = "저장 중..."; overlay.style.display = 'flex';
-
-            try {
-                if (!player.name) {
-                    player.name = localStorage.getItem('rpg_player_name');
-                }
-
-                await fetch(DB_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: JSON.stringify(player)
-                });
-
-                localStorage.removeItem('rpg_temp_player');
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    showConfirm("저장 완료", "데이터가 스프레드시트에 전송되었습니다!", null, true);
-                }, 1500);
-
-            } catch(e) {
-                console.error("Save Error:", e);
-                showConfirm("저장 실패", "네트워크 오류가 발생했습니다.", null, true);
-                overlay.style.display = 'none';
-            }
+            const overlay = document.getElementById('loading-overlay'); overlay.style.display = 'flex';
+            try { await fetch(DB_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(player) }); showConfirm("저장 완료", "데이터가 저장되었습니다.", null); }
+            catch(e) { showConfirm("저장 실패", "오류가 발생했습니다.", null); }
+            overlay.style.display = 'none';
         }
-
         function showRandomEvent() {
-            const overlay = document.getElementById('event-overlay');
-            const text = document.getElementById('event-text');
-            const rewardText = document.getElementById('event-reward');
-            const img = document.getElementById('event-img');
-            const events = [
-                { t: "보물 발견!", g: 200, h: 0, m: 0, i: "image/bm.jpg", r: "+200 골드" },
-                { t: "고대의 샘!", g: 0, h: 50, m: 30, i: "image/bm.jpg", r: "+50 HP / +30 MP" },
-                { t: "행운의 동전!", g: 100, h: 0, m: 0, i: "image/bm.jpg", r: "+100 골드" }
-            ];
-            const ev = events[Math.floor(Math.random() * events.length)];
-            text.innerText = ev.t; rewardText.innerText = ev.r; img.src = ev.i;
-            player.gold += ev.g; player.hp = Math.min(player.hp + ev.h, player.maxHp); player.mp = Math.min(player.mp + ev.m, player.maxMp);
-            if (ev.g > 0) goldSfx.play().catch(e => {});
-            overlay.style.display = 'flex'; overlay.classList.remove('event-anim'); void overlay.offsetWidth; overlay.classList.add('event-anim');
-            setTimeout(() => { overlay.style.display = 'none'; }, 3000);
-            updateUI();
+            const overlay = document.getElementById('event-overlay'); overlay.style.display = 'flex';
+            document.getElementById('event-text').innerText = "행운의 발견!"; document.getElementById('event-reward').innerText = "+100 Gold";
+            player.gold += 100; goldSfx.play().catch(e=>{}); setTimeout(() => overlay.style.display = 'none', 2000); updateUI();
         }
+        function showGameOver(msg) { document.getElementById('gameover-modal').style.display = 'flex'; }
     </script>
 </body>
 </html>
