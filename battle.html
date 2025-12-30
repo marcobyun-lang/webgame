@@ -124,6 +124,11 @@
         .btn-run { background: linear-gradient(to bottom, #333, #111); border-color: #555; }
         .btn-run:hover { background: linear-gradient(to bottom, #555, #333); transform: translateY(-3px); color: #fff; }
 
+        /* Special Button Style */
+        .btn-special { background: linear-gradient(to bottom, #6a1b9a, #4a148c); border-color: #7b1fa2; }
+        .btn-special:hover { background: linear-gradient(to bottom, #8e24aa, #6a1b9a); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(123, 31, 162, 0.6); }
+        .btn-special:disabled { filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
+
         .btn-rage {
             background: linear-gradient(to bottom, #e65100, #bf360c); border-color: #ff9800;
             color: #fff; font-size: 1.5rem; padding: 15px 50px; display: none;
@@ -461,6 +466,13 @@
             <button class="btn-confirm" onclick="closeItemModal()" style="background:#555; margin-top:20px;">닫기</button>
         </div>
 
+        <div id="effect-modal" class="modal-overlay">
+            <div class="modal-title" id="effect-title" style="font-size: 2rem;">효과 발동</div>
+            <img id="effect-img" src="" style="width:100px; height:100px; border-radius:10px; margin:20px 0; box-shadow:0 0 20px var(--accent-gold);">
+            <div id="effect-desc" class="result-content" style="font-size:1.2rem; white-space: pre-line;"></div>
+            <button class="btn-confirm" onclick="closeEffectModal()">확인</button>
+        </div>
+
         <div id="gameover-modal" class="modal-overlay">
             <div class="gameover-title">패배</div>
             <div class="gameover-stats">
@@ -533,6 +545,7 @@
         <div class="btns">
             <button class="btn btn-atk" onclick="atk()">⚔️ 공격</button>
             <button class="btn btn-skl" onclick="skl()">⚡ 스킬</button>
+            <button id="btn-special" class="btn btn-special" onclick="specialAtk()">🌟 특수기</button>
             <button class="btn btn-item" onclick="openItemModal()">💊 아이템</button>
             <button class="btn btn-run" onclick="run()">🏃 도망</button>
         </div>
@@ -555,13 +568,15 @@
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
             {f:'image/ka2.jpg', n:'리던', e:50, w:3},
-            {f:'image/ka3.jpg', n:'겁먹은 토끼', e:30, w:4},
+            {f:'image/ka3.jpg', n:'토끼사냥꾼 요치', e:30, w:4},
+            {f:'image/ka4.jpg', n:'곰전사 추파', e:120, w:2, type: 'bear_warrior'},
             {f:'image/ke1.jpg', n:'엘리트 나무 병사', e:100, w:1, mult: 1.2}
         ];
         const NIGHT_ENEMY_POOL = [
             {f:'image/monster1.jpg', n:'블루머쉬 가디언 (Bluemush Guardian)', e:150, w:3, poison: true},
             {f:'image/monster2.jpg', n:'그로울 트렌트 (Growl Trent)', e:180, w:3},
             {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true},
+            {f:'image/ke3.jpg', n:'마법사 홀리', e:200, w:2, type: 'mage_holly'},
             {f:'image/ke2.jpg', n:'심연의 감시자', e:250, w:1, mult: 1.3}
         ];
         
@@ -572,13 +587,20 @@
             '아크메이지': 'weapon_mage.jpg', '소서러': 'weapon_mage.jpg'
         };
         const ITEM_IMAGES = {
-            'hp_potion': 'potion_hp.jpg',
-            'mp_potion': 'potion_mp.jpg',
-            'poison_potion': 'potion_poison.jpg',
-            'exp_potion': 'potion_exp.jpg',
+            'hp_potion': 'potion_hp.jpg', 'potion_hp': 'potion_hp.jpg',
+            'mp_potion': 'potion_mp.jpg', 'potion_mp': 'potion_mp.jpg',
+            'poison_potion': 'potion_poison.jpg', 'potion_poison': 'potion_poison.jpg',
+            'exp_potion': 'potion_exp.jpg', 'potion_exp': 'potion_exp.jpg',
             'gold': 'coin_gold.jpg',
             'potion_atk': 'attack_10.jpg',
-            'potion_def': 'Defense_10.jpg'
+            'potion_def': 'Defense_10.jpg',
+            'scroll_option': 'Scroll.jpg',
+            'potion_skeleton': 'potion_skeleton.jpg',
+            'potion_invis': 'potion_invis.jpg',
+            'potion_gamble': 'potion_gamble.jpg',
+            'potion_focus': 'potion_focus.jpg',
+            'potion_holy': 'potion_holy.jpg',
+            'potion_madness': 'potion_madness.jpg'
         };
         
         const DROP_TABLE = {
@@ -599,11 +621,13 @@
         let currentWeather = "sunny";
         let isLegendary = false;
 
-        let pStatus = { poison: 0, stun: 0 };
+        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
         let eStatus = { poison: 0, stun: 0 };
         let rage = 0;
         const maxRage = 100;
         let mageAttackToggle = false;
+        let specialCooldown = 0;
+        const SPECIAL_COOLDOWN_MAX = 5;
 
         window.onload = async () => {
             const name = localStorage.getItem('rpg_player_name');
@@ -624,6 +648,17 @@
             if(player.rage === undefined) player.rage = 0;
             rage = player.rage;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
+
+            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
+            specialCooldown = 0;
+            updateSpecialTooltip();
+
+            if (player.battleCurse) {
+                pStatus.stun = 1;
+                pStatus.poison = 1;
+                addLog("<span style='color:#9b26b6; font-weight:bold;'>☠️ 해골 포션의 저주가 발동했습니다! (기절/중독)</span>");
+                delete player.battleCurse;
+            }
 
             if(!player.quests) player.quests = {
                 killCount: 0,
@@ -670,8 +705,16 @@
                 isBossBattle = true;
                 const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
                 const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 400 + (player.level * 30));
-                const bossAtk = 15 + (player.level * 2);
-                enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
+                let bossAtk = 15 + (player.level * 2);
+
+                if (isNight) {
+                    const nHp = Math.floor(bossHp * 1.3);
+                    const nMaxHp = Math.floor(bossMaxHp * 1.3);
+                    const nAtk = Math.floor(bossAtk * 1.3);
+                    enemy = { name: '어둠의 지배자', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 3000, img: 'image/monster_boss.jpg', isNightBoss: true };
+                } else {
+                    enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
+                }
                 localStorage.removeItem('rpg_boss_encounter'); 
             } else {
                 isBossBattle = false;
@@ -689,7 +732,8 @@
                     atk: Math.floor((avg/2.2) * multiplier) + 2,
                     exp: sel.e,
                     img: sel.f,
-                    canPoison: sel.poison || false
+                    canPoison: sel.poison || false,
+                    type: sel.type || 'normal'
                 };
             }
             
@@ -704,6 +748,24 @@
             addLog(`<span class='log-highlight'>[${enemy.name}]</span>이(가) 나타났습니다!`);
             document.getElementById('loading-overlay').style.display = 'none';
             update(); say('p', '전투 시작!');
+        }
+
+        function updateSpecialTooltip() {
+            const btn = document.getElementById('btn-special');
+            let desc = "";
+            switch(player.job) {
+                case '전사': desc = "[방패 방어] 2턴 동안 받는 피해량 50% 감소"; break;
+                case '도적': desc = "[집중력 강화] 다음 공격 명중률/치명타 대폭 상승"; break;
+                case '마법사': desc = "[마나 순환] 최대 MP의 30% 즉시 회복"; break;
+                case '버서커': desc = "[피의 갈증] HP 20% 소모, 2턴간 공격력 2배"; break;
+                case '가디언': desc = "[완전 방어] 2턴 동안 무적 (데미지 무효)"; break;
+                case '어쌔신': desc = "[그림자 일격] 방어 무시 크리티컬 공격"; break;
+                case '섀도우': desc = "[독 확산] 독 피해 즉시 입히고 재중독"; break;
+                case '아크메이지': desc = "[마력 폭주] 다음 스킬 데미지 3배 (사용 후 1턴 기절)"; break;
+                case '소서러': desc = "[원소 과부하] 2턴 동안 스킬 마나 소모 0"; break;
+                default: desc = "특수 기술"; break;
+            }
+            btn.title = desc;
         }
 
         function updateWeatherUI() {
@@ -732,6 +794,15 @@
             document.getElementById('p-rage-text').innerText = `RAGE ${rage}/${maxRage}`;
             document.getElementById('e-hp-text').innerText = `${Math.ceil(enemy.hp)}/${enemy.maxHp}`;
 
+            const btnSpecial = document.getElementById('btn-special');
+            if (specialCooldown > 0) {
+                btnSpecial.disabled = true;
+                btnSpecial.innerText = `⏳ ${specialCooldown}`;
+            } else {
+                btnSpecial.disabled = false;
+                btnSpecial.innerText = "🌟 특수기";
+            }
+
             const pStatusEl = document.getElementById('p-status');
             pStatusEl.innerHTML = '';
             if(pStatus.poison > 0) {
@@ -741,6 +812,14 @@
                 document.getElementById('player-frame').classList.remove('poison-aura');
             }
             if(pStatus.stun > 0) pStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${pStatus.stun})</span>`;
+
+            // Buff Icons
+            if(pStatus.defUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#795548;">방어(${pStatus.defUp})</span>`;
+            if(pStatus.atkUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#d32f2f;">공격(${pStatus.atkUp})</span>`;
+            if(pStatus.invincible > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ffd700; color:#000;">무적(${pStatus.invincible})</span>`;
+            if(pStatus.zeroMana > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">마나0(${pStatus.zeroMana})</span>`;
+            if(pStatus.skillDmgUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">스킬강화(${pStatus.skillDmgUp})</span>`;
+            if(pStatus.critUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ff1744;">광기(${pStatus.critUp})</span>`;
 
             const eStatusEl = document.getElementById('e-status');
             eStatusEl.innerHTML = '';
@@ -899,6 +978,82 @@
         function playPotionSfx() { potionSfx.currentTime = 0; potionSfx.play().catch(e => {}); }
         function playGoldSfx() { goldSfx.currentTime = 0; goldSfx.play().catch(e => {}); }
 
+        function specialAtk() {
+            if(isActing || specialCooldown > 0) return;
+            if(pStatus.stun > 0) { addLog("기절 상태라 특수기를 쓸 수 없습니다!"); return; }
+
+            isActing = true;
+            specialCooldown = SPECIAL_COOLDOWN_MAX;
+
+            let job = player.job;
+            let logMsg = "";
+
+            triggerScreenShake();
+            playItemSfx();
+
+            setTimeout(() => {
+                switch(job) {
+                    case '전사':
+                        pStatus.defUp = 2;
+                        logMsg = "🛡️ [방패 방어] 태세를 취합니다! (받는 피해 50% 감소)";
+                        break;
+                    case '도적':
+                        pStatus.focus = 1;
+                        logMsg = "👁️ [집중력 강화] 적의 약점을 노립니다! (다음 공격 치명타)";
+                        break;
+                    case '마법사':
+                        let rec = Math.floor(player.maxMp * 0.3);
+                        player.mp = Math.min(player.maxMp, player.mp + rec);
+                        logMsg = `💧 [마나 순환] 마나를 ${rec} 회복했습니다!`;
+                        break;
+                    case '버서커':
+                        let cost = Math.floor(player.hp * 0.2);
+                        player.hp -= cost;
+                        pStatus.atkUp = 2;
+                        logMsg = `🩸 [피의 갈증] 체력 ${cost}을 소모하여 공격력을 2배로 높입니다!`;
+                        showDamage('player-frame', cost, 'player_hit');
+                        break;
+                    case '가디언':
+                        pStatus.invincible = 2;
+                        logMsg = "🛡️ [완전 방어] 절대 방어 태세! (2턴간 무적)";
+                        break;
+                    case '어쌔신':
+                        let dmg = Math.floor((player.stats.dex * 2.5 + player.level * 5) * 1.5);
+                        enemy.hp -= dmg;
+                        showDamage('enemy-frame', dmg, 'crit');
+                        triggerHitEffect('enemy-frame', 'crit');
+                        logMsg = `🗡️ [그림자 일격] 적의 급소를 찔러 ${dmg}의 치명적인 피해!`;
+                        break;
+                    case '섀도우':
+                        if (eStatus.poison > 0) {
+                            let pDmg = Math.floor(enemy.maxHp * 0.05) * eStatus.poison;
+                            enemy.hp -= pDmg;
+                            showDamage('enemy-frame', pDmg, 'poison');
+                            logMsg = `☠️ [독 확산] 독을 폭발시켜 ${pDmg} 피해를 입히고 다시 중독시킵니다!`;
+                        } else {
+                            logMsg = "☠️ [독 확산] 적에게 맹독을 주입합니다!";
+                        }
+                        eStatus.poison = 3;
+                        break;
+                    case '아크메이지':
+                        pStatus.nextSkillTriple = 1;
+                        logMsg = "🔮 [마력 폭주] 마력을 한계까지 끌어올립니다! (다음 스킬 3배)";
+                        break;
+                    case '소서러':
+                        pStatus.zeroMana = 2;
+                        logMsg = "🌀 [원소 과부하] 마나의 흐름을 제어합니다! (스킬 소모 0)";
+                        break;
+                    default:
+                        logMsg = "특수 기술 발동!";
+                        break;
+                }
+
+                addLog(logMsg);
+                update();
+                check();
+            }, 500);
+        }
+
         function atk() { 
             if(isActing) return;
             if(pStatus.stun > 0) { addLog("기절 상태라 공격할 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
@@ -914,11 +1069,21 @@
             
             playAttackSfx();
 
+            // Check Focus
+            let isFocused = false;
+            if (pStatus.focus > 0) {
+                isFocused = true;
+                pStatus.focus = 0;
+            }
+
+            // Check Berserk
+            let isBerserk = (pStatus.atkUp > 0);
+
             setTimeout(() => {
                 let enemyEvadeChance = isBossBattle ? 0.1 : 0.05;
                 if (currentWeather === "fog") enemyEvadeChance += 0.15;
 
-                if (Math.random() < enemyEvadeChance) {
+                if (Math.random() < enemyEvadeChance && !isFocused) {
                     addLog("<span class='log-evade'>적이 공격을 회피했습니다!</span>");
                     playEvadeSfx();
                     showDamage('enemy-frame', 0, 'evade');
@@ -929,9 +1094,14 @@
 
                 let critChance = 0.2;
                 if (player.job === '어쌔신') critChance = 0.35;
+                if (isFocused) critChance = 1.0;
+                if (pStatus.critUp > 0) critChance = 1.0;
 
                 let isCrit = Math.random() < critChance;
                 let dmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
+
+                if (isBerserk) dmg *= 2;
+
                 if(isCrit) {
                     dmg = Math.floor(dmg*2);
                     playCritSfx();
@@ -959,11 +1129,14 @@
             if (player.job === '소서러') costRate = 0.3;
             if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.4;
 
+            if (pStatus.zeroMana > 0 || pStatus.nextSkillZeroCost > 0) costRate = 0;
+
             const cost = Math.floor(player.maxMp * costRate);
             if(player.mp < cost) { say('p', '마나가 부족해!'); return; }
 
             isActing = true;
             player.mp -= cost;
+            if (pStatus.nextSkillZeroCost > 0) pStatus.nextSkillZeroCost = 0;
             update();
 
             const jobKey = player.job || '전사';
@@ -976,6 +1149,7 @@
                     say('p', `급소 찌르기!`);
                     let baseDmg = Math.floor(player.stats.dex * 0.5) + (player.level * 2);
                     let critChance = (player.job === '어쌔신') ? 0.55 : 0.4;
+                    if (pStatus.critUp > 0) critChance = 1.0;
                     isCrit = Math.random() < critChance;
                     if (isCrit) {
                         dmg = (baseDmg * 4) + (player.bonusAtk||0);
@@ -1026,6 +1200,7 @@
 
             if (dmg === 0) { // If not pre-calculated (for non-rogue classes)
                 isCrit = Math.random() < 0.2;
+                if (pStatus.critUp > 0) isCrit = true;
                 let multiplier = 2.0;
 
                 if (job === '버서커') multiplier = 4.0;
@@ -1045,8 +1220,24 @@
                     dmg = (player.stats.int * multiplier) + (player.level * 5);
                 }
 
+                // Berserk check
+                if (pStatus.atkUp > 0 && (job === '버서커' || job === '전사')) dmg *= 2;
+
                 dmg += (player.bonusAtk||0);
                 if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
+            }
+
+            // Skill Dmg Up (Focus Potion)
+            if (pStatus.skillDmgUp > 0) {
+                dmg = Math.floor(dmg * 1.5);
+            }
+
+            // Archmage Triple
+            if (pStatus.nextSkillTriple > 0) {
+                dmg *= 3;
+                pStatus.nextSkillTriple = 0;
+                pStatus.stun = 1;
+                addLog("마력 폭주 반동으로 기절했습니다!");
             }
 
             if (isLegendary && (job === '전사' || job === '버서커' || job === '가디언')) {
@@ -1123,8 +1314,23 @@
             else { setTimeout(eTurn, 1500); }
         }
         
-        function eTurn() { 
-            if(eStatus.stun > 0) { addLog("적이 기절 상태라 행동할 수 없습니다!"); eStatus.stun--; update(); isActing = false; return; }
+        function tickPlayerBuffs() {
+            if (specialCooldown > 0) specialCooldown--;
+            if (pStatus.defUp > 0) pStatus.defUp--;
+            if (pStatus.atkUp > 0) pStatus.atkUp--;
+            if (pStatus.invincible > 0) pStatus.invincible--;
+            if (pStatus.zeroMana > 0) pStatus.zeroMana--;
+            if (pStatus.skillDmgUp > 0) pStatus.skillDmgUp--;
+            if (pStatus.critUp > 0) pStatus.critUp--;
+        }
+
+        function eTurn() {
+            if(eStatus.stun > 0) {
+                addLog("적이 기절 상태라 행동할 수 없습니다!");
+                eStatus.stun--;
+                tickPlayerBuffs();
+                update(); isActing = false; return;
+            }
 
             if(eStatus.poison > 0) {
                 const pDmg = Math.floor(enemy.maxHp * 0.05);
@@ -1157,6 +1363,7 @@
                 say('p', '느려!');
                 playMotion('', 'player-frame', 'evade');
                 showDamage('player-frame', 0, 'evade');
+                tickPlayerBuffs();
                 update(); isActing = false;
                 return;
             }
@@ -1164,27 +1371,68 @@
             let dmg = Math.max(1, enemy.atk - Math.floor(player.stats.dex/3));
             if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
 
-            player.hp -= dmg;
-            rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5));
-            player.rage = rage;
+            let isCrit = false;
+            if (enemy.isNightBoss && Math.random() < 0.2) {
+                dmg = Math.floor(dmg * 1.5);
+                isCrit = true;
+            }
 
-            playDamageSfx();
-            const jobKey = player.job || '전사';
-            const hitMap = {
-                '전사':'hit-warrior', '도적':'hit-rogue', '마법사':'hit-mage',
-                '버서커':'hit-warrior', '가디언':'hit-warrior',
-                '어쌔신':'hit-rogue', '섀도우':'hit-rogue',
-                '아크메이지':'hit-mage', '소서러':'hit-mage'
-            };
-            playMotion(hitMap[jobKey], 'player-frame', 'player_hit'); 
-            showDamage('player-frame', dmg, 'player_hit');
-            say('e', '받아라!'); 
-            addLog(`적이 공격합니다! <span style='color:red'>${dmg}</span> 피해를 입었습니다.`);
+            // Special damage logic for new monsters
+            if (enemy.type === 'bear_warrior') {
+                if (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') {
+                    dmg = Math.floor(dmg * 1.3);
+                    addLog("<span style='color:orange'>곰전사 추파가 마법사에게 추가 피해를 입힙니다!</span>");
+                }
+            } else if (enemy.type === 'mage_holly') {
+                if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우' ||
+                    player.job === '전사' || player.job === '버서커' || player.job === '가디언') {
+                    dmg = Math.floor(dmg * 1.3);
+                    addLog("<span style='color:purple'>마법사 홀리가 근접 직업에게 추가 피해를 입힙니다!</span>");
+                }
+            }
 
-            let poisonChance = enemy.canPoison ? 0.3 : 0;
-            if(Math.random() < poisonChance) { pStatus.poison = 3; addLog("<span style='color:#9b26b6'>적의 공격에 중독되었습니다!</span>"); }
-            if(Math.random() < 0.1) { pStatus.stun = 1; addLog("기절했습니다!"); }
+            // Apply Defense Buffs
+            if (pStatus.invincible > 0) {
+                dmg = 0;
+                addLog("완전 방어로 공격을 무효화했습니다!");
+            } else if (pStatus.defUp > 0) {
+                dmg = Math.floor(dmg * 0.5);
+                addLog("방패 방어로 피해가 반감되었습니다.");
+            }
 
+            if (dmg > 0) {
+                player.hp -= dmg;
+                rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5));
+                player.rage = rage;
+
+                playDamageSfx();
+                const jobKey = player.job || '전사';
+                const hitMap = {
+                    '전사':'hit-warrior', '도적':'hit-rogue', '마법사':'hit-mage',
+                    '버서커':'hit-warrior', '가디언':'hit-warrior',
+                    '어쌔신':'hit-rogue', '섀도우':'hit-rogue',
+                    '아크메이지':'hit-mage', '소서러':'hit-mage'
+                };
+
+                if (isCrit) {
+                    triggerScreenShake(true);
+                    playMotion(hitMap[jobKey], 'player-frame', 'big');
+                    showDamage('player-frame', dmg, 'player_hit');
+                    say('e', '크하하하!');
+                    addLog(`<span style='color:red; font-weight:bold; font-size:1.2rem;'>치명상! ${dmg} 피해!</span>`);
+                } else {
+                    playMotion(hitMap[jobKey], 'player-frame', 'player_hit');
+                    showDamage('player-frame', dmg, 'player_hit');
+                    say('e', '받아라!');
+                    addLog(`적이 공격합니다! <span style='color:red'>${dmg}</span> 피해를 입었습니다.`);
+                }
+
+                let poisonChance = enemy.canPoison ? 0.3 : 0;
+                if(Math.random() < poisonChance) { pStatus.poison = 3; addLog("<span style='color:#9b26b6'>적의 공격에 중독되었습니다!</span>"); }
+                if(Math.random() < 0.1) { pStatus.stun = 1; addLog("기절했습니다!"); }
+            }
+
+            tickPlayerBuffs();
             update(); isActing = false;
             if(player.hp <= 0) { showGameOver("패배했습니다..."); }
         }
@@ -1263,10 +1511,15 @@
             if(!dropImg) dropImg = ITEM_IMAGES['gold'];
             playGoldSfx();
 
-            if (isBossBattle && Math.random() < 0.5) {
+            const rand = Math.random();
+
+            if (isBossBattle && rand < 0.5) {
                 const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = jobList[Math.floor(Math.random() * jobList.length)];
+
                 let isLegendary = isSuperBoss || Math.random() < 0.3;
+                if (!player.isAdvanced) isLegendary = false;
+
                 let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
                 let colorCode = isLegendary ? "#ff8000" : "#a335ee";
                 let rarityName = isLegendary ? "전설의" : "에픽";
@@ -1279,26 +1532,51 @@
                 player.inventory.push(newItem);
                 dropName = newItem.name; dropColor = colorCode; dropImg = WEAPON_IMAGES[player.job];
             } 
-            else if (!isBossBattle && Math.random() < 0.05) {
+            else if (!isBossBattle && rand < 0.05) {
                 const nameList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = nameList[Math.floor(Math.random() * nameList.length)];
-                const grade = Math.floor(Math.random() * 5) + 8;
-                const newItem = { name: `에픽 ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: "epic", rarityColor: '#a335ee', enhanceCount: grade, options: [] };
 
+                let isLegendary = false;
+                if (player.isAdvanced && Math.random() < 0.01) isLegendary = true;
+
+                let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
+                let colorCode = isLegendary ? "#ff8000" : "#a335ee";
+                let rarityName = isLegendary ? "전설의" : "에픽";
+                let rarity = isLegendary ? "legendary" : "epic";
+
+                const newItem = { name: `${rarityName} ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: rarity, rarityColor: colorCode, enhanceCount: grade, options: [] };
+
+                const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+1}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+1}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+1}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+1}];
-                const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)];
-                newItem.options.push(opt);
-                newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
+                for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
 
                 player.inventory.push(newItem);
-                dropName = newItem.name; dropColor = '#a335ee'; dropImg = WEAPON_IMAGES[player.job];
+                dropName = newItem.name; dropColor = colorCode; dropImg = WEAPON_IMAGES[player.job];
             }
             else if (Math.random() < 0.6) {
-                const rand = Math.random();
-                if(rand < 0.3) { player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=ITEM_IMAGES['hp_potion']; }
-                else if(rand < 0.6) { player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=ITEM_IMAGES['mp_potion']; }
-                else if(rand < 0.8) { player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=ITEM_IMAGES['exp_potion']; }
-                else { player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=ITEM_IMAGES['poison_potion']; }
+                const r = Math.random();
+                if (r < 0.01) {
+                     player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0});
+                     dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg="potion_focus.jpg";
+                } else if (r < 0.02) {
+                     player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0});
+                     dropName = "광기의 물약"; dropColor="#ff1744"; dropImg="potion_madness.jpg";
+                } else if (r < 0.04) {
+                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:9999});
+                    dropName = "해골 포션"; dropColor="#757575"; dropImg="potion_skeleton.jpg";
+                } else if (r < 0.07) {
+                     player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0});
+                     dropName = "정화의 성수"; dropColor="#00e676"; dropImg="potion_holy.jpg";
+                } else if (r < 0.20) {
+                    player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0});
+                    dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg="Scroll.jpg";
+                } else {
+                    const subR = Math.random();
+                    if(subR < 0.3) { player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=ITEM_IMAGES['hp_potion']; }
+                    else if(subR < 0.6) { player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=ITEM_IMAGES['mp_potion']; }
+                    else if(subR < 0.8) { player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=ITEM_IMAGES['exp_potion']; }
+                    else { player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=ITEM_IMAGES['poison_potion']; }
+                }
             }
             else if (Math.random() < 0.2) {
                 const rand = Math.random();
@@ -1409,10 +1687,8 @@
                     const item = group.item;
                     const div = document.createElement('div');
                     div.className = 'battle-item-row';
-                    let iconSrc = 'potion_hp.jpg';
-                    if (item.name.includes('마나')) iconSrc = 'potion_mp.jpg';
-                    else if (item.name.includes('해독')) iconSrc = 'potion_poison.jpg';
-                    else if (item.name.includes('경험치')) iconSrc = 'potion_exp.jpg';
+                    let iconSrc = ITEM_IMAGES[item.type] || 'potion_hp.jpg';
+
                     div.innerHTML = `<img src="image/${iconSrc}" class="battle-item-icon"><div class="battle-item-info"><div class="battle-item-name">${item.name}<span class="battle-item-count">x${group.count}</span></div><div class="battle-item-desc">${item.desc}</div></div>`;
                     div.onclick = () => useBattleItem(group.indices[0]);
                     list.appendChild(div);
@@ -1428,6 +1704,8 @@
             if(isActing) return;
             const item = player.inventory[index];
             if (!item) return;
+
+            let handledByPopup = false;
 
             if (item.name.includes('체력')) {
                 if (player.hp >= player.maxHp) { addLog("체력이 이미 가득 찼습니다."); return; }
@@ -1457,9 +1735,57 @@
                 const cureEl = document.getElementById('p-cure');
                 cureEl.style.display = 'block';
                 setTimeout(() => { cureEl.style.display = 'none'; }, 1000);
+            } else if (item.type === 'potion_skeleton') {
+                isActing = true;
+                player.hp = player.maxHp;
+                player.mp = player.maxMp;
+                player.battleCurse = true;
+                addLog(`<span style="color:#757575">해골 포션</span>을 사용하여 체력과 마나를 모두 회복했습니다...`);
+                playPotionSfx();
+            } else if (item.type === 'potion_focus') {
+                isActing = true;
+                pStatus.nextSkillZeroCost = 1;
+                pStatus.skillDmgUp = 3;
+                showEffectPopup("정신 집중", "다음 스킬 마나 소모 0\n3턴간 스킬 데미지 50% 증가", "potion_focus.jpg");
+                playPotionSfx();
+                handledByPopup = true;
+            } else if (item.type === 'potion_holy') {
+                isActing = true;
+                pStatus.poison = 0;
+                pStatus.stun = 0;
+                addLog(`<span style="color:#00e676">정화의 성수</span>가 모든 상태 이상을 씻어냈습니다!`);
+                playPotionSfx();
+                const cureEl = document.getElementById('p-cure');
+                cureEl.style.display = 'block';
+                setTimeout(() => { cureEl.style.display = 'none'; }, 1000);
+            } else if (item.type === 'potion_madness') {
+                isActing = true;
+                const dmg = Math.floor(player.hp * 0.3);
+                player.hp = Math.max(1, player.hp - dmg);
+                pStatus.critUp = 3;
+                showDamage('player-frame', dmg, 'player_hit');
+                showEffectPopup("광기의 힘", `HP ${dmg} 감소\n3턴간 크리티컬 100%`, "potion_madness.jpg");
+                playPotionSfx();
+                handledByPopup = true;
             }
 
             player.inventory.splice(index, 1);
+
+            if (!handledByPopup) {
+                update();
+                setTimeout(eTurn, 1500);
+            }
+        }
+
+        function showEffectPopup(title, desc, img) {
+            document.getElementById('effect-title').innerText = title;
+            document.getElementById('effect-desc').innerText = desc;
+            document.getElementById('effect-img').src = 'image/' + img;
+            document.getElementById('effect-modal').style.display = 'flex';
+        }
+
+        function closeEffectModal() {
+            document.getElementById('effect-modal').style.display = 'none';
             update();
             setTimeout(eTurn, 1500);
         }

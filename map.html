@@ -997,6 +997,13 @@
         else if (rand < 0.15) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
         else if (rand < 0.4) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
 
+        // 전직 전에는 레전드리 드롭 불가
+        if (!player.isAdvanced && rarity === "legendary") {
+            rarity = "epic";
+            rarityColor = "#a335ee";
+            grade = Math.floor(Math.random() * 5) + 10;
+        }
+
         const newItem = {
             name: `${rarity.toUpperCase()} ${baseName} (+${grade})`,
             type: 'weapon',
@@ -1124,8 +1131,8 @@
         player.inventory.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = `item-card ${item.equipped ? 'equipped' : ''}`;
-            const typeText = item.type.includes('potion') ? '소모품' : '장비';
-            const typeColor = item.type.includes('potion') ? '#ef5350' : '#26a69a';
+            const typeText = item.type.includes('potion') || item.type.includes('scroll') ? '소모품' : '장비';
+            const typeColor = item.type.includes('potion') || item.type.includes('scroll') ? '#ef5350' : '#26a69a';
             const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
             const nameStyle = item.rarityColor ? `color:${item.rarityColor};` : (item.equipped ? 'color:var(--accent-gold)' : '');
             const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const sellPrice = Math.floor((baseVal * 5) + (enh * 50));
@@ -1296,7 +1303,7 @@
 
     function useItem(index) {
         const item = player.inventory[index];
-        if (item.type.includes('potion')) {
+        if (item.type.includes('potion') || item.type.includes('scroll')) {
             if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
             if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
 
@@ -1319,7 +1326,17 @@
                 player.bonusDef += item.val;
                 potionSfx.play().catch(e => {});
                 showConfirm("아이템 사용", `방어력이 ${item.val}만큼 일시적으로 증가했습니다!`, null, true);
+            } else if (item.type === 'scroll_option') {
+                // 옵션 부여 스크롤 사용 로직
+                showOptionScrollUI(index);
+                return; // UI에서 처리하므로 여기서 종료
+            } else if (item.type === 'potion_skeleton') {
+                // 해골 포션은 전투 중에만 사용 가능하므로 맵에서는 사용 불가 메시지
+                return showConfirm("사용 불가", "전투 중에만 사용할 수 있는 아이템입니다.", null, true);
+            } else if (item.type === 'potion_focus' || item.type === 'potion_holy' || item.type === 'potion_madness') {
+                return showConfirm("사용 불가", "전투 중에만 사용할 수 있는 아이템입니다.", null, true);
             }
+
             player.inventory.splice(index, 1);
             if (!item.name.includes('경험치') && !item.type.includes('atk') && !item.type.includes('def')) showConfirm("아이템 사용", `${item.name}을(를) 사용했습니다.`, null, true);
         } else if (item.type === 'weapon') {
@@ -1345,6 +1362,106 @@
             playerImg.src = getPlayerImage(player.job, player.inventory);
         }
         renderInventory(); updateUI();
+    }
+
+    function showOptionScrollUI(scrollIndex) {
+        // 장비 목록을 보여주고 선택하게 함
+        const weapons = player.inventory.map((item, idx) => ({ item, idx })).filter(obj => obj.item.type === 'weapon');
+        if (weapons.length === 0) {
+            return showConfirm("사용 불가", "옵션을 부여할 장비가 없습니다.", null, true);
+        }
+
+        // 간단하게 프롬프트나 컨펌으로 처리하기엔 복잡하므로,
+        // 기존 상점 모달을 재활용하거나 새로운 모달을 띄워야 함.
+        // 여기서는 간단히 confirm으로 첫 번째 장비부터 순회하며 물어보는 방식보다는
+        // 스크롤 사용 시 장비 선택 모달을 띄우는 것이 좋음.
+        // 하지만 코드 복잡도를 줄이기 위해, 현재 착용 중인 장비에 우선 적용하거나
+        // 인벤토리에서 장비를 클릭했을 때 '스크롤 사용' 버튼이 나오게 하는 것이 좋음.
+
+        // 여기서는 "옵션 부여 스크롤"을 클릭했을 때 -> "장비를 선택하세요" 알림 후
+        // 인벤토리의 장비를 클릭하면 스크롤을 사용할지 묻는 방식으로 변경하는 것이 UX상 좋음.
+        // 하지만 현재 구조상 복잡하므로,
+        // 스크롤 사용 시 -> [강화] 모달처럼 장비 리스트를 띄우고 선택하게 하는 방식을 사용.
+
+        toggleModal('inventory-modal'); // 인벤토리 닫기
+
+        // 임시로 shop-modal을 재활용하여 장비 선택 유도
+        const modal = document.getElementById('shop-modal');
+        const list = document.getElementById('shop-list');
+        const title = modal.querySelector('h2');
+        const originalTitle = title.innerText;
+
+        title.innerText = "옵션 부여 대상 선택";
+        document.getElementById('shop-gold-display').style.display = 'none';
+
+        list.innerHTML = '';
+        weapons.forEach(({ item, idx }) => {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
+            div.innerHTML = `<div class="item-name ${rarityClass}">${item.name}</div><div class="item-desc">${item.desc}</div><button class="enhance-btn" onclick="applyOptionScroll(${scrollIndex}, ${idx})">선택</button>`;
+            list.appendChild(div);
+        });
+
+        // 모달 닫기 버튼 재정의 (원상복구 필요)
+        const closeBtn = modal.querySelector('.close-btn');
+        const originalOnClick = closeBtn.onclick;
+        closeBtn.onclick = () => {
+            toggleModal('shop-modal');
+            title.innerText = originalTitle;
+            document.getElementById('shop-gold-display').style.display = 'block';
+            closeBtn.onclick = originalOnClick;
+        };
+
+        toggleModal('shop-modal');
+    }
+
+    function applyOptionScroll(scrollIndex, itemIndex) {
+        const item = player.inventory[itemIndex];
+
+        // 기존 옵션 제거 (스탯 차감)
+        if (item.equipped && item.options) {
+            item.options.forEach(opt => player.stats[opt.key] -= opt.val);
+        }
+
+        // 새로운 옵션 생성
+        const optCount = Math.floor(Math.random() * 3) + 1; // 1~3개
+        const newOptions = [];
+        const possibleOpts = [
+            { name: "힘", key: "str" },
+            { name: "민첩", key: "dex" },
+            { name: "체력", key: "con" },
+            { name: "지능", key: "int" }
+        ];
+
+        let descText = `공격력 +${item.val} (${item.reqJob || player.job} 전용)`;
+
+        for(let i=0; i<optCount; i++) {
+            const type = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
+            const val = Math.floor(Math.random() * 5) + 1; // 1~5
+            newOptions.push({ name: type.name, key: type.key, val: val });
+            descText += `\n[옵션] ${type.name} +${val}`;
+        }
+
+        item.options = newOptions;
+        item.desc = descText;
+
+        // 새 옵션 적용 (스탯 가산)
+        if (item.equipped) {
+            item.options.forEach(opt => player.stats[opt.key] += opt.val);
+        }
+
+        // 스크롤 소모
+        player.inventory.splice(scrollIndex, 1);
+
+        // 모달 닫기 및 복구
+        const modal = document.getElementById('shop-modal');
+        toggleModal('shop-modal');
+        modal.querySelector('h2').innerText = "대장간";
+        document.getElementById('shop-gold-display').style.display = 'block';
+
+        showConfirm("옵션 부여 성공", `${item.name}에 새로운 옵션이 부여되었습니다!`, null, true);
+        updateUI();
     }
 
     function askSell(index) {
