@@ -472,7 +472,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbxcAQ048KXXkJvfDgwBOrL0jKW-TGXzPqNMARU-pwWZSJGQMjthkkgCRLH5jqffs-BOLA/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbyMzgOIDngrCGtEPluBsD4nDXzWNn3fIC9Ky9cdG0ke4rXoEp9HapeYD4lS_E1ITu-pcQ/exec";
         const CHAR_FILES = {
             '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg',
             '버서커': 'image/warrior1.jpg', '가디언': 'image/warrior1.jpg',
@@ -1118,8 +1118,9 @@
         }
 
         function executeConfirm() {
+            const action = currentConfirmAction;
             closeConfirm();
-            if (currentConfirmAction) currentConfirmAction();
+            if (action) action();
         }
 
         function askEnhance(index, cost, rate, currentLv) {
@@ -1250,11 +1251,32 @@
             const overlay = document.getElementById('loading-overlay');
             const txt = document.querySelector('.loading-text');
             txt.innerText = "저장 중..."; overlay.style.display = 'flex';
+
             try {
-                await fetch(DB_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(player) });
+                if (!player.name) {
+                    player.name = localStorage.getItem('rpg_player_name');
+                }
+
+                await fetch(DB_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(player)
+                });
+
                 localStorage.removeItem('rpg_temp_player');
-                setTimeout(() => { overlay.style.display = 'none'; showConfirm("저장 완료", "게임이 저장되었습니다!", null, true); }, 1000);
-            } catch(e) { showConfirm("저장 실패", "저장에 실패했습니다.", null, true); overlay.style.display = 'none'; }
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    showConfirm("저장 완료", "데이터가 스프레드시트에 전송되었습니다!", null, true);
+                }, 1500);
+
+            } catch(e) {
+                console.error("Save Error:", e);
+                showConfirm("저장 실패", "네트워크 오류가 발생했습니다.", null, true);
+                overlay.style.display = 'none';
+            }
         }
 
         function showRandomEvent() {

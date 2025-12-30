@@ -1,0 +1,60 @@
+// Code.gs
+
+// 1. 데이터 저장 (POST 요청)
+function doPost(e) {
+  try {
+    // 시트 가져오기 (이름이 '시트1'이 아니면 첫 번째 시트를 가져옴)
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
+
+    const contents = e.postData.contents;
+    const params = JSON.parse(contents);
+    const name = params.name;
+    const jsonData = JSON.stringify(params); // 전체 데이터를 문자로 변환
+
+    // 이미 존재하는 아이디(이름)인지 확인
+    const data = sheet.getDataRange().getValues();
+    let rowIndex = -1;
+
+    for (let i = 1; i < data.length; i++) { // 1행은 헤더니까 제외
+      if (data[i][0] == name) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex > 0) {
+      // 기존 데이터 업데이트
+      sheet.getRange(rowIndex, 2).setValue(jsonData);
+      sheet.getRange(rowIndex, 3).setValue(new Date());
+      return ContentService.createTextOutput("Updated").setMimeType(ContentService.MimeType.TEXT);
+    } else {
+      // 새 데이터 추가
+      sheet.appendRow([name, jsonData, new Date()]);
+      return ContentService.createTextOutput("Created").setMimeType(ContentService.MimeType.TEXT);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput("Error: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// 2. 데이터 불러오기 (GET 요청)
+function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
+    const name = e.parameter.name;
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] == name) {
+        // 저장된 JSON 문자열을 그대로 반환
+        return ContentService.createTextOutput(data[i][1]).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ error: "Not Found" })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}

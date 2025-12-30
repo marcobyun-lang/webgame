@@ -280,7 +280,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbxcAQ048KXXkJvfDgwBOrL0jKW-TGXzPqNMARU-pwWZSJGQMjthkkgCRLH5jqffs-BOLA/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbyMzgOIDngrCGtEPluBsD4nDXzWNn3fIC9Ky9cdG0ke4rXoEp9HapeYD4lS_E1ITu-pcQ/exec";
         const player = { name: "", job: "", stats: null, level: 1, exp: 0, maxExp: 100, hp: 0, maxHp: 0, mp: 0, maxMp: 0, x: 480, y: 325 };
         let rollCount = 5;
 
@@ -362,7 +362,6 @@
             player.maxMp = (player.stats.int * 1.5) + player.stats.wis + (player.job === '마법사' ? 30 : 10);
             player.mp = player.maxMp;
 
-            // Clear all previous game remnants
             const keysToRemove = [];
             for(let i=0; i<localStorage.length; i++) {
                 const key = localStorage.key(i);
