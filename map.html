@@ -38,11 +38,12 @@
             color: var(--text-main);
             font-family: var(--font-body);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow: auto;
             user-select: none;
         }
 
@@ -361,14 +362,15 @@
 
         /* Mobile Controls */
         #mobile-controls {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;
-            display: none; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px;
+            margin-top: 20px;
+            z-index: 9999;
+            display: none; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); gap: 10px;
             pointer-events: auto;
         }
         .d-pad-btn {
-            width: 60px; height: 60px; background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 80px; height: 80px; background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            color: #fff; font-size: 1.5rem; user-select: none; cursor: pointer;
+            color: #fff; font-size: 2rem; user-select: none; cursor: pointer;
             backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
             touch-action: manipulation;
         }
@@ -496,13 +498,13 @@
         </div>
     </div>
     <div class="canvas-wrapper"><canvas id="gameCanvas" width="960" height="640"></canvas></div>
+</div>
 
-    <div id="mobile-controls">
-        <div class="d-pad-btn" id="btn-up" style="grid-column: 2; grid-row: 1;">▲</div>
-        <div class="d-pad-btn" id="btn-left" style="grid-column: 1; grid-row: 2;">◀</div>
-        <div class="d-pad-btn" id="btn-right" style="grid-column: 3; grid-row: 2;">▶</div>
-        <div class="d-pad-btn" id="btn-down" style="grid-column: 2; grid-row: 3;">▼</div>
-    </div>
+<div id="mobile-controls">
+    <div class="d-pad-btn" id="btn-up" style="grid-column: 2; grid-row: 1;">▲</div>
+    <div class="d-pad-btn" id="btn-left" style="grid-column: 1; grid-row: 2;">◀</div>
+    <div class="d-pad-btn" id="btn-right" style="grid-column: 3; grid-row: 2;">▶</div>
+    <div class="d-pad-btn" id="btn-down" style="grid-column: 2; grid-row: 3;">▼</div>
 </div>
 
 <script>

@@ -391,6 +391,7 @@
                     <img id="eva-rogue" src="image/rogue_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-mage" src="image/mage_evasion.jpg" class="unit-img" style="display:none;">
                     <video id="v-warrior" src="image/warrior_atk.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-rogue" src="image/rogue_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
                 </div>
                 <div class="unit-info">
@@ -774,7 +775,7 @@
 
             let costRate = 0.6;
             if (player.job === '소서러') costRate = 0.3;
-            if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.2;
+            if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.4;
 
             const cost = Math.floor(player.maxMp * costRate);
             if(player.mp < cost) { say('p', '마나가 부족해!'); return; }
@@ -803,7 +804,18 @@
                     let poisonChance = (player.job === '섀도우') ? 1.0 : 0.5;
                     if(Math.random() < poisonChance) { eStatus.poison = 3; addLog("적에게 독을 부여했습니다!"); }
 
-                    playMotion('atk-rogue', 'enemy-frame', isCrit?'crit':'rogue');
+                    const vMap = {
+                        '도적':'v-rogue', '어쌔신':'v-rogue', '섀도우':'v-rogue'
+                    };
+                    const v = document.getElementById(vMap[jobKey] || 'v-rogue'); const pImg = document.getElementById('p-img');
+                    if(v) {
+                        pImg.style.display='none'; v.style.display='block'; v.play();
+                        v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job, dmg, isCrit); }
+                    } else {
+                        playMotion('atk-rogue', 'enemy-frame', isCrit?'crit':'rogue');
+                        applySkillDmg(player.job, dmg, isCrit);
+                    }
+                    return;
                 } else {
                     say('p', '강력한 스킬 발동!');
                     const vMap = {
@@ -818,36 +830,37 @@
                     } else applySkillDmg(player.job);
                     return;
                 }
-                enemy.hp -= dmg; 
-                showDamage('enemy-frame', dmg, isCrit?'crit':'normal'); 
-                addLog(`강력한 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 피해!`);
-                update(); check();
             }, 200);
         }
 
-        function applySkillDmg(job) {
-            let isCrit = Math.random() < 0.2; let dmg = 0;
-            let multiplier = 2.0;
+        function applySkillDmg(job, preCalcDmg = 0, preCalcCrit = false) {
+            let isCrit = preCalcCrit;
+            let dmg = preCalcDmg;
 
-            if (job === '버서커') multiplier = 4.0;
-            else if (job === '아크메이지') multiplier = 4.5;
-            else if (job === '전사' || job === '가디언') multiplier = 2.5;
-            else if (job === '마법사' || job === '소서러') multiplier = 2.2;
+            if (dmg === 0) { // If not pre-calculated (for non-rogue classes)
+                isCrit = Math.random() < 0.2;
+                let multiplier = 2.0;
 
-            if (currentWeather === "rain" && (job === '마법사' || job === '아크메이지' || job === '소서러')) {
-                multiplier *= 1.3;
-                addLog("<span style='color:#82b1ff'>비의 기운으로 마법이 강화되었습니다!</span>");
+                if (job === '버서커') multiplier = 4.0;
+                else if (job === '아크메이지') multiplier = 4.5;
+                else if (job === '전사' || job === '가디언') multiplier = 2.5;
+                else if (job === '마법사' || job === '소서러') multiplier = 2.2;
+
+                if (currentWeather === "rain" && (job === '마법사' || job === '아크메이지' || job === '소서러')) {
+                    multiplier *= 1.3;
+                    addLog("<span style='color:#82b1ff'>비의 기운으로 마법이 강화되었습니다!</span>");
+                }
+
+                if(job === '전사' || job === '버서커' || job === '가디언') {
+                    dmg = (player.stats.str * multiplier) + (player.level * 4);
+                    if (job === '가디언' && Math.random() < 0.3) { eStatus.stun = 1; addLog("적을 기절시켰습니다!"); }
+                } else {
+                    dmg = (player.stats.int * multiplier) + (player.level * 5);
+                }
+
+                dmg += (player.bonusAtk||0);
+                if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
             }
-
-            if(job === '전사' || job === '버서커' || job === '가디언') {
-                dmg = (player.stats.str * multiplier) + (player.level * 4);
-                if (job === '가디언' && Math.random() < 0.3) { eStatus.stun = 1; addLog("적을 기절시켰습니다!"); }
-            } else {
-                dmg = (player.stats.int * multiplier) + (player.level * 5);
-            }
-
-            dmg += (player.bonusAtk||0);
-            if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
 
             triggerHitEffect('enemy-frame', isCrit?'crit':'big');
             enemy.hp -= dmg; 
