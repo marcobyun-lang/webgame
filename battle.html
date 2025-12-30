@@ -334,7 +334,7 @@
         </div>
 
         <img id="drop-item-img" class="drop-item-effect" src="" style="display:none;">
-        <img id="rage-kill-img" class="rage-kill-effect" src="image/damage_kill.Jpg">
+        <img id="rage-kill-img" class="rage-kill-effect" src="image/damage_kill.jpg">
 
         <div id="loading-overlay"><div class="spinner"></div><h2 id="loading-text" style="color:var(--accent-red); font-family:var(--font-eng);">BATTLE START</h2></div>
         
@@ -442,6 +442,8 @@
         const itemSfx = new Audio('song/poka.mp3');
         const damageSfx = new Audio('song/damage1.mp3');
         const evadeSfx = new Audio('song/swish.mp3');
+        const potionSfx = new Audio('song/potion-inght.wav');
+        const goldSfx = new Audio('song/gold_drop-inght.wav');
 
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
@@ -535,8 +537,8 @@
             if (isSuperBossFlag === 'true') {
                 isBossBattle = true;
                 isSuperBoss = true;
-                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 5000);
-                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 5000);
+                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 3000);
+                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 3000);
                 enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 40 + (player.level * 4), exp: 10000, img: 'image/best_boss.jpg' };
                 localStorage.removeItem('rpg_is_super_boss');
             } else if (isBossFlag === 'true') {
@@ -717,6 +719,8 @@
         function playItemSfx() { itemSfx.currentTime = 0; itemSfx.play().catch(e => {}); }
         function playDamageSfx() { damageSfx.currentTime = 0; damageSfx.play().catch(e => {}); }
         function playEvadeSfx() { evadeSfx.currentTime = 0; evadeSfx.play().catch(e => {}); }
+        function playPotionSfx() { potionSfx.currentTime = 0; potionSfx.play().catch(e => {}); }
+        function playGoldSfx() { goldSfx.currentTime = 0; goldSfx.play().catch(e => {}); }
 
         function atk() { 
             if(isActing) return;
@@ -984,6 +988,20 @@
             document.getElementById('go-lv').innerText = `LV.${player.level}`;
             document.getElementById('go-score-val').innerText = score.toLocaleString();
 
+            // Send Ranking Data
+            fetch(DB_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    type: 'ranking',
+                    name: player.name,
+                    score: score,
+                    job: player.job,
+                    level: player.level
+                })
+            });
+
             localStorage.removeItem('rpg_temp_player');
             localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
             localStorage.removeItem('rpg_boss_death_time');
@@ -1017,6 +1035,7 @@
             player.gold = (player.gold||0) + gold;
             resultHTML += `<div class="result-row">획득 골드 <span style="color:gold">+${gold} G</span></div>`;
             if(!dropImg) dropImg = ITEM_IMAGES['gold'];
+            playGoldSfx();
 
             if (isBossBattle && Math.random() < 0.5) {
                 const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
@@ -1170,28 +1189,31 @@
                 const heal = item.val;
                 player.hp = Math.min(player.hp + heal, player.maxHp);
                 addLog(`<span style="color:#ff5252">체력 물약</span>을 사용하여 HP를 <span style="color:#00e676">${heal}</span> 회복했습니다.`);
+                playPotionSfx();
             } else if (item.name.includes('마나')) {
                 if (player.mp >= player.maxMp) { addLog("마나가 이미 가득 찼습니다."); return; }
                 isActing = true;
                 const heal = item.val;
                 player.mp = Math.min(player.mp + heal, player.maxMp);
                 addLog(`<span style="color:#2979ff">마나 물약</span>을 사용하여 MP를 <span style="color:#2979ff">${heal}</span> 회복했습니다.`);
+                playPotionSfx();
             } else if (item.name.includes('경험치')) {
                 isActing = true;
                 player.exp += item.val;
                 addLog(`<span style="color:#e040fb">경험치 물약</span>을 사용하여 경험치를 <span style="color:#e040fb">${item.val}</span> 획득했습니다!`);
+                playPotionSfx();
             } else if (item.type === 'potion_poison') {
                 if (pStatus.poison <= 0) { addLog("독 상태가 아닙니다."); return; }
                 isActing = true;
                 pStatus.poison = 0;
                 addLog(`<span style="color:#00e676">해독 물약</span>을 사용하여 독을 치료했습니다!`);
+                playPotionSfx();
                 const cureEl = document.getElementById('p-cure');
                 cureEl.style.display = 'block';
                 setTimeout(() => { cureEl.style.display = 'none'; }, 1000);
             }
 
             player.inventory.splice(index, 1);
-            playItemSfx();
             update();
             setTimeout(eTurn, 1500);
         }

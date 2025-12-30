@@ -347,12 +347,24 @@
         }
         .thunder-anim { animation: thunderFlash 0.2s ease-out; }
         @keyframes thunderFlash { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* Boss Warning Popup */
+        #boss-warning {
+            position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(139, 0, 0, 0.9); border: 2px solid var(--accent-gold);
+            color: #fff; padding: 15px 30px; border-radius: 8px; font-family: var(--font-body);
+            font-size: 1.5rem; font-weight: bold; z-index: 1000; display: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); animation: warningPulse 1s infinite alternate;
+            text-align: center; pointer-events: none;
+        }
+        @keyframes warningPulse { from { opacity: 0.8; transform: translateX(-50%) scale(1); } to { opacity: 1; transform: translateX(-50%) scale(1.05); } }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="loading-overlay"><div class="spinner"></div><div class="loading-text">연결 중...</div></div>
         <div id="enhance-effect">강화 성공!</div>
+        <div id="boss-warning">⚠️ 경고: 초강력 보스가 필드에 출현했습니다!</div>
 
         <div id="weather-ui">
             <span class="weather-icon" id="weather-icon">☀️</span>
@@ -472,7 +484,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbyMzgOIDngrCGtEPluBsD4nDXzWNn3fIC9Ky9cdG0ke4rXoEp9HapeYD4lS_E1ITu-pcQ/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbwZLUFRddKgIrW_8SsAhxONqEbBRNkOmw0RoEXzhMUU3QDwY5vhcHrJGXbd8yj-bIehKg/exec";
         const CHAR_FILES = {
             '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg',
             '버서커': 'image/warrior1.jpg', '가디언': 'image/warrior1.jpg',
@@ -496,7 +508,7 @@
         let playerImg = new Image();
         let mapImg = new Image();
         let boss = { x: 100, y: 100, speed: 2.2, img: new Image(), alive: true, isNightBoss: false, hp: 100, maxHp: 100 };
-        let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 5000, maxHp: 5000, name: "초강력 보스" };
+        let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 3000, maxHp: 3000, name: "초강력 보스" };
         superBoss.img.src = 'image/best_boss.jpg';
 
         const GAME_TIME_LIMIT = 15 * 60 * 1000;
@@ -511,11 +523,19 @@
         const successSfx = new Audio('song/blackout_piano1.mp3');
         const failSfx = new Audio('song/blackout_piano2.mp3');
         const thunderSfx = new Audio('song/thunder.mp3');
+        const potionSfx = new Audio('song/potion-inght.wav');
+        const goldSfx = new Audio('song/gold_drop-inght.wav');
+        const rainThunderSfx = new Audio('song/thunder1-inght.wav');
+        const rainRuinSfx = new Audio('song/ruin-inght.wav');
+
         fieldBgm.loop = true;
         fieldBgm.volume = 0.15;
 
         let fieldItems = [];
         const potionImg = new Image(); potionImg.src = 'image/potion_hp.jpg';
+        const shoesImg = new Image(); shoesImg.src = 'image/shoes.jpg';
+        const atkImg = new Image(); atkImg.src = 'image/attack_10.jpg';
+        const defImg = new Image(); defImg.src = 'image/Defense_10.jpg';
 
         let treasureBoxes = [];
         const treasureBoxImg = new Image(); treasureBoxImg.src = 'image/bm.jpg';
@@ -539,6 +559,8 @@
         function initData() {
             if (!player.inventory) player.inventory = [];
             if (!player.bonusAtk) player.bonusAtk = 0;
+            if (player.bonusDef === undefined) player.bonusDef = 0;
+            if (player.moveSpeed === undefined) player.moveSpeed = 12;
             if (player.gold === undefined) player.gold = 0;
             if (player.traitPoints === undefined) player.traitPoints = 0;
             if (!player.traits) player.traits = { str: 0, dex: 0, con: 0, int: 0, wis: 0 };
@@ -560,6 +582,10 @@
             if (player.quests.claimed.bossKill === undefined) player.quests.claimed.bossKill = false;
 
             if (player.isAdvanced === undefined) player.isAdvanced = false;
+
+            // Boundary check on load
+            if (player.x === undefined || player.x < 16 || player.x > 944) player.x = 480;
+            if (player.y === undefined || player.y < 16 || player.y > 624) player.y = 320;
 
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
             const elapsed = Date.now() - startTime;
@@ -606,10 +632,16 @@
         }
 
         function spawnFieldItem() {
-            if (fieldItems.length < 5) {
-                fieldItems.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30, type: 'potion' });
+            if (fieldItems.length < 6) {
+                const rand = Math.random();
+                let type = 'potion';
+                if (rand < 0.05) type = 'shoes';
+                else if (rand < 0.15) type = 'attack';
+                else if (rand < 0.25) type = 'defense';
+
+                fieldItems.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30, type: type });
             }
-            setTimeout(spawnFieldItem, 10000);
+            setTimeout(spawnFieldItem, 8000);
         }
 
         function spawnTreasureBox() {
@@ -736,6 +768,9 @@
                     drop.style.animationDelay = Math.random() * 0.8 + 's';
                     overlay.appendChild(drop);
                 }
+                // Play rain weather sounds
+                rainThunderSfx.play().catch(e => {});
+                rainThunderSfx.onended = () => { rainRuinSfx.play().catch(e => {}); };
             }
             else if (currentWeather === "fog") {
                 icon.innerText = "🌫️"; text.innerText = "안개 (조우율 상승 / 명중 변화)";
@@ -759,9 +794,12 @@
         function spawnSuperBoss() {
             superBoss.alive = true;
             superBoss.x = 480; superBoss.y = 320;
-            superBoss.hp = 5000 + (player.level * 200);
+            superBoss.hp = 3000 + (player.level * 200);
             superBoss.maxHp = superBoss.hp;
-            alert("⚠️ 경고: 초강력 보스가 필드에 출현했습니다!");
+
+            const warning = document.getElementById('boss-warning');
+            warning.style.display = 'block';
+            setTimeout(() => { warning.style.display = 'none'; }, 5000);
         }
 
         function gameLoop() {
@@ -823,7 +861,18 @@
                 const dx = player.x - item.x; const dy = player.y - item.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < 25) {
-                    player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50});
+                    if (item.type === 'potion') {
+                        player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50});
+                    } else if (item.type === 'shoes') {
+                        player.moveSpeed += 2;
+                        showConfirm("아이템 획득", "신속의 장화를 획득했습니다! 이동 속도가 영구적으로 증가합니다.", null, true);
+                    } else if (item.type === 'attack') {
+                        player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +10 증가', val:10});
+                        showConfirm("아이템 획득", "공격력 강화 물약을 획득했습니다!", null, true);
+                    } else if (item.type === 'defense') {
+                        player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +10 증가', val:10});
+                        showConfirm("아이템 획득", "방어력 강화 물약을 획득했습니다!", null, true);
+                    }
                     return false;
                 }
                 return true;
@@ -921,6 +970,7 @@
                 rarity: rarity,
                 rarityColor: rarityColor,
                 enhanceCount: grade,
+                failCount: 0,
                 options: []
             };
 
@@ -983,7 +1033,13 @@
             const ctx = document.getElementById('gameCanvas').getContext('2d');
             ctx.clearRect(0, 0, 960, 640);
             ctx.drawImage(mapImg, 0, 0, 960, 640);
-            fieldItems.forEach(item => { ctx.drawImage(potionImg, item.x - 12, item.y - 12, 24, 24); });
+            fieldItems.forEach(item => {
+                let img = potionImg;
+                if (item.type === 'shoes') img = shoesImg;
+                else if (item.type === 'attack') img = atkImg;
+                else if (item.type === 'defense') img = defImg;
+                ctx.drawImage(img, item.x - 12, item.y - 12, 24, 24);
+            });
             treasureBoxes.forEach(box => { ctx.drawImage(treasureBoxImg, box.x - 15, box.y - 15, 30, 30); });
             ctx.drawImage(playerImg, player.x - 16, player.y - 16, 32, 32);
             if(boss.alive) ctx.drawImage(boss.img, boss.x - 25, boss.y - 25, 50, 50);
@@ -1023,6 +1079,7 @@
                 <div class="side-stat-row"><span class="side-stat-name">지능</span><span class="side-stat-val">${player.stats.int}</span></div>
                 <div class="side-stat-row"><span class="side-stat-name">지혜</span><span class="side-stat-val">${player.stats.wis}</span></div>
                 <div class="side-stat-row" style="margin-top:15px; border-top:1px solid #333;"><span class="side-stat-name" style="color:#ef5350">총 공격력</span><div class="side-atk-val">${totalAtk}${player.bonusAtk > 0 ? `<span class="side-bonus">(+${player.bonusAtk})</span>` : ''}</div></div>
+                <div class="side-stat-row"><span class="side-stat-name" style="color:#2196f3">추가 방어력</span><div class="side-stat-val">${player.bonusDef}</div></div>
             `;
 
             list.innerHTML = '';
@@ -1146,10 +1203,21 @@
                 else item.name += ` (+${item.enhanceCount})`;
                 if(item.equipped) player.bonusAtk += 1;
                 player.quests.enhanceCount++;
+                item.failCount = 0; // Reset fail count on success
                 showEnhanceEffect();
                 successSfx.play().catch(e => console.log(e));
             } else {
-                showConfirm("강화 실패", "강화에 실패했습니다... 골드만 소모되었습니다.", null, true);
+                item.failCount = (item.failCount || 0) + 1;
+                if (item.failCount >= 3) {
+                    if(item.equipped) {
+                        player.bonusAtk -= item.val;
+                        if (item.options) item.options.forEach(opt => player.stats[opt.key] -= opt.val);
+                    }
+                    player.inventory.splice(index, 1);
+                    showConfirm("강화 실패", "강화에 3번 실패하여 무기가 파괴되었습니다!", null, true);
+                } else {
+                    showConfirm("강화 실패", `강화에 실패했습니다... (연속 실패: ${item.failCount}/3)\n골드만 소모되었습니다.`, null, true);
+                }
                 failSfx.play().catch(e => console.log(e));
             }
             updateUI(); renderShopList();
@@ -1195,19 +1263,28 @@
                 if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
                 if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
 
-                if (item.name.includes('체력')) player.hp = Math.min(player.hp + item.val, player.maxHp);
-                else if (item.name.includes('마나')) player.mp = Math.min(player.mp + item.val, player.maxMp);
+                if (item.name.includes('체력')) { player.hp = Math.min(player.hp + item.val, player.maxHp); potionSfx.play().catch(e => {}); }
+                else if (item.name.includes('마나')) { player.mp = Math.min(player.mp + item.val, player.maxMp); potionSfx.play().catch(e => {}); }
                 else if (item.name.includes('경험치')) {
                     player.exp += item.val;
+                    potionSfx.play().catch(e => {});
                     showConfirm("아이템 사용", `경험치를 ${item.val} 획득했습니다!`, null, true);
                     if (player.exp >= player.maxExp) {
                         player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp*1.5); player.maxHp+=10; player.maxMp+=5; player.hp=player.maxHp; player.mp=player.maxMp;
                         player.traitPoints += 2;
                         showConfirm("레벨 업!", "레벨 업! 특성 포인트 2개를 획득했습니다.", () => { checkAdvancement(); }, true);
                     }
+                } else if (item.type === 'potion_atk') {
+                    player.bonusAtk += item.val;
+                    potionSfx.play().catch(e => {});
+                    showConfirm("아이템 사용", `공격력이 ${item.val}만큼 영구적으로 증가했습니다!`, null, true);
+                } else if (item.type === 'potion_def') {
+                    player.bonusDef += item.val;
+                    potionSfx.play().catch(e => {});
+                    showConfirm("아이템 사용", `방어력이 ${item.val}만큼 일시적으로 증가했습니다!`, null, true);
                 }
                 player.inventory.splice(index, 1);
-                if (!item.name.includes('경험치')) showConfirm("아이템 사용", `${item.name}을(를) 사용했습니다.`, null, true);
+                if (!item.name.includes('경험치') && !item.type.includes('atk') && !item.type.includes('def')) showConfirm("아이템 사용", `${item.name}을(를) 사용했습니다.`, null, true);
             } else if (item.type === 'weapon') {
                 if (item.reqJob && item.reqJob !== player.job) return showConfirm("착용 불가", `[${item.reqJob}] 전용 장비입니다.`, null, true);
                 if (item.equipped) {
@@ -1292,6 +1369,7 @@
             const ev = events[Math.floor(Math.random() * events.length)];
             text.innerText = ev.t; rewardText.innerText = ev.r; img.src = ev.i;
             player.gold += ev.g; player.hp = Math.min(player.hp + ev.h, player.maxHp); player.mp = Math.min(player.mp + ev.m, player.maxMp);
+            if (ev.g > 0) goldSfx.play().catch(e => {});
             overlay.style.display = 'flex'; overlay.classList.remove('event-anim'); void overlay.offsetWidth; overlay.classList.add('event-anim');
             setTimeout(() => { overlay.style.display = 'none'; }, 3000);
             updateUI();
@@ -1299,14 +1377,14 @@
 
         function move(e) {
             if(document.querySelector('.modal[style*="flex"]')) return;
-            let s = 12;
-            if (currentWeather === "rain") s = 8;
+            let s = player.moveSpeed || 12;
+            if (currentWeather === "rain") s *= 0.7;
 
             let m = false;
-            if (e.key === "ArrowUp") { player.y -= s; m = true; }
-            if (e.key === "ArrowDown") { player.y += s; m = true; }
-            if (e.key === "ArrowLeft") { player.x -= s; m = true; }
-            if (e.key === "ArrowRight") { player.x += s; m = true; }
+            if (e.key === "ArrowUp") { player.y = Math.max(16, player.y - s); m = true; }
+            if (e.key === "ArrowDown") { player.y = Math.min(624, player.y + s); m = true; }
+            if (e.key === "ArrowLeft") { player.x = Math.max(16, player.x - s); m = true; }
+            if (e.key === "ArrowRight") { player.x = Math.min(944, player.x + s); m = true; }
             if (m) {
                 const rand = Math.random();
                 let eventChance = isNight ? 0.04 : 0.02;
