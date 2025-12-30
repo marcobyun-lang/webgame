@@ -324,6 +324,32 @@
             border-radius: 20px; display: flex; align-items: center; gap: 8px;
             font-family: var(--font-ui); font-size: 0.8rem; color: #fff; z-index: 100;
         }
+
+        /* Rage Mode Visuals */
+        .rage-ready-overlay {
+            box-shadow: inset 0 0 60px 30px rgba(255, 50, 0, 0.4);
+            animation: rageScreenPulse 1s infinite alternate;
+            border: 2px solid rgba(255, 50, 0, 0.6);
+        }
+        @keyframes rageScreenPulse {
+            from { box-shadow: inset 0 0 60px 30px rgba(255, 50, 0, 0.3); }
+            to { box-shadow: inset 0 0 100px 50px rgba(255, 50, 0, 0.6); }
+        }
+
+        .rage-active-aura {
+            box-shadow: 0 0 40px 15px #ff3d00 !important;
+            border-color: #ff3d00 !important;
+            filter: sepia(1) saturate(5) hue-rotate(-50deg) !important;
+            animation: rageShake 0.2s infinite;
+            z-index: 50;
+        }
+        @keyframes rageShake {
+            0% { transform: translate(0, 0) scale(1.1); }
+            25% { transform: translate(-3px, 3px) scale(1.1); }
+            50% { transform: translate(3px, -3px) scale(1.1); }
+            75% { transform: translate(-3px, -3px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1.1); }
+        }
     </style>
 </head>
 <body>
@@ -387,12 +413,17 @@
                     <img id="crit-warrior" src="image/critical_warrior.jpg" class="unit-img" style="display:none;">
                     <img id="crit-rogue" src="image/critical_rogue.jpg" class="unit-img" style="display:none;">
                     <img id="crit-mage" src="image/critical_mage.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-warrior1" src="image/warrior_critical.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-rogue1" src="image/rogue_critical.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-mage1" src="image/mage_critical.jpg" class="unit-img" style="display:none;">
                     <img id="eva-warrior" src="image/warrior_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-rogue" src="image/rogue_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-mage" src="image/mage_evasion.jpg" class="unit-img" style="display:none;">
                     <video id="v-warrior" src="image/warrior_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-rogue" src="image/rogue_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-warrior1" src="image/warrior_atk1.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-mage1" src="image/mage_atk1.mp4" class="unit-img" style="display:none;"></video>
                 </div>
                 <div class="unit-info">
                     <h3 id="p-name" class="unit-name">플레이어</h3>
@@ -448,13 +479,15 @@
 
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
-            {f:'image/ka2.jpg', n:'슬라임 베이비', e:50, w:3}, 
-            {f:'image/ka3.jpg', n:'겁먹은 토끼', e:30, w:4}  
+            {f:'image/ka2.jpg', n:'던피', e:50, w:3},
+            {f:'image/ka3.jpg', n:'겁먹은 토끼', e:30, w:4},
+            {f:'image/ke1.jpg', n:'엘리트 나무 병사', e:100, w:1, mult: 1.2}
         ];
         const NIGHT_ENEMY_POOL = [
             {f:'image/monster1.jpg', n:'블루머쉬 가디언 (Bluemush Guardian)', e:150, w:3, poison: true},
             {f:'image/monster2.jpg', n:'그로울 트렌트 (Growl Trent)', e:180, w:3},
-            {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true}
+            {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true},
+            {f:'image/ke2.jpg', n:'심연의 감시자', e:250, w:1, mult: 1.3}
         ];
         
         const WEAPON_IMAGES = {
@@ -492,6 +525,7 @@
         let eStatus = { poison: 0, stun: 0 };
         let rage = 0;
         const maxRage = 100;
+        let mageAttackToggle = false;
 
         window.onload = async () => {
             const name = localStorage.getItem('rpg_player_name');
@@ -557,11 +591,12 @@
                 for (let e of pool) { if (r < e.w) { sel = e; break; } r -= e.w; }
 
                 const avg = (player.stats.str + player.stats.int) / 2 + (player.level * 3);
+                const multiplier = sel.mult || 1.0;
                 enemy = {
                     name: sel.n,
-                    hp: Math.floor(avg * 2.5) + 10,
-                    maxHp: Math.floor(avg * 2.5) + 10,
-                    atk: Math.floor(avg/2.2) + 2,
+                    hp: Math.floor(avg * 2.5 * multiplier) + 10,
+                    maxHp: Math.floor(avg * 2.5 * multiplier) + 10,
+                    atk: Math.floor((avg/2.2) * multiplier) + 2,
                     exp: sel.e,
                     img: sel.f,
                     canPoison: sel.poison || false
@@ -624,8 +659,10 @@
 
             if (rage >= maxRage) {
                 document.getElementById('btn-rage').style.display = 'block';
+                document.getElementById('game-container').classList.add('rage-ready-overlay');
             } else {
                 document.getElementById('btn-rage').style.display = 'none';
+                document.getElementById('game-container').classList.remove('rage-ready-overlay');
             }
         }
         
@@ -677,14 +714,32 @@
 
             let base = jM[player.job];
             if (base) {
+                if (effectType === 'crit') {
+                    const critMap = { 'warrior': 'crit-warrior1', 'rogue': 'crit-rogue1', 'mage': 'crit-mage1' };
+                    const cImg = document.getElementById(critMap[base]);
+                    if (cImg) {
+                        pImg.style.display = 'none'; cImg.style.display = 'block';
+                        document.getElementById('player-frame').classList.add('crit-action');
+                        setTimeout(() => {
+                            cImg.style.display = 'none'; pImg.style.display = 'block';
+                            document.getElementById('player-frame').classList.remove('crit-action');
+                        }, 1000);
+                        return; // 전직 크리티컬은 여기서 종료
+                    }
+                }
+
                 if (imgId && imgId.includes('atk')) {
-                    pImg.src = `image/${base}2.jpg`;
-                } else if (imgId && imgId.includes('skl')) {
-                    pImg.src = `image/${base}3.jpg`;
+                    if (base === 'mage') {
+                        pImg.src = mageAttackToggle ? 'image/mage3.jpg' : 'image/mage2.jpg';
+                        mageAttackToggle = !mageAttackToggle;
+                    } else {
+                        pImg.src = `image/${base}2.jpg`;
+                    }
                 }
                 triggerHitEffect(targetFrameId, effectType);
                 setTimeout(() => { pImg.src = `image/${base}1.jpg`; }, 1000);
-            } else {
+
+            } else { // 전직 안한 경우
                 if (effectType === 'crit') {
                     const critMap = { '전사': 'crit-warrior', '도적': 'crit-rogue', '마법사': 'crit-mage' };
                     const cImg = document.getElementById(critMap[player.job || '전사']);
@@ -820,8 +875,8 @@
                     say('p', '강력한 스킬 발동!');
                     const vMap = {
                         '전사':'v-warrior', '마법사':'v-mage',
-                        '버서커':'v-warrior', '가디언':'v-warrior',
-                        '아크메이지':'v-mage', '소서러':'v-mage'
+                        '버서커':'v-warrior1', '가디언':'v-warrior1',
+                        '아크메이지':'v-mage1', '소서러':'v-mage1'
                     };
                     const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
                     if(v) {
@@ -878,6 +933,10 @@
             player.rage = 0;
             update();
 
+            // 분노 발동 이펙트
+            const pFrame = document.getElementById('player-frame');
+            pFrame.classList.add('rage-active-aura');
+
             say('p', '분노의 일격!!!');
             playCritSfx();
 
@@ -901,8 +960,14 @@
                 enemy.hp -= dmg;
                 showDamage('enemy-frame', dmg, 'crit');
                 addLog(`분노 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 치명적인 피해를 입혔습니다!`);
+
+                // 이펙트 제거
+                setTimeout(() => {
+                    pFrame.classList.remove('rage-active-aura');
+                }, 1000);
+
                 update(); check();
-            }, 200);
+            }, 500);
         }
 
         function check() { 

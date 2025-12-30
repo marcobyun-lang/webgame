@@ -1411,7 +1411,7 @@
         if (e.key === "ArrowRight") { player.x = Math.min(944, player.x + s); m = true; }
         if (m) {
             const rand = Math.random();
-            let eventChance = isNight ? 0.04 : 0.02;
+            let eventChance = isNight ? 0.02 : 0.01; // Reduced event chance
             let encounterChance = 0.06;
 
             if (currentWeather === "fog") {
