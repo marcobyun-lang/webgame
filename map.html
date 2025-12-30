@@ -358,6 +358,21 @@
             text-align: center; pointer-events: none;
         }
         @keyframes warningPulse { from { opacity: 0.8; transform: translateX(-50%) scale(1); } to { opacity: 1; transform: translateX(-50%) scale(1.05); } }
+
+        /* Mobile Controls */
+        #mobile-controls {
+            position: absolute; bottom: 20px; left: 20px; z-index: 9999;
+            display: none; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px;
+            pointer-events: auto;
+        }
+        .d-pad-btn {
+            width: 60px; height: 60px; background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            color: #fff; font-size: 1.5rem; user-select: none; cursor: pointer;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            touch-action: manipulation;
+        }
+        .d-pad-btn:active { background: rgba(255, 215, 0, 0.3); border-color: var(--accent-gold); color: var(--accent-gold); }
     </style>
 </head>
 <body>
@@ -481,6 +496,13 @@
         </div>
     </div>
     <div class="canvas-wrapper"><canvas id="gameCanvas" width="960" height="640"></canvas></div>
+
+    <div id="mobile-controls">
+        <div class="d-pad-btn" id="btn-up" style="grid-column: 2; grid-row: 1;">▲</div>
+        <div class="d-pad-btn" id="btn-left" style="grid-column: 1; grid-row: 2;">◀</div>
+        <div class="d-pad-btn" id="btn-right" style="grid-column: 3; grid-row: 2;">▶</div>
+        <div class="d-pad-btn" id="btn-down" style="grid-column: 2; grid-row: 3;">▼</div>
+    </div>
 </div>
 
 <script>
@@ -1402,6 +1424,41 @@
             }
         }
     }
+
+    // Mobile Control Logic
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        document.getElementById('mobile-controls').style.display = 'grid';
+    }
+
+    let moveTimer = null;
+    function handleMobilePress(key) {
+        if (moveTimer) clearInterval(moveTimer);
+        move({key: key});
+        moveTimer = setInterval(() => {
+            move({key: key});
+        }, 100);
+    }
+    function handleMobileRelease() {
+        if (moveTimer) clearInterval(moveTimer);
+        moveTimer = null;
+    }
+
+    const dPadButtons = [
+        { id: 'btn-up', key: 'ArrowUp' },
+        { id: 'btn-down', key: 'ArrowDown' },
+        { id: 'btn-left', key: 'ArrowLeft' },
+        { id: 'btn-right', key: 'ArrowRight' }
+    ];
+
+    dPadButtons.forEach(btn => {
+        const el = document.getElementById(btn.id);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); handleMobilePress(btn.key); }, {passive: false});
+        el.addEventListener('touchend', (e) => { e.preventDefault(); handleMobileRelease(); });
+        el.addEventListener('mousedown', (e) => { handleMobilePress(btn.key); });
+        el.addEventListener('mouseup', (e) => { handleMobileRelease(); });
+        el.addEventListener('mouseleave', (e) => { handleMobileRelease(); });
+    });
 </script>
 </body>
 </html>
