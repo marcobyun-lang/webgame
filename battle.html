@@ -750,9 +750,9 @@
                 let bossAtk = 15 + (player.level * 2);
 
                 if (isNight) {
-                    const nHp = Math.floor(bossHp * 1.8);
-                    const nMaxHp = Math.floor(bossMaxHp * 1.8);
-                    const nAtk = Math.floor(bossAtk * 1.5);
+                    const nHp = Math.floor(bossHp * 1.5);
+                    const nMaxHp = Math.floor(bossMaxHp * 1.5);
+                    const nAtk = Math.floor(bossAtk * 1.2);
                     enemy = { name: '심연의 군주', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 5000, img: 'image/monster_boss.jpg', isNightBoss: true };
                     playBossBgm('song/monster_boss_bgm1.mp3');
                 } else {
