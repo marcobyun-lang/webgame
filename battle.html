@@ -1259,6 +1259,7 @@
                     };
                     const v = document.getElementById(vMap[jobKey] || 'v-rogue'); const pImg = document.getElementById('p-img');
                     if(v) {
+                        v.pause();
                         v.currentTime = 0; // Reset video to start
                         pImg.style.display='none'; v.style.display='block'; v.play();
                         v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job, dmg, isCrit); }
@@ -1285,6 +1286,7 @@
 
                     const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
                     if(v) {
+                        v.pause();
                         v.currentTime = 0; // Reset video to start
                         pImg.style.display='none'; v.style.display='block'; v.play();
                         v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
