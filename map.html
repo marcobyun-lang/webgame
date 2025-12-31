@@ -509,7 +509,7 @@
 </div>
 
 <script>
-    const DB_URL = "https://script.google.com/macros/s/AKfycbwqQ6hbPZNyULQpXUW0SRdDHRLsrGkRL4p3t-12oPPyYRAnFW0smnXW1ZaqWq5qgABtIw/exec";
+    const DB_URL = "https://script.google.com/macros/s/AKfycbyhQ2I7xbqksQWfZ9Ftgw3qvRRt4wj574j_tvVkzXls3dYfo0NbrlP9d5U-_Tm90KVWg/exec";
     const CHAR_FILES = {
         '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg',
         '버서커': 'image/warrior1.jpg', '가디언': 'image/warrior1.jpg',
@@ -909,7 +909,7 @@
         }
 
         if (superBoss.alive) {
-            const dx = player.x - superBoss.x; const dy = player.y - superBoss.y;
+            const dx = player.x - superBoss.x; const dy = player.y - boss.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if(dist > 0) { superBoss.x += (dx / dist) * superBoss.speed; superBoss.y += (dy / dist) * superBoss.speed; }
             if(dist < 40) {
@@ -1029,7 +1029,8 @@
                 name: player.name,
                 score: totalScore,
                 job: player.job,
-                level: player.level
+                level: player.level,
+                bossKills: bossKills // 신규 추가 필드
             })
         });
 

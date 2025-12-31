@@ -555,7 +555,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbwqQ6hbPZNyULQpXUW0SRdDHRLsrGkRL4p3t-12oPPyYRAnFW0smnXW1ZaqWq5qgABtIw/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbyhQ2I7xbqksQWfZ9Ftgw3qvRRt4wj574j_tvVkzXls3dYfo0NbrlP9d5U-_Tm90KVWg/exec";
         
         const attackSfx = new Audio('song/attack.mp3');
         const critSfx = new Audio('song/attack_1.mp3');
@@ -1527,7 +1527,34 @@
             if(player.hp <= 0) { showGameOver("패배했습니다..."); }
         }
 
+        function sendRankingData(score, survivalTime) {
+            const bossKills = player.quests.bossKillCount || 0;
+            fetch(DB_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    type: 'ranking',
+                    name: player.name,
+                    score: score,
+                    job: player.job,
+                    level: player.level,
+                    bossKills: bossKills
+                })
+            });
+        }
+
         function showGameOver(msg) {
+            isActing = true; // 게임 종료 후 버튼 비활성화
+            // 배경 버튼들 명시적 비활성화
+            document.querySelectorAll('.btns .btn').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+            const rageBtn = document.getElementById('btn-rage');
+            if(rageBtn) rageBtn.style.display = 'none';
+
             stopBossBgm();
             const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
             const survivalTime = Math.floor((Date.now() - startTime) / 1000);
@@ -1558,7 +1585,7 @@
             const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
 
             const statsContainer = document.getElementById('go-stats-container');
-            statsContainer.innerHTML = statsContainer.innerHTML = `
+            statsContainer.innerHTML = `
                 <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
@@ -1571,18 +1598,7 @@
             document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
             // Send Ranking Data
-            fetch(DB_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({
-                    type: 'ranking',
-                    name: player.name,
-                    score: totalScore,
-                    job: player.job,
-                    level: player.level
-                })
-            });
+            sendRankingData(totalScore, survivalTime);
 
             localStorage.removeItem('rpg_temp_player');
             localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');

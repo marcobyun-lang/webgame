@@ -49,11 +49,18 @@ function saveRanking(ss, params) {
     let rankSheet = ss.getSheetByName('Ranking');
     if (!rankSheet) {
       rankSheet = ss.insertSheet('Ranking');
-      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt']);
+      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
     }
 
-    // 새 점수 추가
-    rankSheet.appendRow([params.name, params.score, params.job, params.level, new Date()]);
+    // 데이터 추가 (모든 수치는 Number로 강제 변환)
+    rankSheet.appendRow([
+      params.name,
+      Number(params.score),
+      params.job,
+      Number(params.level),
+      new Date(),
+      Number(params.bossKills || 0)
+    ]);
 
     // 데이터가 2줄 이상일 때 (헤더 + 데이터 1개 이상) 정렬 수행
     if (rankSheet.getLastRow() > 1) {
@@ -95,7 +102,8 @@ function doGet(e) {
             name: data[i][0],
             score: data[i][1],
             job: data[i][2],
-            level: data[i][3]
+            level: data[i][3],
+            bossKills: data[i][5] || 0
           });
         }
       }
