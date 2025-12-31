@@ -567,6 +567,11 @@
     const rainThunderSfx = new Audio('song/thunder1-inght.wav');
     const rainRuinSfx = new Audio('song/ruin-inght.wav');
     const equipSfx = new Audio('image/eqp.mp3');
+    const coinSfx = new Audio('song/money_box.mp3');
+    const coinImgDay = new Image(); coinImgDay.src = 'image/coin_gold.jpg';
+    const coinImgNight = new Image(); coinImgNight.src = 'image/coin_gold_night.jpg';
+    let coins = [];
+    let floatingTexts = [];
 
     fieldBgm.loop = true;
     fieldBgm.volume = 0.15;
@@ -602,6 +607,7 @@
         if (player.bonusDef === undefined) player.bonusDef = 0;
         if (player.moveSpeed === undefined) player.moveSpeed = 12;
         if (player.gold === undefined) player.gold = 0;
+        if (player.coinScore === undefined) player.coinScore = 0;
         if (player.traitPoints === undefined) player.traitPoints = 0;
         if (!player.traits) player.traits = { str: 0, dex: 0, con: 0, int: 0, wis: 0 };
         if (!player.quests) player.quests = {
@@ -692,6 +698,7 @@
             checkAdvancement();
             spawnFieldItem();
             spawnTreasureBox();
+            spawnCoin();
         };
         updateUI();
         window.addEventListener('keydown', move);
@@ -713,6 +720,34 @@
             treasureBoxes.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30 });
         }
         setTimeout(spawnTreasureBox, Math.random() * 30000 + 30000);
+    }
+
+    function spawnCoin() {
+        if (coins.length < 30) {
+            const isSmall = Math.random() < 0.7;
+            const size = isSmall ? 20 : 30;
+            const score = isSmall ? Math.floor(Math.random() * 41) + 10 : Math.floor(Math.random() * 51) + 50;
+            coins.push({
+                x: Math.random() * 900 + 30,
+                y: Math.random() * 600 + 30,
+                size: size,
+                score: score,
+                creationTime: Date.now(),
+                lifeTime: 10000 + Math.random() * 5000
+            });
+        }
+        setTimeout(spawnCoin, Math.random() * 2000 + 1000);
+    }
+
+    function addFloatingText(x, y, text, color) {
+        floatingTexts.push({
+            x: x,
+            y: y,
+            text: text,
+            color: color,
+            startTime: Date.now(),
+            lifeTime: 1500
+        });
     }
 
     function checkAdvancement() { if (player.level >= 5 && !player.isAdvanced) openAdvancement(); }
@@ -956,6 +991,24 @@
             return true;
         });
 
+        const now = Date.now();
+        coins = coins.filter(coin => {
+            if (now - coin.creationTime > coin.lifeTime) return false;
+            const dx = player.x - coin.x; const dy = player.y - coin.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < (coin.size/2 + 16)) {
+                player.coinScore += coin.score;
+                const sfx = coinSfx.cloneNode();
+                sfx.volume = 0.5;
+                sfx.play().catch(e=>{});
+                addFloatingText(player.x, player.y - 30, `+${coin.score}`, '#ffd700');
+                return false;
+            }
+            return true;
+        });
+
+        floatingTexts = floatingTexts.filter(ft => now - ft.startTime < ft.lifeTime);
+
         draw();
     }
 
@@ -1014,8 +1067,9 @@
         const normalScore = normalKills * 10;
         const goldScore = Math.floor(player.gold * 0.1);
         const survivalScore = survivalTime;
+        const coinScore = player.coinScore || 0;
 
-        const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
+        const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore + coinScore;
 
         const statsContainer = document.getElementById('go-stats-container');
         statsContainer.innerHTML = `
@@ -1024,6 +1078,7 @@
             <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
         `;
 
@@ -1157,9 +1212,28 @@
             ctx.drawImage(img, item.x - 12, item.y - 12, 24, 24);
         });
         treasureBoxes.forEach(box => { ctx.drawImage(treasureBoxImg, box.x - 15, box.y - 15, 30, 30); });
+
+        const cImg = isNight ? coinImgNight : coinImgDay;
+        coins.forEach(coin => {
+            ctx.drawImage(cImg, coin.x - coin.size/2, coin.y - coin.size/2, coin.size, coin.size);
+        });
+
         ctx.drawImage(playerImg, player.x - 16, player.y - 16, 32, 32);
         if(boss.alive) ctx.drawImage(boss.img, boss.x - 25, boss.y - 25, 50, 50);
         if(superBoss.alive) ctx.drawImage(superBoss.img, superBoss.x - 40, superBoss.y - 40, 80, 80);
+
+        ctx.font = "bold 16px 'Noto Serif KR'";
+        ctx.textAlign = "center";
+        const now = Date.now();
+        floatingTexts.forEach(ft => {
+            const elapsed = now - ft.startTime;
+            const alpha = 1 - (elapsed / ft.lifeTime);
+            const lift = (elapsed / ft.lifeTime) * 30;
+            ctx.fillStyle = ft.color;
+            ctx.globalAlpha = alpha;
+            ctx.fillText(ft.text, ft.x, ft.y - lift);
+            ctx.globalAlpha = 1.0;
+        });
     }
 
     function toggleModal(id) {
