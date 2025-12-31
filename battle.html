@@ -1542,7 +1542,7 @@
             const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
 
             const statsContainer = document.getElementById('go-stats-container');
-            statsContainer.innerHTML = `
+            statsContainer.innerHTML = statsContainer.innerHTML = `
                 <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
@@ -1696,8 +1696,9 @@
                     player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0, img: img});
                     dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg=img;
                 } else if (r < 0.25) {
-                    player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0});
-                    dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg="Scroll.jpg";
+                    const img = "Scroll" + ns + ".jpg";
+                    player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0, img: img});
+                    dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg=img;
                 } else {
                     const subR = Math.random();
                     if(subR < 0.3) { const img = "potion_hp" + ns + ".jpg"; player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: img}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=img; }
