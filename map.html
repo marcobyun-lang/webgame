@@ -1044,14 +1044,17 @@
         const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
         const baseName = jobList[Math.floor(Math.random() * jobList.length)];
 
+        const cha = player.stats.cha || 10;
+        const chaBonus = (cha - 10) * 0.005; // 0.5% per CHA point above 10
+
         const rand = Math.random();
         let rarity = "common";
         let rarityColor = "#ffffff";
         let grade = Math.floor(Math.random() * 3) + 1;
 
-        if (rand < 0.05) { rarity = "legendary"; rarityColor = "#ff8000"; grade = Math.floor(Math.random() * 6) + 15; }
-        else if (rand < 0.15) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
-        else if (rand < 0.4) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
+        if (rand < 0.05 + chaBonus) { rarity = "legendary"; rarityColor = "#ff8000"; grade = Math.floor(Math.random() * 6) + 15; }
+        else if (rand < 0.15 + chaBonus) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
+        else if (rand < 0.4 + chaBonus) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
 
         // 전직 전에는 레전드리 드롭 불가
         if (!player.isAdvanced && rarity === "legendary") {
@@ -1179,12 +1182,17 @@
             <div class="side-stat-row"><span class="side-stat-name">체력</span><span class="side-stat-val">${player.stats.con}</span></div>
             <div class="side-stat-row"><span class="side-stat-name">지능</span><span class="side-stat-val">${player.stats.int}</span></div>
             <div class="side-stat-row"><span class="side-stat-name">지혜</span><span class="side-stat-val">${player.stats.wis}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">매력</span><span class="side-stat-val">${player.stats.cha}</span></div>
             <div class="side-stat-row" style="margin-top:15px; border-top:1px solid #333;"><span class="side-stat-name" style="color:#ef5350">총 공격력</span><div class="side-atk-val">${totalAtk}${player.bonusAtk > 0 ? `<span class="side-bonus">(+${player.bonusAtk})</span>` : ''}</div></div>
             <div class="side-stat-row"><span class="side-stat-name" style="color:#2196f3">추가 방어력</span><div class="side-stat-val">${player.bonusDef}</div></div>
         `;
 
         list.innerHTML = '';
         if(player.inventory.length === 0) list.innerHTML = '<p style="color:#666; grid-column:span 3; text-align:center; padding:20px;">가방이 비어 있습니다.</p>';
+
+        const cha = player.stats.cha || 10;
+        const chaSellBonus = 1 + (cha * 0.01); // 1% increase per CHA point
+
         player.inventory.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = `item-card ${item.equipped ? 'equipped' : ''}`;
@@ -1192,7 +1200,8 @@
             const typeColor = item.type.includes('potion') || item.type.includes('scroll') ? '#ef5350' : '#26a69a';
             const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
             const nameStyle = item.rarityColor ? `color:${item.rarityColor};` : (item.equipped ? 'color:var(--accent-gold)' : '');
-            const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const sellPrice = Math.floor((baseVal * 5) + (enh * 50));
+            const baseVal = item.val || 10; const enh = item.enhanceCount || 0;
+            const sellPrice = Math.floor(((baseVal * 5) + (enh * 50)) * chaSellBonus);
 
             let iconHtml = '';
             if (item.type.includes('potion') || item.type.includes('scroll') || item.type === 'weapon') {
@@ -1215,7 +1224,8 @@
             { key: 'dex', name: '민첩 강화', desc: '민첩 능력치를 영구적으로 증가시킵니다.' },
             { key: 'con', name: '체력 강화', desc: '체력 능력치를 영구적으로 증가시킵니다.' },
             { key: 'int', name: '지능 강화', desc: '지능 능력치를 영구적으로 증가시킵니다.' },
-            { key: 'wis', name: '지혜 강화', desc: '지혜 능력치를 영구적으로 증가시킵니다.' }
+            { key: 'wis', name: '지혜 강화', desc: '지혜 능력치를 영구적으로 증가시킵니다.' },
+            { key: 'cha', name: '매력 강화', desc: '매력 능력치를 영구적으로 증가시킵니다.' }
         ];
 
         traitData.forEach(t => {
@@ -1237,6 +1247,7 @@
     function upgradeTrait(key) {
         if (player.traitPoints <= 0) return;
         player.traitPoints--;
+        if (!player.traits[key]) player.traits[key] = 0;
         player.traits[key]++;
         player.stats[key]++;
 
@@ -1255,9 +1266,15 @@
         list.innerHTML = '';
         const weapons = player.inventory.map((item, idx) => ({ item, idx })).filter(obj => obj.item.type === 'weapon');
         if(weapons.length === 0) { list.innerHTML = '<p style="color:#666; grid-column:span 4; text-align:center;">강화할 무기가 없습니다.</p>'; return; }
+
+        const cha = player.stats.cha || 10;
+        const chaDiscount = Math.min(0.3, cha * 0.005); // Max 30% discount
+
         weapons.forEach(({ item, idx }) => {
             const enhanceLv = item.enhanceCount !== undefined ? item.enhanceCount : 0;
-            const cost = (enhanceLv + 1) * 50;
+            const baseCost = (enhanceLv + 1) * 50;
+            const cost = Math.floor(baseCost * (1 - chaDiscount));
+
             let successRate = 100;
             if (enhanceLv < 5) successRate = 100;
             else if (enhanceLv < 10) successRate = 100 - (enhanceLv - 4) * 10;
@@ -1525,7 +1542,10 @@
 
     function askSell(index) {
         const item = player.inventory[index];
-        const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const price = Math.floor((baseVal * 5) + (enh * 50));
+        const cha = player.stats.cha || 10;
+        const chaSellBonus = 1 + (cha * 0.01);
+        const baseVal = item.val || 10; const enh = item.enhanceCount || 0;
+        const price = Math.floor(((baseVal * 5) + (enh * 50)) * chaSellBonus);
         showConfirm("판매 확인", `[${item.name}]을(를) ${price} G에 판매하시겠습니까?`, () => sellItem(index, price));
     }
 

@@ -177,6 +177,28 @@
             text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
         }
 
+        .stat-guide-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-guide {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #444;
+            color: #aaa;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: 0.2s;
+        }
+        .btn-guide:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
         .input-section {
             display: flex;
             flex-direction: column;
@@ -343,6 +365,14 @@
                 <div class="stat-item"><span class="stat-label">매력</span><span id="val-cha" class="stat-value">-</span></div>
             </div>
             <button id="btn-dice" class="btn btn-dice" onclick="rollAllStats()">🎲 능력치 주사위 굴리기 (남은 횟수: 5)</button>
+            <div class="stat-guide-container">
+                <button class="btn-guide" onclick="showStatGuide('str')">힘 가이드</button>
+                <button class="btn-guide" onclick="showStatGuide('dex')">민첩 가이드</button>
+                <button class="btn-guide" onclick="showStatGuide('con')">체력 가이드</button>
+                <button class="btn-guide" onclick="showStatGuide('int')">지능 가이드</button>
+                <button class="btn-guide" onclick="showStatGuide('wis')">지혜 가이드</button>
+                <button class="btn-guide" onclick="showStatGuide('cha')">매력 가이드</button>
+            </div>
         </div>
 
         <div class="input-section">
@@ -533,6 +563,18 @@
                     window.location.href = 'map.html';
                 }
             } catch(e) { alert("서버 연결에 실패했습니다."); document.getElementById('loading-overlay').style.display = 'none'; }
+        }
+
+        function showStatGuide(stat) {
+            const guides = {
+                'str': '힘(STR): 물리 공격력을 결정합니다. 전사 계열의 핵심 능력치입니다.',
+                'dex': '민첩(DEX): 명중률과 회피율을 결정하며, 도적 계열의 스킬 위력에 영향을 줍니다.',
+                'con': '체력(CON): 최대 생명력(HP)을 결정합니다.',
+                'int': '지능(INT): 마법 공격력과 최대 마나(MP)를 결정합니다. 마법사 계열의 핵심 능력치입니다.',
+                'wis': '지혜(WIS): 최대 마나(MP)와 마법 저항력에 영향을 줍니다.',
+                'cha': '매력(CHA): 아이템 판매가 상승, 강화 비용 할인, 공격 시 분노 추가 수급, 도망 성공률 보정, 아이템 드롭 품질 향상에 영향을 줍니다.'
+            };
+            alert(guides[stat]);
         }
     </script>
 </body>

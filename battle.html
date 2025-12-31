@@ -1489,7 +1489,10 @@
 
             if (dmg > 0) {
                 player.hp -= dmg;
-                rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5));
+
+                const cha = player.stats.cha || 10;
+                const chaRageBonus = (cha - 10) * 0.5; // 0.5 extra rage per CHA point above 10
+                rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5 + chaRageBonus));
                 player.rage = rage;
 
                 playDamageSfx();
@@ -1638,13 +1641,16 @@
             if(!dropImg) dropImg = ITEM_IMAGES['gold'];
             playGoldSfx();
 
+            const cha = player.stats.cha || 10;
+            const chaDropBonus = (cha - 10) * 0.005; // 0.5% per CHA point above 10
+
             const rand = Math.random();
 
-            if (isBossBattle && rand < 0.5) {
+            if (isBossBattle && rand < 0.5 + chaDropBonus) {
                 const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = jobList[Math.floor(Math.random() * jobList.length)];
 
-                let isLegendary = isSuperBoss || Math.random() < 0.3;
+                let isLegendary = isSuperBoss || Math.random() < 0.3 + chaDropBonus;
                 if (!player.isAdvanced) isLegendary = false;
 
                 let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
@@ -1659,12 +1665,12 @@
                 player.inventory.push(newItem);
                 dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
             } 
-            else if (!isBossBattle && rand < 0.05) {
+            else if (!isBossBattle && rand < 0.05 + chaDropBonus) {
                 const nameList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = nameList[Math.floor(Math.random() * nameList.length)];
 
                 let isLegendary = false;
-                if (player.isAdvanced && Math.random() < 0.01) isLegendary = true;
+                if (player.isAdvanced && Math.random() < 0.01 + chaDropBonus) isLegendary = true;
 
                 let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
                 let colorCode = isLegendary ? "#ff8000" : "#a335ee";
@@ -1680,35 +1686,35 @@
                 player.inventory.push(newItem);
                 dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
             }
-            else if (Math.random() < 0.6) {
+            else if (Math.random() < 0.6 + chaDropBonus) {
                 const r = Math.random();
                 const ns = isNight ? "_night" : "";
                 const holyNs = isNight ? "_holy" : "";
-                if (r < 0.008) {
+                if (r < 0.008 + chaDropBonus) {
                     const img = "potion_full" + ns + ".jpg";
                     player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999, img: img});
                     dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg=img;
-                } else if (r < 0.018) {
+                } else if (r < 0.018 + chaDropBonus) {
                      const img = "potion_focus" + ns + ".jpg";
                      player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0, img: img});
                      dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg=img;
-                } else if (r < 0.03) {
+                } else if (r < 0.03 + chaDropBonus) {
                      const img = "potion_madness" + ns + ".jpg";
                      player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0, img: img});
                      dropName = "광기의 물약"; dropColor="#ff1744"; dropImg=img;
-                } else if (r < 0.05) {
+                } else if (r < 0.05 + chaDropBonus) {
                     const img = "potion_skeleton" + ns + ".jpg";
                     player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0, img: img});
                     dropName = "해골 포션"; dropColor="#757575"; dropImg=img;
-                } else if (r < 0.08) {
+                } else if (r < 0.08 + chaDropBonus) {
                      const img = "potion_holy" + holyNs + ".jpg";
                      player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0, img: img});
                      dropName = "정화의 성수"; dropColor="#00e676"; dropImg=img;
-                } else if (r < 0.12) {
+                } else if (r < 0.12 + chaDropBonus) {
                     const img = "potion_gamble" + ns + ".jpg";
                     player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0, img: img});
                     dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg=img;
-                } else if (r < 0.25) {
+                } else if (r < 0.25 + chaDropBonus) {
                     const img = "Scroll" + ns + ".jpg";
                     player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0, img: img});
                     dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg=img;
@@ -1720,7 +1726,7 @@
                     else { const img = "potion_poison" + ns + ".jpg"; player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0, img: img}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=img; }
                 }
             }
-            else if (Math.random() < 0.2) {
+            else if (Math.random() < 0.2 + chaDropBonus) {
                 const rand = Math.random();
                 const ns = isNight ? "_night" : "";
                 if(rand < 0.5) {
@@ -1801,7 +1807,13 @@
         
         function run() { 
             if(isActing) return; isActing = true; 
+
+            const cha = player.stats.cha || 10;
+            const chaRunBonus = (cha - 10) * 0.01; // 1% per CHA point above 10
+
             let runChance = isBossBattle ? 0.3 : 0.4;
+            runChance += chaRunBonus;
+
             if(Math.random() < runChance) {
                 say('p', "튀어!");
                 addLog("무사히 도망쳤습니다!");
