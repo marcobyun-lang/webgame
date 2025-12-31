@@ -504,6 +504,9 @@
                     <img id="eva-warrior" src="image/warrior_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-rogue" src="image/rogue_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-mage" src="image/mage_evasion.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-warrior1" src="image/warrior3.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-rogue1" src="image/rogue3.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-mage1" src="image/mage3.jpg" class="unit-img" style="display:none;">
                     <video id="v-warrior" src="image/warrior_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-rogue" src="image/rogue_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
@@ -976,6 +979,20 @@
                             document.getElementById('player-frame').classList.remove('crit-action');
                         }, 1000);
                         return; // 전직 크리티컬은 여기서 종료
+                    }
+                }
+
+                if (effectType === 'evade') {
+                    const evaMap = { 'warrior': 'eva-warrior1', 'rogue': 'eva-rogue1', 'mage': 'eva-mage1' };
+                    const eImg = document.getElementById(evaMap[base]);
+                    if (eImg) {
+                        pImg.style.display = 'none'; eImg.style.display = 'block';
+                        document.getElementById('player-frame').classList.add('evasion-action');
+                        setTimeout(() => {
+                            eImg.style.display = 'none'; pImg.style.display = 'block';
+                            document.getElementById('player-frame').classList.remove('evasion-action');
+                        }, 1000);
+                        return;
                     }
                 }
 
