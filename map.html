@@ -532,7 +532,7 @@
     let playerImg = new Image();
     let mapImg = new Image();
     let boss = { x: 100, y: 100, speed: 2.2, img: new Image(), alive: true, isNightBoss: false, hp: 100, maxHp: 100 };
-    let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 1000, maxHp: 1000, name: "초강력 보스" };
+    let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 1500, maxHp: 1500, name: "초강력 보스" };
     superBoss.img.src = 'image/best_boss.jpg';
 
     const GAME_TIME_LIMIT = 15 * 60 * 1000;
@@ -832,8 +832,8 @@
     function spawnSuperBoss() {
         superBoss.alive = true;
         superBoss.x = 480; superBoss.y = 320;
-        superBoss.hp = 1000;
-        superBoss.maxHp = 1000;
+        superBoss.hp = 1500;
+        superBoss.maxHp = 1500;
 
         const warning = document.getElementById('boss-warning');
         warning.style.display = 'block';
@@ -842,7 +842,6 @@
 
     function gameLoop() {
         if(!player) return;
-        if(document.querySelector('.modal[style*="flex"]')) return;
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
@@ -854,9 +853,7 @@
             return;
         }
 
-        if (remain <= 5 * 60 * 1000 && !superBoss.alive && !localStorage.getItem('rpg_super_boss_killed')) {
-            spawnSuperBoss();
-        }
+        if(document.querySelector('.modal[style*="flex"]')) return;
 
         const m = Math.floor(remain / 60000);
         const s = Math.floor((remain % 60000) / 1000);
@@ -866,6 +863,10 @@
 
         if (currentWeather === "thunder" && Math.random() < 0.01) {
             triggerThunder();
+        }
+
+        if (remain <= 5 * 60 * 1000 && !superBoss.alive && !localStorage.getItem('rpg_super_boss_killed')) {
+            spawnSuperBoss();
         }
 
         if (boss.alive) {
@@ -977,6 +978,20 @@
         document.getElementById('go-boss').innerText = `${bossKills}마리`;
         document.getElementById('go-lv').innerText = `LV.${player.level}`;
         document.getElementById('go-score-val').innerText = score.toLocaleString();
+
+        // Send Ranking Data
+        fetch(DB_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                type: 'ranking',
+                name: player.name,
+                score: score,
+                job: player.job,
+                level: player.level
+            })
+        });
 
         localStorage.removeItem('rpg_temp_player');
         localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');

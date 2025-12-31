@@ -699,8 +699,8 @@
             if (isSuperBossFlag === 'true') {
                 isBossBattle = true;
                 isSuperBoss = true;
-                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 1000);
-                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 1000);
+                const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 1500);
+                const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 1500);
                 enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 30 + (player.level * 3), exp: 10000, img: 'image/best_boss.jpg' };
                 localStorage.removeItem('rpg_is_super_boss');
                 playBossBgm('song/best_boss_bgm.mp3');
