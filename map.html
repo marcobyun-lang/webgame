@@ -657,8 +657,8 @@
                 else { localStorage.removeItem('rpg_boss_death_time'); spawnBossDefault(); }
             } else if (savedX) {
                 boss.x = parseFloat(savedX); boss.y = parseFloat(localStorage.getItem('rpg_boss_y')); boss.alive = true;
-                boss.hp = parseFloat(localStorage.getItem('rpg_boss_hp') || 100);
-                boss.maxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 100);
+                boss.hp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
+                boss.maxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 400 + (player.level * 30));
             } else {
                 boss.alive = false; setTimeout(spawnBossDefault, 15000);
             }
@@ -1033,15 +1033,16 @@
         if (rarity !== "common") {
             const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 1 : 1);
             const possibleOpts = [
-                { name: "힘", key: "str", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "민첩", key: "dex", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "체력", key: "con", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "지능", key: "int", val: Math.floor(Math.random() * 5) + 1 }
+                { name: "힘", key: "str" },
+                { name: "민첩", key: "dex" },
+                { name: "체력", key: "con" },
+                { name: "지능", key: "int" }
             ];
             for (let i = 0; i < optCount; i++) {
                 const opt = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
-                newItem.options.push(opt);
-                newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
+                const val = Math.floor(Math.random() * 5) + 1; // 1~5
+                newItem.options.push({ name: type.name, key: type.key, val: val });
+                newItem.desc += `\n[옵션] ${type.name} +${val}`;
             }
         }
 
@@ -1387,11 +1388,6 @@
         // 기존 상점 모달을 재활용하거나 새로운 모달을 띄워야 함.
         // 여기서는 간단히 confirm으로 첫 번째 장비부터 순회하며 물어보는 방식보다는
         // 스크롤 사용 시 장비 선택 모달을 띄우는 것이 좋음.
-        // 하지만 코드 복잡도를 줄이기 위해, 현재 착용 중인 장비에 우선 적용하거나
-        // 인벤토리에서 장비를 클릭했을 때 '스크롤 사용' 버튼이 나오게 하는 것이 좋음.
-
-        // 여기서는 "옵션 부여 스크롤"을 클릭했을 때 -> "장비를 선택하세요" 알림 후
-        // 인벤토리의 장비를 클릭하면 스크롤을 사용할지 묻는 방식으로 변경하는 것이 UX상 좋음.
         // 하지만 현재 구조상 복잡하므로,
         // 스크롤 사용 시 -> [강화] 모달처럼 장비 리스트를 띄우고 선택하게 하는 방식을 사용.
 

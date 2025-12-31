@@ -733,9 +733,9 @@
                 let bossAtk = 15 + (player.level * 2);
 
                 if (isNight) {
-                    const nHp = Math.floor(bossHp * 1.3);
-                    const nMaxHp = Math.floor(bossMaxHp * 1.3);
-                    const nAtk = Math.floor(bossAtk * 1.3);
+                    const nHp = Math.floor(bossHp * 1.5);
+                    const nMaxHp = Math.floor(bossMaxHp * 1.5);
+                    const nAtk = Math.floor(bossAtk * 1.5);
                     enemy = { name: '어둠의 지배자', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 3000, img: 'image/monster_boss.jpg', isNightBoss: true };
                     playBossBgm('song/monster_boss_bgm1.mp3');
                 } else {
