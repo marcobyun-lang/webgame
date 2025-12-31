@@ -680,6 +680,7 @@
             if(!player.bonusAtk) player.bonusAtk = 0;
             if(!player.bonusDef) player.bonusDef = 0;
             if(player.gold === undefined) player.gold = 0;
+            if(player.coinScore === undefined) player.coinScore = 0;
             if(player.rage === undefined) player.rage = 0;
             rage = player.rage;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
@@ -1698,8 +1699,9 @@
             const normalScore = normalKills * 10;
             const goldScore = Math.floor(player.gold * 0.1);
             const survivalScore = survivalTime;
+            const coinScore = player.coinScore || 0;
 
-            const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
+            const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore + coinScore;
 
             const statsContainer = document.getElementById('go-stats-container');
             statsContainer.innerHTML = `
@@ -1708,6 +1710,7 @@
                 <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
             `;
 
