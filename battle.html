@@ -554,7 +554,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbyl5HZ8Yk_x8_3d8Ayf2B-j480ZDX3czhlULozQHUO20gbviOMcI9ivOF6Ht6uOQbFD9Q/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbx-QwdXFDlin0T-qdKFxau0CHm8X06CPdDWyVPMZphNbIHgvjgtjQYSGk9AEqaRBEfDeA/exec";
         
         const attackSfx = new Audio('song/attack.mp3');
         const critSfx = new Audio('song/attack_1.mp3');
@@ -1200,6 +1200,7 @@
                     };
                     const v = document.getElementById(vMap[jobKey] || 'v-rogue'); const pImg = document.getElementById('p-img');
                     if(v) {
+                        v.currentTime = 0; // Reset video to start
                         pImg.style.display='none'; v.style.display='block'; v.play();
                         v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job, dmg, isCrit); }
                     } else {
@@ -1216,6 +1217,7 @@
                     };
                     const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
                     if(v) {
+                        v.currentTime = 0; // Reset video to start
                         pImg.style.display='none'; v.style.display='block'; v.play();
                         v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
                     } else applySkillDmg(player.job);
@@ -1845,6 +1847,7 @@
                 handledByPopup = true;
             } else if (item.type === 'potion_gamble') {
                 isActing = true;
+                player.inventory.splice(index, 1);
                 const rand = Math.random() * 100;
                 playItemSfx();
 

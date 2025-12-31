@@ -40,55 +40,40 @@ function doPost(e) {
   }
 }
 
-// 랭킹 저장 함수
+// 랭킹 저장 함수 (수정됨)
 function saveRanking(ss, params) {
-  let rankSheet = ss.getSheetByName('Ranking');
-  if (!rankSheet) {
-    rankSheet = ss.insertSheet('Ranking');
-    rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt']);
-  }
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000); // 30초 동안 잠금 대기
 
-  const newScore = parseInt(params.score);
-  const data = rankSheet.getDataRange().getValues();
-  let rankings = [];
-
-  // 기존 데이터 파싱 (헤더 제외)
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0]) { // 이름이 있는 행만 처리
-      rankings.push({
-        name: data[i][0],
-        score: parseInt(data[i][1]),
-        job: data[i][2],
-        level: data[i][3],
-        date: data[i][4]
-      });
+  try {
+    let rankSheet = ss.getSheetByName('Ranking');
+    if (!rankSheet) {
+      rankSheet = ss.insertSheet('Ranking');
+      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt']);
     }
+
+    // 새 점수 추가
+    rankSheet.appendRow([params.name, params.score, params.job, params.level, new Date()]);
+
+    // 데이터가 2줄 이상일 때 (헤더 + 데이터 1개 이상) 정렬 수행
+    if (rankSheet.getLastRow() > 1) {
+      const range = rankSheet.getRange(2, 1, rankSheet.getLastRow() - 1, rankSheet.getLastColumn());
+      range.sort({column: 2, ascending: false}); // 점수(2번째 열)를 기준으로 내림차순 정렬
+    }
+
+    // 상위 10개 랭킹만 남기고 삭제
+    if (rankSheet.getLastRow() > 11) { // 헤더(1) + 랭킹(10) = 11
+      rankSheet.deleteRows(12, rankSheet.getLastRow() - 11);
+    }
+
+    return ContentService.createTextOutput("Ranking Updated").setMimeType(ContentService.MimeType.TEXT);
+  } catch (e) {
+    return ContentService.createTextOutput("Error: " + e.toString()).setMimeType(ContentService.MimeType.TEXT);
+  } finally {
+    lock.releaseLock();
   }
-
-  // 새 점수 추가
-  rankings.push({
-    name: params.name,
-    score: newScore,
-    job: params.job,
-    level: params.level,
-    date: new Date()
-  });
-
-  // 점수 내림차순 정렬
-  rankings.sort((a, b) => b.score - a.score);
-
-  // 상위 10개만 유지
-  rankings = rankings.slice(0, 10);
-
-  // 시트 초기화 및 다시 쓰기
-  rankSheet.clear(); // 서식까지 모두 삭제
-  rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt']);
-  rankings.forEach(r => {
-    rankSheet.appendRow([r.name, r.score, r.job, r.level, r.date]);
-  });
-
-  return ContentService.createTextOutput("Ranking Updated").setMimeType(ContentService.MimeType.TEXT);
 }
+
 
 // 2. 데이터 불러오기 (GET 요청)
 function doGet(e) {
@@ -102,7 +87,9 @@ function doGet(e) {
 
       const data = rankSheet.getDataRange().getValues();
       let rankings = [];
-      for (let i = 1; i < data.length; i++) {
+      // 상위 10개 또는 그 이하의 데이터만 가져오기
+      const numRows = Math.min(data.length, 11); // 헤더 포함 최대 11줄
+      for (let i = 1; i < numRows; i++) {
         if (data[i][0]) {
           rankings.push({
             name: data[i][0],
