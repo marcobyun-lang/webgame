@@ -615,6 +615,7 @@
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
         isNight = elapsed >= 90000;
+        localStorage.setItem('rpg_is_night', isNight);
 
         currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
@@ -1558,6 +1559,7 @@
             if (rand < eventChance) showRandomEvent();
             else if (rand < encounterChance) {
                 saveBossPos(); localStorage.removeItem('rpg_boss_encounter');
+                localStorage.setItem('rpg_is_night', isNight);
                 localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html';
             }
         }
