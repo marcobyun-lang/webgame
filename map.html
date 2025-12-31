@@ -647,7 +647,11 @@
 
             const deathTime = localStorage.getItem('rpg_boss_death_time');
             const savedX = localStorage.getItem('rpg_boss_x');
-            if (deathTime) {
+            if (localStorage.getItem('rpg_boss_ran_away') === 'true') {
+                localStorage.removeItem('rpg_boss_ran_away');
+                boss.alive = false;
+                setTimeout(spawnBossDefault, 10000);
+            } else if (deathTime) {
                 const diff = Date.now() - parseInt(deathTime);
                 if (diff < 10000) { boss.alive = false; setTimeout(spawnBossDefault, 10000 - diff); }
                 else { localStorage.removeItem('rpg_boss_death_time'); spawnBossDefault(); }
@@ -674,8 +678,6 @@
             const rand = Math.random();
             let type = 'potion';
             if (rand < 0.05) type = 'shoes';
-            else if (rand < 0.15) type = 'attack';
-            else if (rand < 0.25) type = 'defense';
 
             fieldItems.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30, type: type });
         }
@@ -905,12 +907,6 @@
                 } else if (item.type === 'shoes') {
                     player.moveSpeed += 2;
                     showConfirm("아이템 획득", "신속의 장화를 획득했습니다! 이동 속도가 영구적으로 증가합니다.", null, true);
-                } else if (item.type === 'attack') {
-                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +5 증가', val:5});
-                    showConfirm("아이템 획득", "공격력 강화 물약을 획득했습니다!", null, true);
-                } else if (item.type === 'defense') {
-                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +5 증가', val:5});
-                    showConfirm("아이템 획득", "방어력 강화 물약을 획득했습니다!", null, true);
                 }
                 return false;
             }
@@ -1341,7 +1337,7 @@
             } else if (item.type === 'potion_def') {
                 player.bonusDef += item.val;
                 potionSfx.play().catch(e => {});
-                showConfirm("아이템 사용", `방어력이 ${item.val}만큼 일시적으로 증가했습니다!`, null, true);
+                showConfirm("아이템 사용", `방어력이 ${item.val}만큼 영구적으로 증가했습니다!`, null, true);
             } else if (item.type === 'scroll_option') {
                 // 옵션 부여 스크롤 사용 로직
                 showOptionScrollUI(index);

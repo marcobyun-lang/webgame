@@ -646,6 +646,7 @@
         function init() {
             if(!player.inventory) player.inventory = [];
             if(!player.bonusAtk) player.bonusAtk = 0;
+            if(!player.bonusDef) player.bonusDef = 0;
             if(player.gold === undefined) player.gold = 0;
             if(player.rage === undefined) player.rage = 0;
             rage = player.rage;
@@ -1392,7 +1393,7 @@
                 return;
             }
 
-            let dmg = Math.max(1, enemy.atk - Math.floor(player.stats.dex/3));
+            let dmg = Math.max(1, enemy.atk - Math.floor(player.stats.dex/3) - (player.bonusDef || 0));
             if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
 
             let isCrit = false;
@@ -1593,6 +1594,9 @@
                 } else if (r < 0.07) {
                      player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0});
                      dropName = "정화의 성수"; dropColor="#00e676"; dropImg="potion_holy.jpg";
+                } else if (r < 0.07) { // 정화의 성수와 비슷한 구간에 배치
+                    player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0});
+                    dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg="potion_gamble.jpg";
                 } else if (r < 0.20) {
                     player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0});
                     dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg="Scroll.jpg";
@@ -1607,12 +1611,14 @@
             else if (Math.random() < 0.2) {
                 const rand = Math.random();
                 if(rand < 0.5) {
-                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:'공격력 +10 영구 증가', val:10});
+                    const val = Math.floor(Math.random() * 5) + 1;
+                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:`공격력 +${val} 영구 증가`, val:val});
                     dropName = "공격력 강화 물약";
                     dropColor="#ff8a80";
                     dropImg=ITEM_IMAGES['potion_atk'];
                 } else {
-                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:'방어력 +10 영구 증가', val:10});
+                    const val = Math.random() < 0.5 ? 1 : 5;
+                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:`방어력 +${val} 영구 증가`, val:val});
                     dropName = "방어력 강화 물약";
                     dropColor="#82b1ff";
                     dropImg=ITEM_IMAGES['potion_def'];
@@ -1683,6 +1689,11 @@
                 say('p', "튀어!");
                 addLog("무사히 도망쳤습니다!");
                 stopBossBgm();
+
+                if (isBossBattle && !isSuperBoss) {
+                    localStorage.setItem('rpg_boss_ran_away', 'true');
+                }
+
                 setTimeout(finishBattle, 1200);
             }
             else {
@@ -1794,6 +1805,72 @@
                 showEffectPopup("광기의 힘", `HP ${dmg} 감소\n3턴간 크리티컬 100%`, "potion_madness.jpg");
                 playPotionSfx();
                 handledByPopup = true;
+            } else if (item.type === 'potion_gamble') {
+                isActing = true;
+                const rand = Math.random() * 100;
+                playItemSfx();
+
+                if (rand < 5) { // 1. 황금의 손
+                    const stolenGold = (player.level * 150) + 300;
+                    player.gold += stolenGold;
+                    addLog(`<span style='color:gold; font-weight:bold;'>💰 황금의 손! 적을 털어 ${stolenGold}G를 얻고 승리했습니다!</span>`);
+                    setTimeout(win, 1000);
+                    return;
+                }
+                else if (rand < 15) { // 2. 시공간의 뒤틀림
+                    const pHpP = player.hp / player.maxHp;
+                    const eHpP = enemy.hp / enemy.maxHp;
+                    player.hp = player.maxHp * eHpP;
+                    enemy.hp = enemy.maxHp * pHpP;
+                    addLog("<span style='color:#9c27b0;'>🌀 시공간의 뒤틀림! 적과 나의 체력 비율이 바뀌었습니다!</span>");
+                }
+                else if (rand < 30) { // 3. 독이 든 성배
+                    eStatus.poison = 5; pStatus.poison = 3;
+                    addLog("<span style='color:#4caf50;'>🧪 독이 든 성배! 서로에게 치명적인 독을 주입합니다.</span>");
+                }
+                else if (rand < 55) { // 4. 미완성된 폭발
+                    const pDmg = Math.floor(player.hp * 0.3);
+                    const eDmg = Math.floor(enemy.hp * 0.3);
+                    player.hp -= pDmg; enemy.hp -= eDmg;
+                    showDamage('player-frame', pDmg, 'player_hit');
+                    showDamage('enemy-frame', eDmg, 'normal');
+                    triggerScreenShake(true);
+                    addLog("<span style='color:#ff5722;'>💥 미완성된 폭발! 모두에게 현재 체력의 30% 피해를 입힙니다!</span>");
+                }
+                else if (rand < 65) { // 5. 가방의 기적
+                    const potions = player.inventory.filter(i => i.type.includes('potion') && i.type !== 'potion_gamble');
+                    if (potions.length > 0) {
+                        const randomPotion = potions[Math.floor(Math.random() * potions.length)];
+                        if (player.inventory.length < 24) {
+                            player.inventory.push({...randomPotion});
+                            addLog(`<span style='color:#e040fb;'>🎒 가방의 기적! [${randomPotion.name}]을(를) 복사했습니다!</span>`);
+                        } else {
+                            addLog(`<span style='color:#e040fb;'>🎒 가방이 가득 차 [${randomPotion.name}]의 효과를 즉시 발동합니다!</span>`);
+                            player.hp = Math.min(player.maxHp, player.hp + 50);
+                        }
+                    } else { addLog("복사할 물약이 없어 효과가 소멸했습니다."); }
+                }
+                else if (rand < 75) { // 6. 분노의 화신
+                    rage = 100; player.rage = 100;
+                    addLog("<span style='color:#ff9800; font-weight:bold;'>🔥 분노의 화신! 분노 게이지가 즉시 충전됩니다!</span>");
+                }
+                else if (rand < 95) { // 7. 강제 차원 이동
+                    addLog("<span style='color:#607d8b;'>🌫️ 강제 차원 이동! 전투에서 강제로 이탈합니다.</span>");
+                    setTimeout(finishBattle, 1200);
+                    return;
+                }
+                else { // 8. 신의 가호
+                    pStatus.invincible = 3;
+                    player.hp = Math.min(player.maxHp, player.hp + (player.maxHp * 0.5));
+                    player.mp = Math.min(player.maxMp, player.mp + (player.maxMp * 0.5));
+                    addLog("<span style='color:#ffd700; font-weight:bold;'>✨ 신의 가호! 3턴 무적 및 체력/마나가 회복됩니다!</span>");
+                }
+
+                update();
+                if (enemy.hp <= 0) setTimeout(win, 1000);
+                else if (player.hp <= 0) showGameOver("도박의 대가는 죽음이었습니다.");
+                else setTimeout(eTurn, 1500);
+                return;
             }
 
             player.inventory.splice(index, 1);
