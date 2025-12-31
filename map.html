@@ -160,12 +160,13 @@
         .btn-no:hover { background: #666; }
 
         /* GameOver Modal */
-        #gameover-modal { width: 500px; height: auto; z-index: 1000; border: 2px solid var(--accent-red); }
+        #gameover-modal { width: 520px; height: auto; z-index: 1000; border: 2px solid var(--accent-red); }
         .gameover-title { font-family: var(--font-head); font-size: 2.5rem; color: var(--accent-red); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
-        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
-        .go-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; color: #ccc; }
+        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; box-sizing: border-box; }
+        .go-row { display: flex; justify-content: space-between; margin: 12px 0; font-size: 1.1rem; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        .go-label { display: flex; align-items: center; gap: 8px; }
         .go-val { color: var(--accent-gold); font-weight: bold; }
-        .go-score { font-size: 1.8rem; color: #fff; text-align: center; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; }
+        .go-score { font-size: 2rem; color: #fff; text-align: center; margin-top: 15px; border-top: 2px solid #444; padding-top: 15px; font-family: var(--font-head); letter-spacing: 2px; }
 
         .inv-container { display: flex; gap: 20px; height: auto; min-height: 100%; }
         .inv-status-side {
@@ -462,14 +463,11 @@
         <div class="modal-header"><h2 style="color:var(--accent-red)">GAME OVER</h2></div>
         <div class="modal-body">
             <div class="gameover-title">던전 붕괴</div>
-            <div class="gameover-stats">
-                <div class="go-row"><span>생존 시간</span><span id="go-time" class="go-val"></span></div>
-                <div class="go-row"><span>처치한 몬스터</span><span id="go-kills" class="go-val"></span></div>
-                <div class="go-row"><span>처치한 보스</span><span id="go-boss" class="go-val"></span></div>
-                <div class="go-row"><span>최종 레벨</span><span id="go-lv" class="go-val"></span></div>
-                <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
+            <div id="go-stats-container" class="gameover-stats">
+                <!-- 상세 점수 내역이 여기에 들어갑니다 -->
             </div>
-            <button class="btn btn-start" style="width:100%; padding:15px; font-size:1.2rem;" onclick="location.href='index.html'">메인 화면으로</button>
+            <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
+            <button class="btn btn-start" style="width:100%; padding:15px; font-size:1.2rem; margin-top: 20px;" onclick="location.href='index.html'">메인 화면으로</button>
         </div>
     </div>
 
@@ -516,6 +514,13 @@
         '아크메이지': 'image/mage1.jpg', '소서러': 'image/mage1.jpg'
     };
 
+    const MAP_SETS = [
+        { day: 'image/map.jpg', night: 'image/map1.jpg' },
+        { day: 'image/map2.jpg', night: 'image/map3.jpg' },
+        { day: 'image/map4.jpg', night: 'image/map5.jpg' },
+        { day: 'image/map6.jpg', night: 'image/map7.jpg' }
+    ];
+
     const DROP_TABLE = {
         '전사': ['기사의 검', '대검', '용사의 검', '심판의 도끼'],
         '도적': ['암살자의 단도', '쌍검', '그림자 비수'],
@@ -531,6 +536,7 @@
     let player = null;
     let playerImg = new Image();
     let mapImg = new Image();
+    let mapSetIndex = 0;
     let boss = { x: 100, y: 100, speed: 2.2, img: new Image(), alive: true, isNightBoss: false, hp: 100, maxHp: 100 };
     let superBoss = { x: 500, y: 500, speed: 3.5, img: new Image(), alive: false, hp: 1500, maxHp: 1500, name: "초강력 보스" };
     superBoss.img.src = 'image/best_boss.jpg';
@@ -623,6 +629,14 @@
             localStorage.removeItem('rpg_open_traits');
             setTimeout(() => { openInventory(); switchTab('traits'); }, 500);
         }
+
+        let savedMapIndex = localStorage.getItem('rpg_map_set_index');
+        if (savedMapIndex === null) {
+            mapSetIndex = Math.floor(Math.random() * MAP_SETS.length);
+            localStorage.setItem('rpg_map_set_index', mapSetIndex);
+        } else {
+            mapSetIndex = parseInt(savedMapIndex);
+        }
     }
 
     function getPlayerImage(job, inventory) {
@@ -639,7 +653,8 @@
 
     function initMap() {
         playerImg.src = getPlayerImage(player.job, player.inventory);
-        mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
+        const currentSet = MAP_SETS[mapSetIndex];
+        mapImg.src = isNight ? currentSet.night : currentSet.day;
 
         mapImg.onload = () => {
             document.getElementById('loading-overlay').style.display = 'none';
@@ -759,7 +774,8 @@
 
         if (newIsNight !== isNight) {
             isNight = newIsNight;
-            mapImg.src = isNight ? 'image/map1.jpg' : 'image/map.jpg';
+            const currentSet = MAP_SETS[mapSetIndex];
+            mapImg.src = isNight ? currentSet.night : currentSet.day;
             localStorage.setItem('rpg_is_night', isNight);
             changeWeather();
         }
@@ -958,22 +974,39 @@
 
         const kills = player.quests.killCount || 0;
         const bossKills = player.quests.bossKillCount || 0;
+        const normalKills = Math.max(0, kills - bossKills);
 
         let itemValue = 0;
         player.inventory.forEach(item => {
-            const baseVal = item.val || 10;
-            const enh = item.enhanceCount || 0;
-            itemValue += Math.floor((baseVal * 5) + (enh * 50));
+            if (item.type === 'weapon') {
+                if (item.rarity === 'legendary') itemValue += 5000;
+                else if (item.rarity === 'epic') itemValue += 2000;
+            } else if (item.type.includes('potion') || item.type.includes('scroll')) {
+                const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
+                if (rareItems.includes(item.type)) itemValue += 500;
+            }
         });
 
-        const score = (kills * 100) + (bossKills * 1000) + (survivalTime * 10) + (player.level * 500) + itemValue;
+        const lvScore = player.level * 1000;
+        const bossScore = bossKills * 2000;
+        const normalScore = normalKills * 10;
+        const goldScore = Math.floor(player.gold * 0.1);
+        const survivalScore = survivalTime;
+
+        const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
+
+        const statsContainer = document.getElementById('go-stats-container');
+        statsContainer.innerHTML = `
+            <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
+        `;
 
         document.querySelector('.gameover-title').innerText = msg;
-        document.getElementById('go-time').innerText = `${min}분 ${sec}초`;
-        document.getElementById('go-kills').innerText = `${kills}마리`;
-        document.getElementById('go-boss').innerText = `${bossKills}마리`;
-        document.getElementById('go-lv').innerText = `LV.${player.level}`;
-        document.getElementById('go-score-val').innerText = score.toLocaleString();
+        document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
         // Send Ranking Data
         fetch(DB_URL, {
@@ -983,7 +1016,7 @@
             body: JSON.stringify({
                 type: 'ranking',
                 name: player.name,
-                score: score,
+                score: totalScore,
                 job: player.job,
                 level: player.level
             })
@@ -1033,15 +1066,16 @@
         if (rarity !== "common") {
             const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 1 : 1);
             const possibleOpts = [
-                { name: "힘", key: "str", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "민첩", key: "dex", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "체력", key: "con", val: Math.floor(Math.random() * 5) + 1 },
-                { name: "지능", key: "int", val: Math.floor(Math.random() * 5) + 1 }
+                { name: "힘", key: "str" },
+                { name: "민첩", key: "dex" },
+                { name: "체력", key: "con" },
+                { name: "지능", key: "int" }
             ];
             for (let i = 0; i < optCount; i++) {
                 const opt = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
-                newItem.options.push(opt);
-                newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
+                const val = Math.floor(Math.random() * 5) + 1; // 1~5
+                newItem.options.push({ name: opt.name, key: opt.key, val: val });
+                newItem.desc += `\n[옵션] ${opt.name} +${val}`;
             }
         }
 
@@ -1569,6 +1603,69 @@
                 localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html';
             }
         }
+    }
+
+    function showGameOver(msg) {
+        const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
+        const survivalTime = Math.floor((Date.now() - startTime) / 1000);
+        const min = Math.floor(survivalTime / 60);
+        const sec = survivalTime % 60;
+
+        const kills = player.quests.killCount || 0;
+        const bossKills = player.quests.bossKillCount || 0;
+        const normalKills = Math.max(0, kills - bossKills);
+
+        let itemValue = 0;
+        player.inventory.forEach(item => {
+            if (item.type === 'weapon') {
+                if (item.rarity === 'legendary') itemValue += 5000;
+                else if (item.rarity === 'epic') itemValue += 2000;
+            } else if (item.type.includes('potion') || item.type.includes('scroll')) {
+                const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
+                if (rareItems.includes(item.type)) itemValue += 500;
+            }
+        });
+
+        const lvScore = player.level * 1000;
+        const bossScore = bossKills * 2000;
+        const normalScore = normalKills * 10;
+        const goldScore = Math.floor(player.gold * 0.1);
+        const survivalScore = survivalTime;
+
+        const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
+
+        const statsContainer = document.getElementById('go-stats-container');
+        statsContainer.innerHTML = `
+            <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
+        `;
+
+        document.querySelector('.gameover-title').innerText = msg;
+        document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
+
+        // Send Ranking Data
+        fetch(DB_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                type: 'ranking',
+                name: player.name,
+                score: totalScore,
+                job: player.job,
+                level: player.level
+            })
+        });
+
+        localStorage.removeItem('rpg_temp_player');
+        localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
+        localStorage.removeItem('rpg_boss_death_time');
+
+        document.getElementById('gameover-modal').style.display = 'flex';
     }
 
     // Mobile Control Logic

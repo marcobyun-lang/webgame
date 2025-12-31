@@ -177,12 +177,13 @@
         .btn-confirm:hover { background: #ffea00; transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 234, 0, 0.5); }
 
         /* GameOver Modal */
-        #gameover-modal { width: 500px; height: auto; z-index: 1000; border: 2px solid var(--danger); display: none; }
+        #gameover-modal { width: 520px; height: auto; z-index: 1000; border: 2px solid var(--danger); display: none; }
         .gameover-title { font-family: var(--font-combat); font-size: 2.5rem; color: var(--danger); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
-        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; }
-        .go-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; color: #ccc; }
+        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; box-sizing: border-box; }
+        .go-row { display: flex; justify-content: space-between; margin: 12px 0; font-size: 1.1rem; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        .go-label { display: flex; align-items: center; gap: 8px; }
         .go-val { color: var(--accent-gold); font-weight: bold; }
-        .go-score { font-size: 1.8rem; color: #fff; text-align: center; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; font-family: var(--font-combat); }
+        .go-score { font-size: 2rem; color: #fff; text-align: center; margin-top: 15px; border-top: 2px solid #444; padding-top: 15px; font-family: var(--font-combat); letter-spacing: 2px; }
 
         /* Item Modal Styles */
         #item-modal {
@@ -475,14 +476,11 @@
 
         <div id="gameover-modal" class="modal-overlay">
             <div class="gameover-title">패배</div>
-            <div class="gameover-stats">
-                <div class="go-row"><span>생존 시간</span><span id="go-time" class="go-val"></span></div>
-                <div class="go-row"><span>처치한 몬스터</span><span id="go-kills" class="go-val"></span></div>
-                <div class="go-row"><span>처치한 보스</span><span id="go-boss" class="go-val"></span></div>
-                <div class="go-row"><span>최종 레벨</span><span id="go-lv" class="go-val"></span></div>
-                <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
+            <div id="go-stats-container" class="gameover-stats">
+                <!-- 상세 점수 내역이 여기에 들어갑니다 -->
             </div>
-            <button class="btn-confirm" style="width:100%;" onclick="location.href='index.html'">메인 화면으로</button>
+            <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
+            <button class="btn-confirm" style="width:100%; margin-top: 20px;" onclick="location.href='index.html'">메인 화면으로</button>
         </div>
 
         <div class="battle-stage">
@@ -1522,22 +1520,39 @@
 
             const kills = player.quests.killCount || 0;
             const bossKills = player.quests.bossKillCount || 0;
+            const normalKills = Math.max(0, kills - bossKills);
 
             let itemValue = 0;
             player.inventory.forEach(item => {
-                const baseVal = item.val || 10;
-                const enh = item.enhanceCount || 0;
-                itemValue += Math.floor((baseVal * 5) + (enh * 50));
+                if (item.type === 'weapon') {
+                    if (item.rarity === 'legendary') itemValue += 5000;
+                    else if (item.rarity === 'epic') itemValue += 2000;
+                } else if (item.type.includes('potion') || item.type.includes('scroll')) {
+                    const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
+                    if (rareItems.includes(item.type)) itemValue += 500;
+                }
             });
 
-            const score = (kills * 100) + (bossKills * 1000) + (survivalTime * 10) + (player.level * 500) + itemValue;
+            const lvScore = player.level * 1000;
+            const bossScore = bossKills * 2000;
+            const normalScore = normalKills * 10;
+            const goldScore = Math.floor(player.gold * 0.1);
+            const survivalScore = survivalTime;
+
+            const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
+
+            const statsContainer = document.getElementById('go-stats-container');
+            statsContainer.innerHTML = `
+                <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
+            `;
 
             document.querySelector('.gameover-title').innerText = msg;
-            document.getElementById('go-time').innerText = `${min}분 ${sec}초`;
-            document.getElementById('go-kills').innerText = `${kills}마리`;
-            document.getElementById('go-boss').innerText = `${bossKills}마리`;
-            document.getElementById('go-lv').innerText = `LV.${player.level}`;
-            document.getElementById('go-score-val').innerText = score.toLocaleString();
+            document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
             // Send Ranking Data
             fetch(DB_URL, {
@@ -1547,7 +1562,7 @@
                 body: JSON.stringify({
                     type: 'ranking',
                     name: player.name,
-                    score: score,
+                    score: totalScore,
                     job: player.job,
                     level: player.level
                 })

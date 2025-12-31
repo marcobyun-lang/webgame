@@ -505,6 +505,7 @@
             localStorage.setItem('rpg_temp_player', JSON.stringify(player));
             localStorage.setItem('rpg_player_name', player.name);
             localStorage.setItem('rpg_start_time', Date.now().toString());
+            localStorage.setItem('rpg_map_set_index', Math.floor(Math.random() * 4));
 
             window.location.href = 'map.html';
         }
