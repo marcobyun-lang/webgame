@@ -602,7 +602,8 @@
             'potion_gamble': 'potion_gamble.jpg',
             'potion_focus': 'potion_focus.jpg',
             'potion_holy': 'potion_holy.jpg',
-            'potion_madness': 'potion_madness.jpg'
+            'potion_madness': 'potion_madness.jpg',
+            'potion_full': 'potion_full.jpg'
         };
         
         const DROP_TABLE = {
@@ -1397,7 +1398,8 @@
             if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
 
             let isCrit = false;
-            if (enemy.isNightBoss && Math.random() < 0.2) {
+            const critChance = 0.05;
+            if (Math.random() < critChance) {
                 dmg = Math.floor(dmg * 1.5);
                 isCrit = true;
             }
@@ -1582,7 +1584,10 @@
             }
             else if (Math.random() < 0.6) {
                 const r = Math.random();
-                if (r < 0.01) {
+                if (r < 0.005) {
+                    player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999});
+                    dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg="potion_full.jpg";
+                } else if (r < 0.01) {
                      player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0});
                      dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg="potion_focus.jpg";
                 } else if (r < 0.02) {
@@ -1745,7 +1750,13 @@
 
             let handledByPopup = false;
 
-            if (item.name.includes('체력')) {
+            if (item.type === 'potion_full') {
+                isActing = true;
+                player.hp = player.maxHp;
+                player.mp = player.maxMp;
+                addLog(`<span style="color:#00e676">풀 회복 포션</span>을 사용하여 HP와 MP를 모두 회복했습니다!`);
+                playPotionSfx();
+            } else if (item.name.includes('체력')) {
                 if (player.hp >= player.maxHp) { addLog("체력이 이미 가득 찼습니다."); return; }
                 isActing = true;
                 const heal = item.val;
