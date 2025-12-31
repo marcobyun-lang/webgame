@@ -654,7 +654,11 @@
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
             pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
-            specialCooldown = 0;
+
+            if (player.specialCooldown > 0) {
+                player.specialCooldown--;
+            }
+            specialCooldown = player.specialCooldown || 0;
             updateSpecialTooltip();
 
             if (player.battleCurse) {
@@ -1615,7 +1619,7 @@
                      player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0});
                      dropName = "광기의 물약"; dropColor="#ff1744"; dropImg="potion_madness.jpg";
                 } else if (r < 0.05) {
-                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:9999});
+                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0});
                     dropName = "해골 포션"; dropColor="#757575"; dropImg="potion_skeleton.jpg";
                 } else if (r < 0.08) {
                      player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0});
@@ -1695,12 +1699,14 @@
         
         function finishBattle() {
             player.rage = rage;
+            player.specialCooldown = specialCooldown;
             localStorage.setItem('rpg_temp_player', JSON.stringify(player));
             location.href = 'map.html';
         }
 
         function finishBattleWithLevelUp() {
             player.rage = rage;
+            player.specialCooldown = specialCooldown;
             localStorage.setItem('rpg_temp_player', JSON.stringify(player));
             if (!(player.level >= 5 && !player.isAdvanced)) {
                 localStorage.setItem('rpg_open_traits', 'true');
