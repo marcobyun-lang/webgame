@@ -508,7 +508,7 @@
 </div>
 
 <script>
-    const DB_URL = "https://script.google.com/macros/s/AKfycbx-QwdXFDlin0T-qdKFxau0CHm8X06CPdDWyVPMZphNbIHgvjgtjQYSGk9AEqaRBEfDeA/exec";
+    const DB_URL = "https://script.google.com/macros/s/AKfycbwqQ6hbPZNyULQpXUW0SRdDHRLsrGkRL4p3t-12oPPyYRAnFW0smnXW1ZaqWq5qgABtIw/exec";
     const CHAR_FILES = {
         '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg',
         '버서커': 'image/warrior1.jpg', '가디언': 'image/warrior1.jpg',
@@ -1033,16 +1033,15 @@
         if (rarity !== "common") {
             const optCount = rarity === "legendary" ? 3 : (rarity === "epic" ? 1 : 1);
             const possibleOpts = [
-                { name: "힘", key: "str" },
-                { name: "민첩", key: "dex" },
-                { name: "체력", key: "con" },
-                { name: "지능", key: "int" }
+                { name: "힘", key: "str", val: Math.floor(Math.random() * 5) + 1 },
+                { name: "민첩", key: "dex", val: Math.floor(Math.random() * 5) + 1 },
+                { name: "체력", key: "con", val: Math.floor(Math.random() * 5) + 1 },
+                { name: "지능", key: "int", val: Math.floor(Math.random() * 5) + 1 }
             ];
             for (let i = 0; i < optCount; i++) {
                 const opt = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
-                const val = Math.floor(Math.random() * 5) + 1; // 1~5
-                newItem.options.push({ name: type.name, key: type.key, val: val });
-                newItem.desc += `\n[옵션] ${type.name} +${val}`;
+                newItem.options.push(opt);
+                newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`;
             }
         }
 

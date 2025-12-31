@@ -511,6 +511,9 @@
                     <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-warrior1" src="image/warrior_atk1.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage1" src="image/mage_atk1.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-rogue1" src="image/rogue_atk1.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-mage2" src="image/mage_atk2.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-warrior2" src="image/warrior_atk2.mp4" class="unit-img" style="display:none;"></video>
                 </div>
                 <div class="unit-info">
                     <h3 id="p-name" class="unit-name">플레이어</h3>
@@ -554,7 +557,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbx-QwdXFDlin0T-qdKFxau0CHm8X06CPdDWyVPMZphNbIHgvjgtjQYSGk9AEqaRBEfDeA/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbwqQ6hbPZNyULQpXUW0SRdDHRLsrGkRL4p3t-12oPPyYRAnFW0smnXW1ZaqWq5qgABtIw/exec";
         
         const attackSfx = new Audio('song/attack.mp3');
         const critSfx = new Audio('song/attack_1.mp3');
@@ -733,10 +736,10 @@
                 let bossAtk = 15 + (player.level * 2);
 
                 if (isNight) {
-                    const nHp = Math.floor(bossHp * 1.5);
-                    const nMaxHp = Math.floor(bossMaxHp * 1.5);
+                    const nHp = Math.floor(bossHp * 1.8);
+                    const nMaxHp = Math.floor(bossMaxHp * 1.8);
                     const nAtk = Math.floor(bossAtk * 1.5);
-                    enemy = { name: '어둠의 지배자', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 3000, img: 'image/monster_boss.jpg', isNightBoss: true };
+                    enemy = { name: '심연의 군주', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 5000, img: 'image/monster_boss.jpg', isNightBoss: true };
                     playBossBgm('song/monster_boss_bgm1.mp3');
                 } else {
                     enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
@@ -1224,7 +1227,7 @@
                     }
 
                     const vMap = {
-                        '도적':'v-rogue', '어쌔신':'v-rogue', '섀도우':'v-rogue'
+                        '도적':'v-rogue1', '어쌔신':'v-rogue1', '섀도우':'v-rogue1'
                     };
                     const v = document.getElementById(vMap[jobKey] || 'v-rogue'); const pImg = document.getElementById('p-img');
                     if(v) {
@@ -1238,11 +1241,20 @@
                     return;
                 } else {
                     say('p', '강력한 스킬 발동!');
-                    const vMap = {
+                    let vMap = {
                         '전사':'v-warrior', '마법사':'v-mage',
                         '버서커':'v-warrior1', '가디언':'v-warrior1',
                         '아크메이지':'v-mage1', '소서러':'v-mage1'
                     };
+
+                    if (isLegendary) {
+                        if (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') {
+                            vMap['마법사'] = 'v-mage2'; vMap['아크메이지'] = 'v-mage2'; vMap['소서러'] = 'v-mage2';
+                        } else if (player.job === '전사' || player.job === '버서커' || player.job === '가디언') {
+                            vMap['전사'] = 'v-warrior2'; vMap['버서커'] = 'v-warrior2'; vMap['가디언'] = 'v-warrior2';
+                        }
+                    }
+
                     const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
                     if(v) {
                         v.currentTime = 0; // Reset video to start
