@@ -63,26 +63,53 @@ function saveRanking(ss, params) {
       rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
     }
 
-    // 헤더가 없는 경우 추가 (시트가 비어있을 때)
     if (rankSheet.getLastRow() === 0) {
       rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
     }
 
-    // 데이터 추가 (수치형 데이터 강제 변환하여 정렬 오류 방지)
-    rankSheet.appendRow([
-      params.name || "Unknown",
-      Number(params.score || 0),
-      params.job || "Novice",
-      Number(params.level || 1),
-      new Date(),
-      Number(params.bossKills || 0)
-    ]);
+    const data = rankSheet.getDataRange().getValues();
+    let rowIndex = -1;
+    const playerName = params.name || "Unknown";
+
+    // Find existing player
+    for (let i = 1; i < data.length; i++) { // Start from 1 to skip header
+      if (data[i][0] == playerName) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    const newScore = Number(params.score || 0);
+
+    if (rowIndex > 0) { // Player exists
+      const oldScore = Number(data[rowIndex - 1][1] || 0);
+      if (newScore > oldScore) {
+        // Update row
+        rankSheet.getRange(rowIndex, 1, 1, 6).setValues([[
+          playerName,
+          newScore,
+          params.job || "Novice",
+          Number(params.level || 1),
+          new Date(),
+          Number(params.bossKills || 0)
+        ]]);
+      }
+    } else { // New player
+      // Append new row
+      rankSheet.appendRow([
+        playerName,
+        newScore,
+        params.job || "Novice",
+        Number(params.level || 1),
+        new Date(),
+        Number(params.bossKills || 0)
+      ]);
+    }
 
     // 정렬 및 상위 10개 유지
     const lastRow = rankSheet.getLastRow();
     if (lastRow > 1) {
       const lastCol = rankSheet.getLastColumn();
-      // 2번째 행부터 정렬 (헤더 제외)
       const range = rankSheet.getRange(2, 1, lastRow - 1, lastCol);
       range.sort({column: 2, ascending: false}); // Score(2열) 기준 내림차순
     }
@@ -97,6 +124,7 @@ function saveRanking(ss, params) {
     return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
+
 
 // 2. 데이터 불러오기 (GET 요청)
 function doGet(e) {
