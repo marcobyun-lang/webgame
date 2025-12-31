@@ -525,6 +525,8 @@
             player.maxMp = (player.stats.int * 1.5) + player.stats.wis + (player.job === '마법사' ? 30 : 10);
             player.mp = player.maxMp;
 
+            player.inventory = [{name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: 'potion_hp.jpg'}];
+
             const keysToRemove = [];
             for(let i=0; i<localStorage.length; i++) {
                 const key = localStorage.key(i);
