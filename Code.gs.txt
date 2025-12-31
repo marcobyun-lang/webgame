@@ -2,9 +2,20 @@
 
 // 1. 데이터 저장 (POST 요청)
 function doPost(e) {
+  const lock = LockService.getScriptLock();
+  // 30초 락 시도 (동시성 제어) - 실패 시 에러 반환
+  if (!lock.tryLock(30000)) {
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: "Server Busy"})).setMimeType(ContentService.MimeType.JSON);
+  }
+
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const contents = e.postData.contents;
+
+    if (!contents) {
+      return ContentService.createTextOutput(JSON.stringify({result: "error", error: "No content"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const params = JSON.parse(contents);
 
     // 랭킹 저장 요청인지 확인
@@ -12,7 +23,7 @@ function doPost(e) {
       return saveRanking(ss, params);
     }
 
-    // 일반 캐릭터 데이터 저장 (수동 저장 시에만 호출됨)
+    // 일반 캐릭터 데이터 저장
     let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
     const name = params.name;
     const jsonData = JSON.stringify(params);
@@ -30,21 +41,21 @@ function doPost(e) {
     if (rowIndex > 0) {
       sheet.getRange(rowIndex, 2).setValue(jsonData);
       sheet.getRange(rowIndex, 3).setValue(new Date());
-      return ContentService.createTextOutput("Updated").setMimeType(ContentService.MimeType.TEXT);
     } else {
       sheet.appendRow([name, jsonData, new Date()]);
-      return ContentService.createTextOutput("Created").setMimeType(ContentService.MimeType.TEXT);
     }
+
+    return ContentService.createTextOutput(JSON.stringify({result: "success"})).setMimeType(ContentService.MimeType.JSON);
+
   } catch (err) {
-    return ContentService.createTextOutput("Error: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
   }
 }
 
-// 랭킹 저장 함수 (수정됨)
+// 랭킹 저장 함수
 function saveRanking(ss, params) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000); // 30초 동안 잠금 대기
-
   try {
     let rankSheet = ss.getSheetByName('Ranking');
     if (!rankSheet) {
@@ -52,35 +63,40 @@ function saveRanking(ss, params) {
       rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
     }
 
-    // 데이터 추가 (모든 수치는 Number로 강제 변환)
+    // 헤더가 없는 경우 추가 (시트가 비어있을 때)
+    if (rankSheet.getLastRow() === 0) {
+      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
+    }
+
+    // 데이터 추가 (수치형 데이터 강제 변환하여 정렬 오류 방지)
     rankSheet.appendRow([
-      params.name,
-      Number(params.score),
-      params.job,
-      Number(params.level),
+      params.name || "Unknown",
+      Number(params.score || 0),
+      params.job || "Novice",
+      Number(params.level || 1),
       new Date(),
       Number(params.bossKills || 0)
     ]);
 
-    // 데이터가 2줄 이상일 때 (헤더 + 데이터 1개 이상) 정렬 수행
-    if (rankSheet.getLastRow() > 1) {
-      const range = rankSheet.getRange(2, 1, rankSheet.getLastRow() - 1, rankSheet.getLastColumn());
-      range.sort({column: 2, ascending: false}); // 점수(2번째 열)를 기준으로 내림차순 정렬
+    // 정렬 및 상위 10개 유지
+    const lastRow = rankSheet.getLastRow();
+    if (lastRow > 1) {
+      const lastCol = rankSheet.getLastColumn();
+      // 2번째 행부터 정렬 (헤더 제외)
+      const range = rankSheet.getRange(2, 1, lastRow - 1, lastCol);
+      range.sort({column: 2, ascending: false}); // Score(2열) 기준 내림차순
     }
 
-    // 상위 10개 랭킹만 남기고 삭제
-    if (rankSheet.getLastRow() > 11) { // 헤더(1) + 랭킹(10) = 11
+    // 10위 밖 데이터 삭제 (헤더 1줄 + 데이터 10줄 = 11줄 유지)
+    if (rankSheet.getLastRow() > 11) {
       rankSheet.deleteRows(12, rankSheet.getLastRow() - 11);
     }
 
-    return ContentService.createTextOutput("Ranking Updated").setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Ranking Updated"})).setMimeType(ContentService.MimeType.JSON);
   } catch (e) {
-    return ContentService.createTextOutput("Error: " + e.toString()).setMimeType(ContentService.MimeType.TEXT);
-  } finally {
-    lock.releaseLock();
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
-
 
 // 2. 데이터 불러오기 (GET 요청)
 function doGet(e) {
@@ -90,20 +106,25 @@ function doGet(e) {
     // 랭킹 데이터 요청
     if (e.parameter.type === 'ranking') {
       let rankSheet = ss.getSheetByName('Ranking');
-      if (!rankSheet) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+      // 시트가 없거나 데이터가 없으면 빈 배열 반환
+      if (!rankSheet || rankSheet.getLastRow() <= 1) {
+        return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+      }
 
       const data = rankSheet.getDataRange().getValues();
       let rankings = [];
-      // 상위 10개 또는 그 이하의 데이터만 가져오기
-      const numRows = Math.min(data.length, 11); // 헤더 포함 최대 11줄
+
+      // 상위 10개 데이터 가져오기 (헤더 제외)
+      const numRows = Math.min(data.length, 11);
       for (let i = 1; i < numRows; i++) {
+        // 이름이 있는 경우만 추가
         if (data[i][0]) {
           rankings.push({
             name: data[i][0],
-            score: data[i][1],
+            score: Number(data[i][1] || 0), // 숫자로 변환하여 전송
             job: data[i][2],
-            level: data[i][3],
-            bossKills: data[i][5] || 0
+            level: Number(data[i][3] || 1),
+            bossKills: Number(data[i][5] || 0)
           });
         }
       }
