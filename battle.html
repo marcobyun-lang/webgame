@@ -734,9 +734,9 @@
                 const multiplier = sel.mult || 1.0;
                 enemy = {
                     name: sel.n,
-                    hp: Math.floor(avg * 2.5 * multiplier) + 10,
-                    maxHp: Math.floor(avg * 2.5 * multiplier) + 10,
-                    atk: Math.floor((avg/2.2) * multiplier) + 2,
+                    hp: Math.floor(avg * 2.8 * multiplier) + 15,
+                    maxHp: Math.floor(avg * 2.8 * multiplier) + 15,
+                    atk: Math.floor((avg/2.0) * multiplier) + 4,
                     exp: sel.e,
                     img: sel.f,
                     canPoison: sel.poison || false,
@@ -1398,7 +1398,7 @@
             if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
 
             let isCrit = false;
-            const critChance = 0.05;
+            const critChance = 0.08;
             if (Math.random() < critChance) {
                 dmg = Math.floor(dmg * 1.5);
                 isCrit = true;
