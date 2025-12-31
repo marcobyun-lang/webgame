@@ -1187,7 +1187,7 @@
         const totalAtk = baseAtk + player.bonusAtk;
 
         statusPanel.innerHTML = `
-            <div style="text-align:center; margin-bottom:15px;"><img src="${CHAR_FILES[player.job]}" style="width:100px; height:100px; border:1px solid #444; margin-bottom:10px;"><div style="color:var(--accent-gold); font-family:var(--font-head); font-size:1.1rem;">${player.job.toUpperCase()}</div></div>
+            <div style="text-align:center; margin-bottom:15px;"><img src="${getPlayerImage(player.job, player.inventory)}" style="width:100px; height:100px; border:1px solid #444; margin-bottom:10px;"><div style="color:var(--accent-gold); font-family:var(--font-head); font-size:1.1rem;">${player.job.toUpperCase()}</div></div>
             <div class="side-stat-row"><span class="side-stat-name">레벨</span><span class="side-stat-val">${player.level}</span></div>
             <div class="side-stat-row"><span class="side-stat-name">힘</span><span class="side-stat-val">${player.stats.str}</span></div>
             <div class="side-stat-row"><span class="side-stat-name">민첩</span><span class="side-stat-val">${player.stats.dex}</span></div>

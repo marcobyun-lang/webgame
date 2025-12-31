@@ -492,6 +492,9 @@
                     <img id="atk-warrior" src="image/warrior_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-rogue" src="image/rogue_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-mage" src="image/mage_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-warrior-double" src="image/warrior_attack.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-rogue-double" src="image/rogue_attack.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-mage-double" src="image/mage_attack.jpg" class="unit-img" style="display:none;">
                     <img id="hit-warrior" src="image/warrior_hit.jpg" class="unit-img" style="display:none;">
                     <img id="hit-rogue" src="image/rogue_hit.jpg" class="unit-img" style="display:none;">
                     <img id="hit-mage" src="image/mage_hit.jpg" class="unit-img" style="display:none;">
@@ -658,6 +661,7 @@
         let mageAttackToggle = false;
         let specialCooldown = 0;
         const SPECIAL_COOLDOWN_MAX = 10;
+        let doubleAttackCooldown = 0;
 
         window.onload = async () => {
             const name = localStorage.getItem('rpg_player_name');
@@ -681,6 +685,7 @@
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
             pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
+            doubleAttackCooldown = 0;
 
             if (player.specialCooldown > 0) {
                 player.specialCooldown--;
@@ -1174,6 +1179,14 @@
             // Check Berserk
             let isBerserk = (pStatus.atkUp > 0);
 
+            // Double Attack Check
+            let isDoubleAttack = false;
+            const advancedJobs = ['버서커', '가디언', '어쌔신', '섀도우', '아크메이지', '소서러'];
+            if (advancedJobs.includes(player.job) && doubleAttackCooldown === 0 && Math.random() < 0.08) {
+                isDoubleAttack = true;
+                doubleAttackCooldown = Math.floor(Math.random() * 2) + 2;
+            }
+
             setTimeout(() => {
                 let enemyEvadeChance = isBossBattle ? 0.1 : 0.05;
                 if (currentWeather === "fog") enemyEvadeChance += 0.15;
@@ -1212,7 +1225,85 @@
                 enemy.hp -= dmg; 
                 showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
                 addLog(`적에게 <span class='log-dmg'>${dmg}</span>의 피해를 입혔습니다!`);
-                update(); check();
+
+                if (isDoubleAttack && enemy.hp > 0) {
+                    setTimeout(() => {
+                        performDoubleAttack();
+                    }, 1100);
+                } else {
+                    update(); check();
+                }
+            }, 200);
+        }
+
+        function performDoubleAttack() {
+            const job = player.job;
+            let msg = "";
+            let atkImg = "";
+            let effectType = "normal";
+
+            if (['버서커', '가디언'].includes(job)) {
+                msg = "한번 더 ! 강력한 일격!";
+                atkImg = "image/warrior_attack.jpg";
+                effectType = "big";
+            } else if (['어쌔신', '섀도우'].includes(job)) {
+                msg = "보이지 않는 속도로!";
+                atkImg = "image/rogue_attack.jpg";
+                effectType = "rogue";
+            } else if (['아크메이지', '소서러'].includes(job)) {
+                msg = "마력이 넘쳐흐른다 !";
+                atkImg = "image/mage_attack.jpg";
+                effectType = "big";
+            }
+
+            say('p', msg);
+
+            const pImg = document.getElementById('p-img');
+            pImg.src = atkImg;
+
+            playAttackSfx();
+
+            setTimeout(() => {
+                let dmgRatio = (Math.random() * 0.4) + 0.3;
+                let baseDmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
+
+                if (pStatus.atkUp > 0) baseDmg *= 2;
+
+                let dmg = Math.floor(baseDmg * dmgRatio);
+
+                triggerHitEffect('enemy-frame', effectType);
+
+                enemy.hp -= dmg;
+                showDamage('enemy-frame', dmg, 'normal');
+                addLog(`연속 공격! <span class='log-dmg'>${dmg}</span>의 추가 피해!`);
+
+                setTimeout(() => {
+                    if (isLegendary) {
+                         const jM = {
+                            '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
+                            '버서커': 'warrior', '가디언': 'warrior',
+                            '어쌔신': 'rogue', '섀도우': 'rogue',
+                            '아크메이지': 'mage', '소서러': 'mage'
+                        };
+                        let base = jM[player.job];
+                        if (base === 'warrior') pImg.src = 'image/warrior4.jpg';
+                        else if (base === 'rogue') pImg.src = 'image/rogue4.jpg';
+                        else if (base === 'mage') pImg.src = 'image/mage4.jpg';
+                        else pImg.src = `image/${base}1.jpg`;
+                    } else {
+                         const jM = {
+                            '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
+                            '버서커': 'warrior1', '가디언': 'warrior1',
+                            '어쌔신': 'rogue1', '섀도우': 'rogue1',
+                            '아크메이지': 'mage1', '소서러': 'mage1'
+                        };
+                        let base = jM[player.job] || 'warrior';
+                        pImg.src = `image/${base}.jpg`;
+                    }
+                }, 500);
+
+                update();
+                check();
             }, 200);
         }
 
@@ -1424,6 +1515,7 @@
         
         function tickPlayerBuffs() {
             if (specialCooldown > 0) specialCooldown--;
+            if (doubleAttackCooldown > 0) doubleAttackCooldown--;
             if (pStatus.defUp > 0) pStatus.defUp--;
             if (pStatus.atkUp > 0) pStatus.atkUp--;
             if (pStatus.invincible > 0) pStatus.invincible--;
