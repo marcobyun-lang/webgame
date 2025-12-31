@@ -1605,25 +1605,25 @@
             }
             else if (Math.random() < 0.6) {
                 const r = Math.random();
-                if (r < 0.005) {
+                if (r < 0.008) {
                     player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999});
                     dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg="potion_full.jpg";
-                } else if (r < 0.01) {
+                } else if (r < 0.018) {
                      player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0});
                      dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg="potion_focus.jpg";
-                } else if (r < 0.02) {
+                } else if (r < 0.03) {
                      player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0});
                      dropName = "광기의 물약"; dropColor="#ff1744"; dropImg="potion_madness.jpg";
-                } else if (r < 0.04) {
+                } else if (r < 0.05) {
                     player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:9999});
                     dropName = "해골 포션"; dropColor="#757575"; dropImg="potion_skeleton.jpg";
-                } else if (r < 0.07) {
+                } else if (r < 0.08) {
                      player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0});
                      dropName = "정화의 성수"; dropColor="#00e676"; dropImg="potion_holy.jpg";
-                } else if (r < 0.07) { // 정화의 성수와 비슷한 구간에 배치
+                } else if (r < 0.12) {
                     player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0});
                     dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg="potion_gamble.jpg";
-                } else if (r < 0.20) {
+                } else if (r < 0.25) {
                     player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0});
                     dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg="Scroll.jpg";
                 } else {
