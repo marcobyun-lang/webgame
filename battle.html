@@ -618,6 +618,22 @@
             '소서러': ['원소의 근원', '마나의 눈']
         };
 
+        const ENEMY_ATTACK_IMAGES = {
+            'image/best_boss.jpg': 'image/best_boss_1.jpg',
+            'image/ka.jpg': 'image/ka_1.jpg',
+            'image/ka1.jpg': 'image/ka1_1.jpg',
+            'image/ke2.jpg': 'image/ke2_1.jpg',
+            'image/ke3.jpg': 'image/ke3_1.jpg',
+            'image/monster_boss.jpg': 'image/monster_boss_1.jpg',
+            'image/monster1.jpg': 'image/monster1_1.jpg',
+            'image/monster2.jpg': 'image/monster2_1.jpg',
+            'image/monster3.jpg': 'image/monster2_3.jpg',
+            'image/ka4.jpg': 'image/ka4_1.jpg',
+            'image/ke1.jpg': 'image/ke1_1.jpg',
+            'image/ka2.jpg': 'image/ka2_1.jpg',
+            'image/ka3.jpg': 'image/ka3_1.jpg'
+        };
+
         let player, enemy, isActing = false;
         let isBossBattle = false;
         let isSuperBoss = false;
@@ -996,6 +1012,18 @@
                     if(motionImg) { pImg.style.display = 'none'; motionImg.style.display = 'block'; setTimeout(() => { motionImg.style.display = 'none'; pImg.style.display = 'block'; }, 1000); }
                 }
                 triggerHitEffect(targetFrameId, effectType);
+            }
+        }
+
+        function playEnemyAttackMotion() {
+            const eImg = document.getElementById('e-img');
+            const currentSrc = enemy.img;
+            const attackImg = ENEMY_ATTACK_IMAGES[currentSrc];
+            if (attackImg) {
+                eImg.src = attackImg;
+                setTimeout(() => {
+                    eImg.src = currentSrc;
+                }, 1000);
             }
         }
 
@@ -1395,10 +1423,13 @@
                 say('p', '느려!');
                 playMotion('', 'player-frame', 'evade');
                 showDamage('player-frame', 0, 'evade');
+                playEnemyAttackMotion();
                 tickPlayerBuffs();
                 update(); isActing = false;
                 return;
             }
+
+            playEnemyAttackMotion();
 
             let dmg = Math.max(1, enemy.atk - Math.floor(player.stats.dex/3) - (player.bonusDef || 0));
             if (player.job === '가디언') dmg = Math.floor(dmg * 0.8);
