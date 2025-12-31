@@ -568,6 +568,13 @@
 
         let bossBgm = null;
 
+        const MAP_SETS = [
+            { day: 'image/map.jpg', night: 'image/map1.jpg' },
+            { day: 'image/map2.jpg', night: 'image/map3.jpg' },
+            { day: 'image/map4.jpg', night: 'image/map5.jpg' },
+            { day: 'image/map6.jpg', night: 'image/map7.jpg' }
+        ];
+
         const DAY_ENEMY_POOL = [
             {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
             {f:'image/ka2.jpg', n:'리던', e:50, w:3},
@@ -628,7 +635,7 @@
             'image/monster_boss.jpg': 'image/monster_boss_1.jpg',
             'image/monster1.jpg': 'image/monster1_1.jpg',
             'image/monster2.jpg': 'image/monster2_1.jpg',
-            'image/monster3.jpg': 'image/monster2_3.jpg',
+            'image/monster3.jpg': 'image/monster3_1.jpg',
             'image/ka4.jpg': 'image/ka4_1.jpg',
             'image/ke1.jpg': 'image/ke1_1.jpg',
             'image/ka2.jpg': 'image/ka2_1.jpg',
@@ -718,6 +725,12 @@
             const isBossFlag = localStorage.getItem('rpg_boss_encounter');
             const isSuperBossFlag = localStorage.getItem('rpg_is_super_boss');
             const isNight = localStorage.getItem('rpg_is_night') === 'true';
+
+            // Background update based on map set and time
+            const mapSetIndex = parseInt(localStorage.getItem('rpg_map_set_index') || 0);
+            const currentSet = MAP_SETS[mapSetIndex];
+            const bgImg = isNight ? currentSet.night : currentSet.day;
+            document.getElementById('game-container').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${bgImg}')`;
 
             if (isSuperBossFlag === 'true') {
                 isBossBattle = true;
