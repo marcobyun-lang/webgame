@@ -720,6 +720,12 @@
                 if (j === '전사' || j === '버서커' || j === '가디언') pImgSrc = 'image/warrior4.jpg';
                 else if (j === '도적' || j === '어쌔신' || j === '섀도우') pImgSrc = 'image/rogue4.jpg';
                 else if (j === '마법사' || j === '아크메이지' || j === '소서러') pImgSrc = 'image/mage4.jpg';
+            } else if (player.isAdvanced) {
+                // 전직 상태이지만 레전드 무기가 없는 경우 전직 이미지 사용
+                const j = player.job;
+                if (j === '버서커' || j === '가디언') pImgSrc = 'image/warrior1.jpg';
+                else if (j === '어쌔신' || j === '섀도우') pImgSrc = 'image/rogue1.jpg';
+                else if (j === '아크메이지' || j === '소서러') pImgSrc = 'image/mage1.jpg';
             }
 
             document.getElementById('p-img').src = pImgSrc;
@@ -1724,7 +1730,7 @@
             else if (Math.random() < 0.6 + chaDropBonus) {
                 const r = Math.random();
                 const ns = isNight ? "_night" : "";
-                const holyNs = isNight ? "_holy" : "";
+                const holyNs = isNight ? "_night" : "";
                 if (r < 0.008 + chaDropBonus) {
                     const img = "potion_full" + ns + ".jpg";
                     player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999, img: img});
