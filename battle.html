@@ -1225,7 +1225,7 @@
                     }
 
                     const vMap = {
-                        '도적':'v-rogue1', '어쌔신':'v-rogue1', '섀도우':'v-rogue1'
+                        '도적':'v-rogue', '어쌔신':'v-rogue1', '섀도우':'v-rogue1'
                     };
                     const v = document.getElementById(vMap[jobKey] || 'v-rogue'); const pImg = document.getElementById('p-img');
                     if(v) {
@@ -1669,49 +1669,60 @@
             }
             else if (Math.random() < 0.6) {
                 const r = Math.random();
+                const ns = isNight ? "_night" : "";
+                const holyNs = isNight ? "_holy" : "";
                 if (r < 0.008) {
-                    player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999});
-                    dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg="potion_full.jpg";
+                    const img = "potion_full" + ns + ".jpg";
+                    player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999, img: img});
+                    dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg=img;
                 } else if (r < 0.018) {
-                     player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0});
-                     dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg="potion_focus.jpg";
+                     const img = "potion_focus" + ns + ".jpg";
+                     player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0, img: img});
+                     dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg=img;
                 } else if (r < 0.03) {
-                     player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0});
-                     dropName = "광기의 물약"; dropColor="#ff1744"; dropImg="potion_madness.jpg";
+                     const img = "potion_madness" + ns + ".jpg";
+                     player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0, img: img});
+                     dropName = "광기의 물약"; dropColor="#ff1744"; dropImg=img;
                 } else if (r < 0.05) {
-                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0});
-                    dropName = "해골 포션"; dropColor="#757575"; dropImg="potion_skeleton.jpg";
+                    const img = "potion_skeleton" + ns + ".jpg";
+                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0, img: img});
+                    dropName = "해골 포션"; dropColor="#757575"; dropImg=img;
                 } else if (r < 0.08) {
-                     player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0});
-                     dropName = "정화의 성수"; dropColor="#00e676"; dropImg="potion_holy.jpg";
+                     const img = "potion_holy" + holyNs + ".jpg";
+                     player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0, img: img});
+                     dropName = "정화의 성수"; dropColor="#00e676"; dropImg=img;
                 } else if (r < 0.12) {
-                    player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0});
-                    dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg="potion_gamble.jpg";
+                    const img = "potion_gamble" + ns + ".jpg";
+                    player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0, img: img});
+                    dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg=img;
                 } else if (r < 0.25) {
                     player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0});
                     dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg="Scroll.jpg";
                 } else {
                     const subR = Math.random();
-                    if(subR < 0.3) { player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=ITEM_IMAGES['hp_potion']; }
-                    else if(subR < 0.6) { player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=ITEM_IMAGES['mp_potion']; }
-                    else if(subR < 0.8) { player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=ITEM_IMAGES['exp_potion']; }
-                    else { player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=ITEM_IMAGES['poison_potion']; }
+                    if(subR < 0.3) { const img = "potion_hp" + ns + ".jpg"; player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: img}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=img; }
+                    else if(subR < 0.6) { const img = "potion_mp" + ns + ".jpg"; player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30, img: img}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=img; }
+                    else if(subR < 0.8) { const img = "potion_exp" + ns + ".jpg"; player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100, img: img}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=img; }
+                    else { const img = "potion_poison" + ns + ".jpg"; player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0, img: img}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=img; }
                 }
             }
             else if (Math.random() < 0.2) {
                 const rand = Math.random();
+                const ns = isNight ? "_night" : "";
                 if(rand < 0.5) {
                     const val = Math.floor(Math.random() * 5) + 1;
-                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:`공격력 +${val} 영구 증가`, val:val});
+                    const img = "attack_10" + ns + ".jpg";
+                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:`공격력 +${val} 영구 증가`, val:val, img: img});
                     dropName = "공격력 강화 물약";
                     dropColor="#ff8a80";
-                    dropImg=ITEM_IMAGES['potion_atk'];
+                    dropImg=img;
                 } else {
                     const val = Math.random() < 0.5 ? 1 : 5;
-                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:`방어력 +${val} 영구 증가`, val:val});
+                    const img = "Defense_10" + ns + ".jpg";
+                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:`방어력 +${val} 영구 증가`, val:val, img: img});
                     dropName = "방어력 강화 물약";
                     dropColor="#82b1ff";
-                    dropImg=ITEM_IMAGES['potion_def'];
+                    dropImg=img;
                 }
             }
 
@@ -1817,7 +1828,7 @@
                     const item = group.item;
                     const div = document.createElement('div');
                     div.className = 'battle-item-row';
-                    let iconSrc = ITEM_IMAGES[item.type] || 'potion_hp.jpg';
+                    let iconSrc = item.img || ITEM_IMAGES[item.type] || 'potion_hp.jpg';
 
                     div.innerHTML = `<img src="image/${iconSrc}" class="battle-item-icon"><div class="battle-item-info"><div class="battle-item-name">${item.name}<span class="battle-item-count">x${group.count}</span></div><div class="battle-item-desc">${item.desc}</div></div>`;
                     div.onclick = () => useBattleItem(group.indices[0]);
@@ -1882,7 +1893,7 @@
                 isActing = true;
                 pStatus.nextSkillZeroCost = 1;
                 pStatus.skillDmgUp = 3;
-                showEffectPopup("정신 집중", "다음 스킬 마나 소모 0\n3턴간 스킬 데미지 50% 증가", "potion_focus.jpg");
+                showEffectPopup("정신 집중", "다음 스킬 마나 소모 0\n3턴간 스킬 데미지 50% 증가", item.img || "potion_focus.jpg");
                 playPotionSfx();
                 handledByPopup = true;
             } else if (item.type === 'potion_holy') {
@@ -1900,7 +1911,7 @@
                 player.hp = Math.max(1, player.hp - dmg);
                 pStatus.critUp = 3;
                 showDamage('player-frame', dmg, 'player_hit');
-                showEffectPopup("광기의 힘", `HP ${dmg} 감소\n3턴간 크리티컬 100%`, "potion_madness.jpg");
+                showEffectPopup("광기의 힘", `HP ${dmg} 감소\n3턴간 크리티컬 100%`, item.img || "potion_madness.jpg");
                 playPotionSfx();
                 handledByPopup = true;
             } else if (item.type === 'potion_gamble') {

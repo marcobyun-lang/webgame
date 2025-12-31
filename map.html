@@ -376,6 +376,9 @@
             touch-action: manipulation;
         }
         .d-pad-btn:active { background: rgba(255, 215, 0, 0.3); border-color: var(--accent-gold); color: var(--accent-gold); }
+
+        .item-icon-small { width: 32px; height: 32px; border: 1px solid var(--bag-border); border-radius: 4px; margin-right: 10px; object-fit: cover; }
+        .item-header { display: flex; align-items: center; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -777,6 +780,12 @@
             const currentSet = MAP_SETS[mapSetIndex];
             mapImg.src = isNight ? currentSet.night : currentSet.day;
             localStorage.setItem('rpg_is_night', isNight);
+
+            const ns = isNight ? "_night" : "";
+            potionImg.src = 'image/potion_hp' + ns + '.jpg';
+            atkImg.src = 'image/attack_10' + ns + '.jpg';
+            defImg.src = 'image/Defense_10' + ns + '.jpg';
+
             changeWeather();
         }
 
@@ -918,8 +927,10 @@
             const dx = player.x - item.x; const dy = player.y - item.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if (dist < 25) {
+                const ns = isNight ? "_night" : "";
                 if (item.type === 'potion') {
-                    player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50});
+                    const img = 'potion_hp' + ns + '.jpg';
+                    player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: img});
                 } else if (item.type === 'shoes') {
                     player.moveSpeed += 2;
                     showConfirm("아이템 획득", "신속의 장화를 획득했습니다! 이동 속도가 영구적으로 증가합니다.", null, true);
@@ -1182,7 +1193,14 @@
             const rarityClass = item.rarity ? `rarity-${item.rarity}` : '';
             const nameStyle = item.rarityColor ? `color:${item.rarityColor};` : (item.equipped ? 'color:var(--accent-gold)' : '');
             const baseVal = item.val || 10; const enh = item.enhanceCount || 0; const sellPrice = Math.floor((baseVal * 5) + (enh * 50));
-            div.innerHTML = `<div><div class="item-name ${rarityClass}" style="${nameStyle}">${item.name}</div><div class="item-desc">${item.desc.replace(/\n/g, '<br>')}</div><div class="item-price">판매가: <span style="color:gold">${sellPrice} G</span></div></div><div class="item-type" style="color:${typeColor}">${typeText}</div><button class="sell-btn" onclick="askSell(${index}); event.stopPropagation();">판매</button>`;
+
+            let iconHtml = '';
+            if (item.type.includes('potion') || item.type.includes('scroll') || item.type === 'weapon') {
+                let iconSrc = item.img || (item.type === 'weapon' ? 'weapon_warrior.jpg' : 'potion_hp.jpg');
+                iconHtml = `<img src="image/${iconSrc}" class="item-icon-small">`;
+            }
+
+            div.innerHTML = `<div><div class="item-header">${iconHtml}<div class="item-name ${rarityClass}" style="${nameStyle}">${item.name}</div></div><div class="item-desc">${item.desc.replace(/\n/g, '<br>')}</div><div class="item-price">판매가: <span style="color:gold">${sellPrice} G</span></div></div><div class="item-type" style="color:${typeColor}">${typeText}</div><button class="sell-btn" onclick="askSell(${index}); event.stopPropagation();">판매</button>`;
             div.onclick = () => useItem(index);
             list.appendChild(div);
         });
@@ -1603,69 +1621,6 @@
                 localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html';
             }
         }
-    }
-
-    function showGameOver(msg) {
-        const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
-        const survivalTime = Math.floor((Date.now() - startTime) / 1000);
-        const min = Math.floor(survivalTime / 60);
-        const sec = survivalTime % 60;
-
-        const kills = player.quests.killCount || 0;
-        const bossKills = player.quests.bossKillCount || 0;
-        const normalKills = Math.max(0, kills - bossKills);
-
-        let itemValue = 0;
-        player.inventory.forEach(item => {
-            if (item.type === 'weapon') {
-                if (item.rarity === 'legendary') itemValue += 5000;
-                else if (item.rarity === 'epic') itemValue += 2000;
-            } else if (item.type.includes('potion') || item.type.includes('scroll')) {
-                const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
-                if (rareItems.includes(item.type)) itemValue += 500;
-            }
-        });
-
-        const lvScore = player.level * 1000;
-        const bossScore = bossKills * 2000;
-        const normalScore = normalKills * 10;
-        const goldScore = Math.floor(player.gold * 0.1);
-        const survivalScore = survivalTime;
-
-        const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore;
-
-        const statsContainer = document.getElementById('go-stats-container');
-        statsContainer.innerHTML = `
-            <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
-        `;
-
-        document.querySelector('.gameover-title').innerText = msg;
-        document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
-
-        // Send Ranking Data
-        fetch(DB_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({
-                type: 'ranking',
-                name: player.name,
-                score: totalScore,
-                job: player.job,
-                level: player.level
-            })
-        });
-
-        localStorage.removeItem('rpg_temp_player');
-        localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
-        localStorage.removeItem('rpg_boss_death_time');
-
-        document.getElementById('gameover-modal').style.display = 'flex';
     }
 
     // Mobile Control Logic
