@@ -1511,6 +1511,27 @@
             document.getElementById('gameover-modal').style.display = 'flex';
         }
 
+        function getWeaponImage(job, rarity) {
+            let baseJob = '전사';
+            if (['도적', '어쌔신', '섀도우'].includes(job)) baseJob = '도적';
+            if (['마법사', '아크메이지', '소서러'].includes(job)) baseJob = '마법사';
+
+            if (baseJob === '전사') {
+                if (rarity === 'legendary') return 'legend_warrior.jpg';
+                if (rarity === 'epic') return 'epic_warrior.jpg';
+                return 'weapon_warrior.jpg';
+            } else if (baseJob === '도적') {
+                if (rarity === 'legendary') return 'legend_rogue.jpg';
+                if (rarity === 'epic') return 'epic_rogue.jpg';
+                return 'weapon_rogue.jpg';
+            } else if (baseJob === '마법사') {
+                if (rarity === 'legendary') return 'legend_mage.jpg';
+                if (rarity === 'epic') return 'epic_mage.jpg';
+                return 'weapon_mage.jpg';
+            }
+            return 'weapon_warrior.jpg';
+        }
+
         function win() {
             stopBossBgm();
             const isNight = localStorage.getItem('rpg_is_night') === 'true';
@@ -1559,7 +1580,7 @@
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
 
                 player.inventory.push(newItem);
-                dropName = newItem.name; dropColor = colorCode; dropImg = WEAPON_IMAGES[player.job];
+                dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
             } 
             else if (!isBossBattle && rand < 0.05) {
                 const nameList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
@@ -1580,7 +1601,7 @@
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
 
                 player.inventory.push(newItem);
-                dropName = newItem.name; dropColor = colorCode; dropImg = WEAPON_IMAGES[player.job];
+                dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
             }
             else if (Math.random() < 0.6) {
                 const r = Math.random();
