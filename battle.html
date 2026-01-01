@@ -574,9 +574,9 @@
                     <h3 id="p-name" class="unit-name">플레이어</h3>
                     <div id="p-status" class="status-effects"></div>
                     <div class="bar-container">
-                        <div class="bar-wrap"><div id="p-hp-bar" class="bar-fill hp-bar"></div><span id="p-hp-text" class="bar-text"></span></div>
-                        <div class="bar-wrap"><div id="p-mp-bar" class="bar-fill mp-bar"></div><span id="p-mp-text" class="bar-text"></span></div>
-                        <div class="bar-wrap"><div id="p-rage-bar" class="bar-fill rage-bar"></div><span id="p-rage-text" class="bar-text"></span></div>
+                        <div id="p-hp-bar-wrap" class="bar-wrap"><div id="p-hp-bar" class="bar-fill hp-bar"></div><span id="p-hp-text" class="bar-text"></span></div>
+                        <div id="p-mp-bar-wrap" class="bar-wrap"><div id="p-mp-bar" class="bar-fill mp-bar"></div><span id="p-mp-text" class="bar-text"></span></div>
+                        <div id="p-rage-bar-wrap" class="bar-wrap"><div id="p-rage-bar" class="bar-fill rage-bar"></div><span id="p-rage-text" class="bar-text"></span></div>
                     </div>
                 </div>
             </div>
@@ -971,7 +971,7 @@
                 case '아크메이지': desc = "[대마법] 적에게 매우 강력한 마법 피해를 입힙니다."; break;
                 case '소서러': desc = "[원소 마법] 적에게 강력한 마법 피해를 입힙니다. (마나 소모량 감소)"; break;
                 case '스나이퍼': desc = "[헤드샷] 적의 현재 체력에 비례한 추가 피해를 입히는 확정 치명타 공격입니다."; break;
-                case '레인저': desc = "[화살비] 적에게 물리 피해를 입히고, 3턴간 연속 공격 확률이 2배 증가합니다."; break;
+                case '레인저': desc = "[화살비] 적에게 물리 피해를 입히고, 3턴간 연속 공격 확률이 3배 증가합니다. (MP 소모량 대폭 증가)"; break;
                 default: desc = "직업 고유의 기술을 사용합니다."; break;
             }
             btn.title = desc;
@@ -1385,7 +1385,11 @@
             let isDoubleAttack = false;
             const advancedJobs = ['버서커', '가디언', '어쌔신', '섀도우', '아크메이지', '소서러', '스나이퍼', '레인저'];
             let doubleAttackBaseChance = 0.08;
-            if (pStatus.doubleAttackChance > 0) doubleAttackBaseChance *= 2; // 레인저 스킬 효과
+            if (player.job === '레인저' && pStatus.doubleAttackChance > 0) { // 엘프 레인저 화살비 스킬 효과
+                doubleAttackBaseChance *= 3;
+            } else if (pStatus.doubleAttackChance > 0) {
+                doubleAttackBaseChance *= 2; // 기존 연속 공격 확률 2배 증가
+            }
 
             if (advancedJobs.includes(player.job) && doubleAttackCooldown === 0 && Math.random() < doubleAttackBaseChance) {
                 isDoubleAttack = true;
@@ -1597,7 +1601,8 @@
             let costRate = 0.6;
             if (player.job === '소서러') costRate = 0.3;
             if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.4;
-            if (player.job === '엘프 궁수' || player.job === '레인저') costRate = 0.3; // 궁수 스킬 마나 소모율
+            if (player.job === '엘프 궁수') costRate = 0.3; // 궁수 스킬 마나 소모율
+            if (player.job === '레인저') costRate = 0.8; // 엘프 레인저 화살비 스킬 마나 소모율 대폭 증가
             if (player.job === '스나이퍼') costRate = 0.7; // 스나이퍼 헤드샷 마나 소모율 증가
 
             if (pStatus.zeroMana > 0 || pStatus.nextSkillZeroCost > 0) costRate = 0;
@@ -1744,7 +1749,7 @@
                 } else if (job === '레인저') {
                     dmg = (player.stats.dex * multiplier) + (player.level * 2);
                     pStatus.doubleAttackChance = 3;
-                    addLog("레인저의 [화살 비]! 3턴간 연속 공격 확률이 2배 증가합니다!");
+                    addLog("레인저의 [화살 비]! 3턴간 연속 공격 확률이 3배 증가합니다!");
                 } else {
                     dmg = (player.stats.int * multiplier) + (player.level * 5);
                 }
