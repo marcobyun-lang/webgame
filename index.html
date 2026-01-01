@@ -706,12 +706,14 @@
         const player = { name: "", job: "", stats: null, level: 1, exp: 0, maxExp: 100, hp: 0, maxHp: 0, mp: 0, maxMp: 0, x: 480, y: 325 };
         let rollCount = 5;
         let isRandomRolling = false;
+        let randomRollCount = 2; // 랜덤 롤링 가능 횟수
 
         const bgm = new Audio('song/song_1.mp3');
         bgm.loop = true;
         bgm.volume = 0.15;
 
         const diceSound = new Audio('song/dice1.mp3');
+        const randomDiceSound = new Audio('song/dice2.mp3');
 
         window.onload = () => {
             loadRankings();
@@ -779,8 +781,13 @@
                 el.classList.remove('bonus');
             });
 
-            diceSound.currentTime = 0;
-            diceSound.play().catch(e => console.log("Sound play failed:", e));
+            if (isAuto) {
+                randomDiceSound.currentTime = 0;
+                randomDiceSound.play().catch(e => console.log("Sound play failed:", e));
+            } else {
+                diceSound.currentTime = 0;
+                diceSound.play().catch(e => console.log("Sound play failed:", e));
+            }
 
             const statIds = ['str','dex','con','int','wis','cha'];
             const statElements = statIds.map(id => document.getElementById(`val-${id}`));
@@ -801,10 +808,16 @@
                     btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
                     if (rollCount > 0) btn.disabled = false;
                 } else {
-                    // 자동 롤링(랜덤 선택)일 경우 버튼 영구 비활성화
-                    btn.innerText = `🎲 주사위 고정됨 (LOCK)`;
-                    btn.disabled = true;
-                    btn.style.filter = "grayscale(100%)";
+                    // 자동 롤링(랜덤 선택)일 경우
+                    if (randomRollCount > 0) {
+                        btn.innerText = `🎲 랜덤 다시 굴리기 (남은 기회: ${randomRollCount})`;
+                        btn.disabled = false;
+                        btn.onclick = selectRandomJob; // 버튼 클릭 시 다시 랜덤 롤링
+                    } else {
+                        btn.innerText = `🎲 주사위 고정됨 (LOCK)`;
+                        btn.disabled = true;
+                        btn.style.filter = "grayscale(100%)";
+                    }
                 }
 
                 // 랜덤 선택 중일 때는 player.job이 아직 없을 수 있으므로 임시로 전사 기준으로 굴림 (나중에 덮어씌움)
@@ -843,30 +856,43 @@
 
         function selectJob(job) { 
             if (isRandomRolling) return;
+
+            // 랜덤 롤링 중이 아니더라도, 랜덤 롤링 기회를 다 소진해서 LOCK 상태라면 변경 불가
+            const btn = document.getElementById('btn-dice');
+            if (btn.innerText.includes('LOCK')) return;
+
+            // 일반 모드로 복귀 시 랜덤 관련 상태 초기화 (만약 랜덤을 하다가 일반을 누른 경우)
+            // 단, 이미 랜덤을 한 번이라도 돌렸으면(randomRollCount < 2) 일반 모드로 못 돌아오게 할 수도 있지만,
+            // 여기서는 자유롭게 왔다갔다 할 수 있게 하되, 랜덤 횟수는 유지하거나 초기화하는 정책이 필요함.
+            // 요구사항: "랜덤은 한번실행후 한번더 실행할수 있게 최대 두번하고 무조건 고정"
+            // 이 말은 랜덤 모드에 진입하면 거기서 끝을 봐야 한다는 의미로 해석됨.
+            // 따라서 랜덤 롤링을 시작했다면(randomRollCount < 2), 다른 직업 선택을 막는 것이 자연스러움.
+            if (randomRollCount < 2) return alert("랜덤 선택이 진행 중입니다. 운명을 받아들이세요!");
+
             player.job = job;
             document.querySelectorAll('.char-card').forEach(el => {
                 el.classList.remove('selected', 'confirmed');
                 if (el.getAttribute('data-job') === job) el.classList.add('selected');
             });
 
-            const btn = document.getElementById('btn-dice');
-            if (btn.innerText.includes('LOCK')) return; // 이미 잠긴 경우 패스
-
             // 직업 변경 시 보너스 표시 제거
             ['str','dex','con','int','wis','cha'].forEach(s => {
                 const el = document.getElementById(`val-${s}`);
                 el.classList.remove('bonus');
-                // innerText는 rollAllStats에서 갱신됨
             });
 
             btn.disabled = rollCount <= 0;
             btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
+            btn.onclick = () => rollAllStats(); // 원래 함수로 복구
             checkStartCondition();
         }
 
         function selectRandomJob() {
             if (isRandomRolling) return;
+            if (randomRollCount <= 0) return; // 기회 소진 시 실행 불가
+
             isRandomRolling = true;
+            randomRollCount--;
 
             // UI 초기화
             document.querySelectorAll('.char-card').forEach(el => el.classList.remove('selected', 'confirmed'));
@@ -947,6 +973,13 @@
 
                 isRandomRolling = false;
                 checkStartCondition();
+
+                // 설명 텍스트 업데이트 (남은 기회 표시)
+                if (randomRollCount > 0) {
+                    descEl.innerHTML = `마음에 드시나요?<br>한 번 더 기회가 있습니다.`;
+                } else {
+                    descEl.innerHTML = `운명이 결정되었습니다.<br>모험을 떠나세요!`;
+                }
 
             }, 2000);
         }

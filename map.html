@@ -210,6 +210,13 @@
         .side-atk-val { color: #ff8a80; font-weight: bold; font-size: 1rem; }
         .side-bonus { color: #81c784; font-size: 0.75rem; margin-left: 4px; }
 
+        /* Stat Colors */
+        .stat-normal { color: #fff; }
+        .stat-20 { color: #4caf50; text-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
+        .stat-30 { color: #2196f3; text-shadow: 0 0 8px rgba(33, 150, 243, 0.6); }
+        .stat-40 { color: #ff9800; text-shadow: 0 0 10px rgba(255, 152, 0, 0.7); }
+        .stat-50 { color: #e91e63; text-shadow: 0 0 12px rgba(233, 30, 99, 0.8); }
+
         .shop-gold { text-align: center; color: var(--accent-gold); font-family: var(--font-body); font-size: 1.2rem; margin-bottom: 15px; padding: 10px; border: 1px solid #333; background: #111; }
         .enhance-btn {
             margin-top: 8px; width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #ddd;
@@ -1253,6 +1260,14 @@
         else renderTraits();
     }
 
+    function getStatClass(val) {
+        if (val >= 50) return 'stat-50';
+        if (val >= 40) return 'stat-40';
+        if (val >= 30) return 'stat-30';
+        if (val >= 20) return 'stat-20';
+        return 'stat-normal';
+    }
+
     function renderInventory() {
         const list = document.getElementById('inv-list');
         const statusPanel = document.getElementById('inv-status-panel');
@@ -1263,12 +1278,12 @@
         statusPanel.innerHTML = `
             <div style="text-align:center; margin-bottom:15px;"><img src="${getPlayerImage(player.job, player.inventory)}" style="width:100px; height:100px; border:1px solid #444; margin-bottom:10px;"><div style="color:var(--accent-gold); font-family:var(--font-head); font-size:1.1rem;">${player.job.toUpperCase()}</div></div>
             <div class="side-stat-row"><span class="side-stat-name">레벨</span><span class="side-stat-val">${player.level}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">힘</span><span class="side-stat-val">${player.stats.str}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">민첩</span><span class="side-stat-val">${player.stats.dex}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">체력</span><span class="side-stat-val">${player.stats.con}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">지능</span><span class="side-stat-val">${player.stats.int}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">지혜</span><span class="side-stat-val">${player.stats.wis}</span></div>
-            <div class="side-stat-row"><span class="side-stat-name">매력</span><span class="side-stat-val">${player.stats.cha}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">힘</span><span class="side-stat-val ${getStatClass(player.stats.str)}">${player.stats.str}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">민첩</span><span class="side-stat-val ${getStatClass(player.stats.dex)}">${player.stats.dex}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">체력</span><span class="side-stat-val ${getStatClass(player.stats.con)}">${player.stats.con}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">지능</span><span class="side-stat-val ${getStatClass(player.stats.int)}">${player.stats.int}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">지혜</span><span class="side-stat-val ${getStatClass(player.stats.wis)}">${player.stats.wis}</span></div>
+            <div class="side-stat-row"><span class="side-stat-name">매력</span><span class="side-stat-val ${getStatClass(player.stats.cha)}">${player.stats.cha}</span></div>
             <div class="side-stat-row" style="margin-top:15px; border-top:1px solid #333;"><span class="side-stat-name" style="color:#ef5350">총 공격력</span><div class="side-atk-val">${totalAtk}${player.bonusAtk > 0 ? `<span class="side-bonus">(+${player.bonusAtk})</span>` : ''}</div></div>
             <div class="side-stat-row"><span class="side-stat-name" style="color:#2196f3">추가 방어력</span><div class="side-stat-val">${player.bonusDef}</div></div>
         `;
