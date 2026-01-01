@@ -669,6 +669,19 @@
             '소서러': ['원소의 근원', '마나의 눈']
         };
 
+        const LEGENDARY_SPECIAL_OPTIONS = [
+            { name: "피의 갈증", desc: "공격 시 10% 확률로 피해량의 20% HP 흡수", key: "l_vamp", val: 20 },
+            { name: "마나의 샘", desc: "공격 시 10% 확률로 최대 MP의 10% 회복", key: "l_mana", val: 10 },
+            { name: "가벼운 발걸음", desc: "회피율 +10%", key: "l_eva", val: 10 },
+            { name: "강철 피부", desc: "받는 피해량 -10%", key: "l_def", val: 10 },
+            { name: "약점 간파", desc: "치명타 피해량 +25%", key: "l_crit_dmg", val: 25 },
+            { name: "골드 러시", desc: "골드 획득량 +30%", key: "l_gold", val: 30 },
+            { name: "성장의 가속", desc: "경험치 획득량 +20%", key: "l_exp", val: 20 },
+            { name: "굳건한 의지", desc: "상태이상 저항 +30%", key: "l_resist", val: 30 },
+            { name: "분노 조절", desc: "분노 획득량 +20%", key: "l_rage", val: 20 },
+            { name: "재빠른 손놀림", desc: "아이템 획득 시 5% 확률로 2배 획득", key: "l_double_drop", val: 5 }
+        ];
+
         const ENEMY_ATTACK_IMAGES = {
             'image/best_boss.jpg': 'image/best_boss_1.jpg',
             'image/ka.jpg': 'image/ka_1.jpg',
@@ -1959,6 +1972,13 @@
                 const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+2}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+2}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+2}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+2}];
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
+
+                if (newItem.rarity === "legendary") {
+                     const specialOpt = LEGENDARY_SPECIAL_OPTIONS[Math.floor(Math.random() * LEGENDARY_SPECIAL_OPTIONS.length)];
+                     newItem.specialOption = specialOpt;
+                     newItem.desc += `\n<span style='color:#b2ff59; font-weight:bold;'>[특수] ${specialOpt.name}</span>\n<span style='color:#aaa; font-size:0.7rem;'>${specialOpt.desc}</span>`;
+                }
+
                 drops.push({ item: newItem, rarity: newItem.rarity });
             } 
             else if (!isBossBattle && rand < 0.05 + chaDropBonus) {
@@ -1974,6 +1994,13 @@
                 const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+1}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+1}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+1}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+1}];
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
+
+                if (newItem.rarity === "legendary") {
+                     const specialOpt = LEGENDARY_SPECIAL_OPTIONS[Math.floor(Math.random() * LEGENDARY_SPECIAL_OPTIONS.length)];
+                     newItem.specialOption = specialOpt;
+                     newItem.desc += `\n<span style='color:#b2ff59; font-weight:bold;'>[특수] ${specialOpt.name}</span>\n<span style='color:#aaa; font-size:0.7rem;'>${specialOpt.desc}</span>`;
+                }
+
                 drops.push({ item: newItem, rarity: newItem.rarity });
             }
             else if (Math.random() < 0.6 + chaDropBonus) {
