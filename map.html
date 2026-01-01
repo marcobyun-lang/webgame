@@ -1629,12 +1629,14 @@
         ];
 
         let descText = `공격력 +${item.val} (${item.reqJob || player.job} 전용)`;
+        let optionMsg = "";
 
         for(let i=0; i<optCount; i++) {
             const type = possibleOpts[Math.floor(Math.random() * possibleOpts.length)];
             const val = Math.floor(Math.random() * 5) + 1; // 1~5
             newOptions.push({ name: type.name, key: type.key, val: val });
             descText += `\n[옵션] ${type.name} +${val}`;
+            optionMsg += `[${type.name} +${val}] `;
         }
 
         item.options = newOptions;
@@ -1654,7 +1656,7 @@
         modal.querySelector('h2').innerText = "대장간";
         document.getElementById('shop-gold-display').style.display = 'block';
 
-        showConfirm("옵션 부여 성공", `${item.name}에 새로운 옵션이 부여되었습니다!`, null, true);
+        showConfirm("옵션 부여 성공", `${item.name}에 새로운 옵션이 부여되었습니다!\n\n부여된 옵션:\n${optionMsg}`, null, true);
         updateUI();
     }
 
