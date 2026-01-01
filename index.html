@@ -178,6 +178,43 @@
             border-top-color: rgba(255, 215, 0, 0.5);
         }
 
+        /* Random Card Styles */
+        #card-random {
+            background: linear-gradient(135deg, #2a0a3a 0%, #1a1a1a 100%);
+            border-color: #9b59b6;
+        }
+        #card-random::before {
+            border-color: rgba(155, 89, 182, 0.3);
+        }
+        #card-random:hover, #card-random.selected {
+            border-color: #e0b0ff;
+            box-shadow: 0 0 30px rgba(155, 89, 182, 0.4);
+        }
+        #card-random p { color: #bcaaa4; }
+        #card-random:hover p { color: #e0b0ff; text-shadow: 0 0 15px rgba(224, 176, 255, 0.6); }
+
+        .selected-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px #ffd700, 0 0 10px #ff0000;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            white-space: nowrap;
+        }
+        .char-card.confirmed .selected-overlay {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            animation: pulseText 1s infinite alternate;
+        }
+        @keyframes pulseText { from { text-shadow: 0 0 20px #ffd700; } to { text-shadow: 0 0 40px #ffd700, 0 0 20px #ff4500; } }
+
         .stats-box {
             background: rgba(0, 0, 0, 0.75);
             border: 1px solid #444;
@@ -224,6 +261,19 @@
             color: #fff;
             text-shadow: 0 0 10px #fff;
         }
+        .stat-value.bonus {
+            color: #00ffea; /* 형광 청록색 */
+            text-shadow: 0 0 10px #00ffea, 0 0 20px #00ffea;
+            font-size: 1.6rem;
+        }
+        .bonus-tag {
+            font-size: 0.8rem;
+            color: #ffeb3b;
+            vertical-align: super;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
         .stat-guide-container {
             display: grid;
@@ -552,6 +602,7 @@
                     <p>WARRIOR</p>
                     <div class="char-desc">높은 체력과 방어력으로<br>전투를 이끄는 수호자</div>
                 </div>
+                <div class="selected-overlay">SELECTED!</div>
             </div>
             <div class="char-card" onclick="selectJob('도적')" data-job="도적">
                 <img src="image/rogue.jpg" alt="ROGUE">
@@ -559,6 +610,7 @@
                     <p>ROGUE</p>
                     <div class="char-desc">빠른 몸놀림으로 공격을<br>회피하고 급소를 타격</div>
                 </div>
+                <div class="selected-overlay">SELECTED!</div>
             </div>
             <div class="char-card" onclick="selectJob('마법사')" data-job="마법사">
                 <img src="image/mage.jpg" alt="MAGE">
@@ -566,6 +618,16 @@
                     <p>MAGE</p>
                     <div class="char-desc">강력한 마법으로 적을<br>섬멸하는 화력의 지배자</div>
                 </div>
+                <div class="selected-overlay">SELECTED!</div>
+            </div>
+            <!-- Random Card -->
+            <div class="char-card" onclick="selectRandomJob()" id="card-random">
+                <img src="image/dice_image.jpg" alt="RANDOM" id="img-random">
+                <div class="char-info">
+                    <p id="txt-random-title">RANDOM</p>
+                    <div class="char-desc" id="txt-random-desc">운명에 맡기시겠습니까?<br>랜덤 직업 + 능력치</div>
+                </div>
+                <div class="selected-overlay">SELECTED!</div>
             </div>
         </div>
 
@@ -643,6 +705,7 @@
         const DB_URL = "https://script.google.com/macros/s/AKfycbwFtbKreW0iJpUXrUs3haBJqiMREL2EQ8XhpomKe7mR6l1Q0NDjoXpe31XY6k6VPe48Iw/exec";
         const player = { name: "", job: "", stats: null, level: 1, exp: 0, maxExp: 100, hp: 0, maxHp: 0, mp: 0, maxMp: 0, x: 480, y: 325 };
         let rollCount = 5;
+        let isRandomRolling = false;
 
         const bgm = new Audio('song/song_1.mp3');
         bgm.loop = true;
@@ -702,45 +765,58 @@
             return sum;
         }
 
-        function rollAllStats() { 
-            if (!player.job) return alert("먼저 직업을 선택하세요!");
-            if (rollCount <= 0) return;
+        function rollAllStats(duration = 800, isAuto = false) {
+            if (!player.job && !isAuto) return alert("먼저 직업을 선택하세요!");
+            if (rollCount <= 0 && !isAuto) return;
 
             const btn = document.getElementById('btn-dice');
-            btn.disabled = true; // 애니메이션 중 버튼 비활성화
-            btn.classList.add('dice-shaking'); // 흔들림 효과 추가
+            btn.disabled = true;
+            btn.classList.add('dice-shaking');
 
-            // 주사위 소리 재생
+            // 기존 보너스 표시 제거
+            ['str','dex','con','int','wis','cha'].forEach(s => {
+                const el = document.getElementById(`val-${s}`);
+                el.classList.remove('bonus');
+            });
+
             diceSound.currentTime = 0;
             diceSound.play().catch(e => console.log("Sound play failed:", e));
 
             const statIds = ['str','dex','con','int','wis','cha'];
             const statElements = statIds.map(id => document.getElementById(`val-${id}`));
 
-            // 롤링 애니메이션 (숫자가 마구 바뀜)
             let rollingInterval = setInterval(() => {
                 statElements.forEach(el => {
-                    el.innerText = Math.floor(Math.random() * 16) + 3; // 3~18 사이 랜덤 숫자
+                    el.innerText = Math.floor(Math.random() * 16) + 3;
                     el.classList.add('rolling');
                 });
             }, 50);
 
-            // 0.8초 후 결과 확정
             setTimeout(() => {
                 clearInterval(rollingInterval);
                 btn.classList.remove('dice-shaking');
 
-                rollCount--;
-                btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
-                if (rollCount > 0) btn.disabled = false;
+                if (!isAuto) {
+                    rollCount--;
+                    btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
+                    if (rollCount > 0) btn.disabled = false;
+                } else {
+                    // 자동 롤링(랜덤 선택)일 경우 버튼 영구 비활성화
+                    btn.innerText = `🎲 주사위 고정됨 (LOCK)`;
+                    btn.disabled = true;
+                    btn.style.filter = "grayscale(100%)";
+                }
 
+                // 랜덤 선택 중일 때는 player.job이 아직 없을 수 있으므로 임시로 전사 기준으로 굴림 (나중에 덮어씌움)
+                // 하지만 시각적 효과를 위해 여기서 계산
+                const tempJob = player.job || '전사';
                 const mainStats = {
                     '전사': ['str', 'con'],
                     '도적': ['dex'],
                     '마법사': ['int', 'wis']
                 };
 
-                const currentMain = mainStats[player.job];
+                const currentMain = mainStats[tempJob];
                 player.stats = {
                     str: rollDice(currentMain.includes('str')),
                     dex: rollDice(currentMain.includes('dex')),
@@ -754,8 +830,6 @@
                     const el = document.getElementById(`val-${s}`);
                     el.classList.remove('rolling');
                     el.innerText = player.stats[s];
-
-                    // 확정 시 팝업 효과
                     el.style.transform = "scale(1.5)";
                     el.style.color = "#fff";
                     setTimeout(() => {
@@ -764,19 +838,117 @@
                     }, 200);
                 });
                 checkStartCondition();
-            }, 800);
+            }, duration);
         }
 
         function selectJob(job) { 
-            player.job = job; 
+            if (isRandomRolling) return;
+            player.job = job;
             document.querySelectorAll('.char-card').forEach(el => {
-                el.classList.toggle('selected', el.getAttribute('data-job') === job);
+                el.classList.remove('selected', 'confirmed');
+                if (el.getAttribute('data-job') === job) el.classList.add('selected');
             });
 
             const btn = document.getElementById('btn-dice');
+            if (btn.innerText.includes('LOCK')) return; // 이미 잠긴 경우 패스
+
+            // 직업 변경 시 보너스 표시 제거
+            ['str','dex','con','int','wis','cha'].forEach(s => {
+                const el = document.getElementById(`val-${s}`);
+                el.classList.remove('bonus');
+                // innerText는 rollAllStats에서 갱신됨
+            });
+
             btn.disabled = rollCount <= 0;
             btn.innerText = `🎲 능력치 주사위 굴리기 (남은 횟수: ${rollCount})`;
             checkStartCondition();
+        }
+
+        function selectRandomJob() {
+            if (isRandomRolling) return;
+            isRandomRolling = true;
+
+            // UI 초기화
+            document.querySelectorAll('.char-card').forEach(el => el.classList.remove('selected', 'confirmed'));
+            const randomCard = document.getElementById('card-random');
+            randomCard.classList.add('selected');
+
+            const jobs = ['전사', '도적', '마법사'];
+            const jobInfos = {
+                '전사': { img: 'image/warrior.jpg', title: 'WARRIOR', desc: '높은 체력과 방어력으로<br>전투를 이끄는 수호자' },
+                '도적': { img: 'image/rogue.jpg', title: 'ROGUE', desc: '빠른 몸놀림으로 공격을<br>회피하고 급소를 타격' },
+                '마법사': { img: 'image/mage.jpg', title: 'MAGE', desc: '강력한 마법으로 적을<br>섬멸하는 화력의 지배자' }
+            };
+
+            const imgEl = document.getElementById('img-random');
+            const titleEl = document.getElementById('txt-random-title');
+            const descEl = document.getElementById('txt-random-desc');
+
+            // 슬롯 애니메이션
+            let idx = 0;
+            const slotInterval = setInterval(() => {
+                const job = jobs[idx % 3];
+                imgEl.src = jobInfos[job].img;
+                titleEl.innerText = jobInfos[job].title;
+                idx++;
+            }, 100);
+
+            // 주사위 롤링 시작 (2초 동안)
+            rollAllStats(2000, true);
+
+            // 2초 후 결과 확정
+            setTimeout(() => {
+                clearInterval(slotInterval);
+
+                // 랜덤 결과 선택
+                const finalJob = jobs[Math.floor(Math.random() * 3)];
+                player.job = finalJob;
+
+                // UI 업데이트
+                imgEl.src = jobInfos[finalJob].img;
+                titleEl.innerText = jobInfos[finalJob].title;
+                descEl.innerHTML = jobInfos[finalJob].desc;
+
+                randomCard.classList.add('confirmed'); // SELECTED! 효과
+
+                // 능력치 재계산 (직업 보정 적용을 위해)
+                const mainStats = {
+                    '전사': ['str', 'con'],
+                    '도적': ['dex'],
+                    '마법사': ['int', 'wis']
+                };
+                const currentMain = mainStats[finalJob];
+                player.stats = {
+                    str: rollDice(currentMain.includes('str')),
+                    dex: rollDice(currentMain.includes('dex')),
+                    con: rollDice(currentMain.includes('con')),
+                    int: rollDice(currentMain.includes('int')),
+                    wis: rollDice(currentMain.includes('wis')),
+                    cha: rollDice(false)
+                };
+
+                // 랜덤 보너스 +5 적용
+                const statKeys = ['str','dex','con','int','wis','cha'];
+                const bonusKey = statKeys[Math.floor(Math.random() * statKeys.length)];
+                player.stats[bonusKey] += 5;
+
+                // 값 업데이트 및 보너스 표시
+                statKeys.forEach(s => {
+                    const el = document.getElementById(`val-${s}`);
+                    el.innerText = player.stats[s];
+
+                    if (s === bonusKey) {
+                        el.classList.add('bonus');
+                        el.innerHTML += ` <span class="bonus-tag">(+5)</span>`;
+                    } else {
+                        el.classList.remove('bonus');
+                    }
+                });
+
+                isRandomRolling = false;
+                checkStartCondition();
+
+            }, 2000);
         }
 
         function checkStartCondition() { 
