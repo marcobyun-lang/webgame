@@ -355,8 +355,18 @@
             100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
         }
 
-        .drop-item-effect { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; object-fit: contain; z-index: 300; pointer-events: none; animation: dropItemPop 2.5s ease-out forwards; filter: drop-shadow(0 0 25px var(--accent-gold)); }
+        .drop-item-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 160px; height: 160px; object-fit: contain; z-index: 300; pointer-events: none;
+            animation: dropItemPop 2.5s ease-out forwards; filter: drop-shadow(0 0 25px var(--accent-gold));
+            border-radius: 12px; box-sizing: border-box;
+        }
         @keyframes dropItemPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } 100% { opacity: 0; transform: translate(-50%, -120%) scale(0.8); } }
+
+        .border-common { border: 3px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        .border-rare { border: 3px solid #2196f3; box-shadow: 0 0 15px rgba(33, 150, 243, 0.6); }
+        .border-epic { border: 3px solid #a335ee; box-shadow: 0 0 15px rgba(163, 53, 238, 0.6); }
+        .border-legendary { border: 3px solid #ff8000; box-shadow: 0 0 20px rgba(255, 128, 0, 0.8); }
 
         /* Rage Kill Effect */
         .rage-kill-effect {
@@ -1809,131 +1819,158 @@
             player.quests.killCount++;
 
             let resultHTML = `<div class="result-row">획득 경험치 <span style="color:violet">+${enemy.exp} EXP</span></div>`;
-            let dropImg = null; let dropName = ""; let dropColor = "#fff";
 
             const gold = Math.floor(Math.random()*50)+10 + (isBossBattle ? 500 : 0);
             player.gold = (player.gold||0) + gold;
             resultHTML += `<div class="result-row">획득 골드 <span style="color:gold">+${gold} G</span></div>`;
-            if(!dropImg) dropImg = ITEM_IMAGES['gold'];
             playGoldSfx();
 
+            const drops = [];
             const cha = player.stats.cha || 10;
-            const chaDropBonus = (cha - 10) * 0.005; // 0.5% per CHA point above 10
+            const chaDropBonus = (cha - 10) * 0.005;
 
+            // Helper to generate random potion/scroll
+            const generateConsumable = () => {
+                const r = Math.random();
+                const ns = isNight ? "_night" : "";
+                const holyNs = isNight ? "_night" : "";
+                let item = null;
+                let rarity = 'common';
+
+                if (r < 0.008 + chaDropBonus) {
+                    const img = "potion_full" + ns + ".jpg";
+                    item = {name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999, img: img};
+                    rarity = 'epic';
+                } else if (r < 0.018 + chaDropBonus) {
+                     const img = "potion_focus" + ns + ".jpg";
+                     item = {name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0, img: img};
+                     rarity = 'rare';
+                } else if (r < 0.03 + chaDropBonus) {
+                     const img = "potion_madness" + ns + ".jpg";
+                     item = {name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0, img: img};
+                     rarity = 'rare';
+                } else if (r < 0.05 + chaDropBonus) {
+                    const img = "potion_skeleton" + ns + ".jpg";
+                    item = {name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0, img: img};
+                    rarity = 'rare';
+                } else if (r < 0.08 + chaDropBonus) {
+                     const img = "potion_holy" + holyNs + ".jpg";
+                     item = {name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0, img: img};
+                     rarity = 'rare';
+                } else if (r < 0.12 + chaDropBonus) {
+                    const img = "potion_gamble" + ns + ".jpg";
+                    item = {name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0, img: img};
+                    rarity = 'rare';
+                } else if (r < 0.25 + chaDropBonus) {
+                    const img = "Scroll" + ns + ".jpg";
+                    item = {name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0, img: img};
+                    rarity = 'epic';
+                } else {
+                    const subR = Math.random();
+                    if(subR < 0.3) { const img = "potion_hp" + ns + ".jpg"; item = {name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: img}; }
+                    else if(subR < 0.6) { const img = "potion_mp" + ns + ".jpg"; item = {name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30, img: img}; }
+                    else if(subR < 0.8) { const img = "potion_exp" + ns + ".jpg"; item = {name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100, img: img}; }
+                    else { const img = "potion_poison" + ns + ".jpg"; item = {name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0, img: img}; }
+                }
+                return { item, rarity };
+            };
+
+            // 1. Primary Drop
             const rand = Math.random();
-
             if (isBossBattle && rand < 0.5 + chaDropBonus) {
                 const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = jobList[Math.floor(Math.random() * jobList.length)];
-
                 let isLegendary = isSuperBoss || Math.random() < 0.3 + chaDropBonus;
                 if (!player.isAdvanced) isLegendary = false;
-
                 let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
                 let colorCode = isLegendary ? "#ff8000" : "#a335ee";
                 let rarityName = isLegendary ? "전설의" : "에픽";
                 const newItem = { name: `${rarityName} ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: isLegendary ? "legendary" : "epic", rarityColor: colorCode, enhanceCount: grade, options: [] };
-
                 const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+2}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+2}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+2}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+2}];
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
-
-                player.inventory.push(newItem);
-                dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
+                drops.push({ item: newItem, rarity: newItem.rarity });
             } 
             else if (!isBossBattle && rand < 0.05 + chaDropBonus) {
                 const nameList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
                 const baseName = nameList[Math.floor(Math.random() * nameList.length)];
-
                 let isLegendary = false;
                 if (player.isAdvanced && Math.random() < 0.01 + chaDropBonus) isLegendary = true;
-
                 let grade = isLegendary ? Math.floor(Math.random() * 6) + 10 : Math.floor(Math.random() * 5) + 8;
                 let colorCode = isLegendary ? "#ff8000" : "#a335ee";
                 let rarityName = isLegendary ? "전설의" : "에픽";
                 let rarity = isLegendary ? "legendary" : "epic";
-
                 const newItem = { name: `${rarityName} ${baseName} (+${grade})`, type: 'weapon', desc: `공격력 +${grade} (${player.job} 전용)`, val: grade, reqJob: player.job, equipped: false, rarity: rarity, rarityColor: colorCode, enhanceCount: grade, options: [] };
-
                 const optCount = isLegendary ? 3 : 1;
                 const possibleOpts = [{name:"힘",key:"str",val:Math.floor(Math.random()*5)+1}, {name:"민첩",key:"dex",val:Math.floor(Math.random()*5)+1}, {name:"체력",key:"con",val:Math.floor(Math.random()*5)+1}, {name:"지능",key:"int",val:Math.floor(Math.random()*5)+1}];
                 for(let i=0; i<optCount; i++) { const opt = possibleOpts[Math.floor(Math.random()*possibleOpts.length)]; newItem.options.push(opt); newItem.desc += `\n[옵션] ${opt.name} +${opt.val}`; }
-
-                player.inventory.push(newItem);
-                dropName = newItem.name; dropColor = colorCode; dropImg = getWeaponImage(player.job, newItem.rarity);
+                drops.push({ item: newItem, rarity: newItem.rarity });
             }
             else if (Math.random() < 0.6 + chaDropBonus) {
-                const r = Math.random();
-                const ns = isNight ? "_night" : "";
-                const holyNs = isNight ? "_night" : "";
-                if (r < 0.008 + chaDropBonus) {
-                    const img = "potion_full" + ns + ".jpg";
-                    player.inventory.push({name:'풀 회복 포션', type:'potion_full', desc:'HP와 MP를 모두 회복합니다.', val:9999, img: img});
-                    dropName = "풀 회복 포션"; dropColor="#00e676"; dropImg=img;
-                } else if (r < 0.018 + chaDropBonus) {
-                     const img = "potion_focus" + ns + ".jpg";
-                     player.inventory.push({name:'정신 집중 포션', type:'potion_focus', desc:'다음 스킬 마나 0 & 3턴간 스킬 데미지 50% 증가', val:0, img: img});
-                     dropName = "정신 집중 포션"; dropColor="#2979ff"; dropImg=img;
-                } else if (r < 0.03 + chaDropBonus) {
-                     const img = "potion_madness" + ns + ".jpg";
-                     player.inventory.push({name:'광기의 물약', type:'potion_madness', desc:'HP 30% 감소, 3턴간 100% 크리티컬', val:0, img: img});
-                     dropName = "광기의 물약"; dropColor="#ff1744"; dropImg=img;
-                } else if (r < 0.05 + chaDropBonus) {
-                    const img = "potion_skeleton" + ns + ".jpg";
-                    player.inventory.push({name:'해골 포션', type:'potion_skeleton', desc:'HP/MP 완전 회복 (다음 전투 저주)', val:0, img: img});
-                    dropName = "해골 포션"; dropColor="#757575"; dropImg=img;
-                } else if (r < 0.08 + chaDropBonus) {
-                     const img = "potion_holy" + holyNs + ".jpg";
-                     player.inventory.push({name:'정화의 성수', type:'potion_holy', desc:'모든 상태 이상 해제', val:0, img: img});
-                     dropName = "정화의 성수"; dropColor="#00e676"; dropImg=img;
-                } else if (r < 0.12 + chaDropBonus) {
-                    const img = "potion_gamble" + ns + ".jpg";
-                    player.inventory.push({name:'도박사의 시약', type:'potion_gamble', desc:'8가지 효과 중 하나가 무작위로 발동합니다.', val:0, img: img});
-                    dropName = "도박사의 시약"; dropColor="#ffd700"; dropImg=img;
-                } else if (r < 0.25 + chaDropBonus) {
-                    const img = "Scroll" + ns + ".jpg";
-                    player.inventory.push({name:'옵션 부여 스크롤', type:'scroll_option', desc:'장비 옵션 재설정 (1~3개)', val:0, img: img});
-                    dropName = "옵션 부여 스크롤"; dropColor="#ffb74d"; dropImg=img;
-                } else {
-                    const subR = Math.random();
-                    if(subR < 0.3) { const img = "potion_hp" + ns + ".jpg"; player.inventory.push({name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: img}); dropName = "체력 물약"; dropColor="#ff8a80"; dropImg=img; }
-                    else if(subR < 0.6) { const img = "potion_mp" + ns + ".jpg"; player.inventory.push({name:'마나 물약', type:'potion_mp', desc:'MP +30 회복', val:30, img: img}); dropName = "마나 물약"; dropColor="#82b1ff"; dropImg=img; }
-                    else if(subR < 0.8) { const img = "potion_exp" + ns + ".jpg"; player.inventory.push({name:'경험치 물약', type:'potion_exp', desc:'EXP +100 획득', val:100, img: img}); dropName = "경험치 물약"; dropColor="#e040fb"; dropImg=img; }
-                    else { const img = "potion_poison" + ns + ".jpg"; player.inventory.push({name:'해독 물약', type:'potion_poison', desc:'독 상태 해제', val:0, img: img}); dropName = "해독 물약"; dropColor="#00e676"; dropImg=img; }
-                }
+                drops.push(generateConsumable());
             }
             else if (Math.random() < 0.2 + chaDropBonus) {
                 const rand = Math.random();
                 const ns = isNight ? "_night" : "";
+                let item = null;
                 if(rand < 0.5) {
                     const val = Math.floor(Math.random() * 5) + 1;
                     const img = "attack_10" + ns + ".jpg";
-                    player.inventory.push({name:'공격력 강화 물약', type:'potion_atk', desc:`공격력 +${val} 영구 증가`, val:val, img: img});
-                    dropName = "공격력 강화 물약";
-                    dropColor="#ff8a80";
-                    dropImg=img;
+                    item = {name:'공격력 강화 물약', type:'potion_atk', desc:`공격력 +${val} 영구 증가`, val:val, img: img};
                 } else {
                     const val = Math.random() < 0.5 ? 1 : 5;
                     const img = "Defense_10" + ns + ".jpg";
-                    player.inventory.push({name:'방어력 강화 물약', type:'potion_def', desc:`방어력 +${val} 영구 증가`, val:val, img: img});
-                    dropName = "방어력 강화 물약";
-                    dropColor="#82b1ff";
-                    dropImg=img;
+                    item = {name:'방어력 강화 물약', type:'potion_def', desc:`방어력 +${val} 영구 증가`, val:val, img: img};
                 }
+                drops.push({ item: item, rarity: 'rare' });
             }
 
-            if(dropName) {
-                playItemSfx();
-                resultHTML += `<div class="result-item-box"><img src="image/${dropImg}" class="result-item-img"><div class="result-item-name" style="color:${dropColor}">${dropName}</div><div style="font-size:0.8rem; color:#aaa;">아이템을 획득했습니다!</div></div>`;
+            // 2. Secondary Drop (Double Drop)
+            if (drops.length > 0 && Math.random() < 0.05 + (chaDropBonus/2)) {
+                // Double drop is usually a consumable
+                drops.push(generateConsumable());
+                addLog("<span style='color:#ffd700; font-weight:bold;'>🍀 행운! 아이템을 하나 더 발견했습니다!</span>");
             }
-            
-            if(dropName && dropImg) { 
-                const imgEl = document.getElementById('drop-item-img'); 
-                imgEl.src = `image/${dropImg}`; 
-                imgEl.style.display = 'block'; 
-                setTimeout(() => { imgEl.style.display = 'none'; showResultModal(resultHTML); }, 2000); 
-            } else { 
-                showResultModal(resultHTML); 
+
+            // Process Drops
+            let bestDrop = null;
+            const rarityWeight = { 'legendary': 4, 'epic': 3, 'rare': 2, 'common': 1 };
+
+            drops.forEach(d => {
+                player.inventory.push(d.item);
+
+                let dropColor = "#fff";
+                if (d.rarity === 'legendary') dropColor = "#ff8000";
+                else if (d.rarity === 'epic') dropColor = "#a335ee";
+                else if (d.rarity === 'rare') dropColor = "#2196f3";
+
+                let dropImg = d.item.img;
+                if (d.item.type === 'weapon') dropImg = getWeaponImage(player.job, d.item.rarity);
+
+                resultHTML += `<div class="result-item-box"><img src="image/${dropImg}" class="result-item-img"><div class="result-item-name" style="color:${dropColor}">${d.item.name}</div><div style="font-size:0.8rem; color:#aaa;">아이템을 획득했습니다!</div></div>`;
+
+                if (!bestDrop || rarityWeight[d.rarity] > rarityWeight[bestDrop.rarity]) {
+                    bestDrop = d;
+                    bestDrop.displayImg = dropImg;
+                }
+            });
+
+            if (drops.length > 0) {
+                playItemSfx();
+                const imgEl = document.getElementById('drop-item-img');
+                imgEl.src = `image/${bestDrop.displayImg}`;
+
+                // Reset classes
+                imgEl.className = 'drop-item-effect';
+                if (bestDrop.rarity === 'legendary') imgEl.classList.add('border-legendary');
+                else if (bestDrop.rarity === 'epic') imgEl.classList.add('border-epic');
+                else if (bestDrop.rarity === 'rare') imgEl.classList.add('border-rare');
+                else imgEl.classList.add('border-common');
+
+                imgEl.style.display = 'block';
+                setTimeout(() => { imgEl.style.display = 'none'; showResultModal(resultHTML); }, 2000);
+            } else {
+                showResultModal(resultHTML);
             }
         }
 

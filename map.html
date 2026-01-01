@@ -1410,7 +1410,7 @@
 
     function showConfirm(title, msg, onYes, onlyOk = false) {
         document.getElementById('confirm-title').innerText = title;
-        document.getElementById('confirm-msg').innerText = msg;
+        document.getElementById('confirm-msg').innerHTML = msg;
         document.getElementById('confirm-no-btn').style.display = onlyOk ? 'none' : 'block';
         document.getElementById('confirm-yes-btn').innerText = onlyOk ? '확인' : '예';
         currentConfirmAction = onYes;
@@ -1636,7 +1636,7 @@
             const val = Math.floor(Math.random() * 5) + 1; // 1~5
             newOptions.push({ name: type.name, key: type.key, val: val });
             descText += `\n[옵션] ${type.name} +${val}`;
-            optionMsg += `[${type.name} +${val}] `;
+            optionMsg += `<span style="color:#ffd700; font-weight:bold;">[${type.name} +${val}]</span> `;
         }
 
         item.options = newOptions;
@@ -1656,7 +1656,7 @@
         modal.querySelector('h2').innerText = "대장간";
         document.getElementById('shop-gold-display').style.display = 'block';
 
-        showConfirm("옵션 부여 성공", `${item.name}에 새로운 옵션이 부여되었습니다!\n\n부여된 옵션:\n${optionMsg}`, null, true);
+        showConfirm("옵션 부여 성공", `${item.name}에 새로운 옵션이 부여되었습니다!<br><br>부여된 옵션:<br>${optionMsg}`, null, true);
         updateUI();
     }
 
