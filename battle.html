@@ -918,25 +918,25 @@
             const pStatusEl = document.getElementById('p-status');
             pStatusEl.innerHTML = '';
             if(pStatus.poison > 0) {
-                pStatusEl.innerHTML += `<span class="status-icon status-poison">독(${pStatus.poison})</span>`;
+                pStatusEl.innerHTML += `<span class="status-icon status-poison">독(${pStatus.poison}턴)</span>`;
                 document.getElementById('player-frame').classList.add('poison-aura');
             } else {
                 document.getElementById('player-frame').classList.remove('poison-aura');
             }
-            if(pStatus.stun > 0) pStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${pStatus.stun})</span>`;
+            if(pStatus.stun > 0) pStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${pStatus.stun}턴)</span>`;
 
             // Buff Icons
-            if(pStatus.defUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#795548;">방어(${pStatus.defUp})</span>`;
-            if(pStatus.atkUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#d32f2f;">공격(${pStatus.atkUp})</span>`;
-            if(pStatus.invincible > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ffd700; color:#000;">무적(${pStatus.invincible})</span>`;
-            if(pStatus.zeroMana > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">마나0(${pStatus.zeroMana})</span>`;
-            if(pStatus.skillDmgUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">스킬강화(${pStatus.skillDmgUp})</span>`;
-            if(pStatus.critUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ff1744;">광기(${pStatus.critUp})</span>`;
+            if(pStatus.defUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#795548;">방어(${pStatus.defUp}턴)</span>`;
+            if(pStatus.atkUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#d32f2f;">공격(${pStatus.atkUp}턴)</span>`;
+            if(pStatus.invincible > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ffd700; color:#000;">무적(${pStatus.invincible}턴)</span>`;
+            if(pStatus.zeroMana > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">마나0(${pStatus.zeroMana}턴)</span>`;
+            if(pStatus.skillDmgUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">스킬강화(${pStatus.skillDmgUp}턴)</span>`;
+            if(pStatus.critUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ff1744;">광기(${pStatus.critUp}턴)</span>`;
 
             const eStatusEl = document.getElementById('e-status');
             eStatusEl.innerHTML = '';
-            if(eStatus.poison > 0) eStatusEl.innerHTML += `<span class="status-icon status-poison">독(${eStatus.poison})</span>`;
-            if(eStatus.stun > 0) eStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${eStatus.stun})</span>`;
+            if(eStatus.poison > 0) eStatusEl.innerHTML += `<span class="status-icon status-poison">독(${eStatus.poison}턴)</span>`;
+            if(eStatus.stun > 0) eStatusEl.innerHTML += `<span class="status-icon status-stun">기절(${eStatus.stun}턴)</span>`;
 
             if (rage >= maxRage) {
                 document.getElementById('btn-rage').style.display = 'block';
