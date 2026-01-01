@@ -1,7 +1,7 @@
 // Code.gs
 
 function doGet(e) {
-  let response;
+  let output;
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -10,7 +10,7 @@ function doGet(e) {
       let rankSheet = ss.getSheetByName('Ranking');
       // 시트가 없거나 데이터가 없으면 빈 배열 반환
       if (!rankSheet || rankSheet.getLastRow() <= 1) {
-        response = ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+        output = ContentService.createTextOutput(JSON.stringify([]));
       } else {
         const data = rankSheet.getDataRange().getValues();
         let rankings = [];
@@ -29,7 +29,7 @@ function doGet(e) {
             });
           }
         }
-        response = ContentService.createTextOutput(JSON.stringify(rankings)).setMimeType(ContentService.MimeType.JSON);
+        output = ContentService.createTextOutput(JSON.stringify(rankings));
       }
     } else {
         // 일반 캐릭터 데이터 불러오기
@@ -40,32 +40,31 @@ function doGet(e) {
         let found = false;
         for (let i = 1; i < data.length; i++) {
             if (data[i][0] == name) {
-                response = ContentService.createTextOutput(data[i][1]).setMimeType(ContentService.MimeType.JSON);
+                output = ContentService.createTextOutput(data[i][1]);
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            response = ContentService.createTextOutput(JSON.stringify({ error: "Not Found" })).setMimeType(ContentService.MimeType.JSON);
+            output = ContentService.createTextOutput(JSON.stringify({ error: "Not Found" }));
         }
     }
   } catch (err) {
-    response = ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+    output = ContentService.createTextOutput(JSON.stringify({ error: err.toString() }));
   }
 
-  return response.setHeader('Access-Control-Allow-Origin', '*');
+  return output.setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
 }
 
 // 1. 데이터 저장 (POST 요청)
 function doPost(e) {
-  let response;
+  let output;
   const lock = LockService.getScriptLock();
   // 30초 락 시도 (동시성 제어) - 실패 시 에러 반환
   if (!lock.tryLock(30000)) {
-    response = ContentService.createTextOutput(JSON.stringify({result: "error", error: "Server Busy"}))
-        .setMimeType(ContentService.MimeType.JSON);
-    return response.setHeader('Access-Control-Allow-Origin', '*');
+    output = ContentService.createTextOutput(JSON.stringify({result: "error", error: "Server Busy"}));
+    return output.setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
   }
 
   try {
@@ -73,17 +72,15 @@ function doPost(e) {
     const contents = e.postData.contents;
 
     if (!contents) {
-      response = ContentService.createTextOutput(JSON.stringify({result: "error", error: "No content"}))
-          .setMimeType(ContentService.MimeType.JSON);
-      return response.setHeader('Access-Control-Allow-Origin', '*');
+      output = ContentService.createTextOutput(JSON.stringify({result: "error", error: "No content"}));
+      return output.setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
     }
 
     const params = JSON.parse(contents);
 
     // 랭킹 저장 요청인지 확인
     if (params.type === 'ranking') {
-      response = saveRanking(ss, params);
-      return response.setHeader('Access-Control-Allow-Origin', '*');
+      return saveRanking(ss, params);
     }
 
     // 일반 캐릭터 데이터 저장
@@ -108,16 +105,14 @@ function doPost(e) {
       sheet.appendRow([name, jsonData, new Date()]);
     }
 
-    response = ContentService.createTextOutput(JSON.stringify({result: "success"}))
-        .setMimeType(ContentService.MimeType.JSON);
+    output = ContentService.createTextOutput(JSON.stringify({result: "success"}));
 
   } catch (err) {
-    response = ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()}))
-        .setMimeType(ContentService.MimeType.JSON);
+    output = ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()}));
   } finally {
     lock.releaseLock();
   }
-  return response.setHeader('Access-Control-Allow-Origin', '*');
+  return output.setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
 }
 
 // 랭킹 저장 함수
@@ -186,9 +181,11 @@ function saveRanking(ss, params) {
     }
 
     return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Ranking Updated"}))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeader('Access-Control-Allow-Origin', '*');
   } catch (e) {
     return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()}))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
