@@ -55,16 +55,21 @@
         }
 
         .creation-title {
-            font-family: 'Cinzel', 'Black Han Sans', serif;
-            font-size: 3rem;
-            color: var(--accent-gold);
-            text-shadow: 2px 2px 0 #000, 0 0 20px rgba(255, 215, 0, 0.5);
             margin-bottom: 30px;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--accent-red);
-            padding-bottom: 5px;
             text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .creation-title img {
+            max-width: 80%; /* 너비 제한 */
+            max-height: 150px; /* 높이 제한 */
+            width: auto;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.9));
+            object-fit: contain;
         }
 
         .char-selection {
@@ -593,7 +598,9 @@
             <h2 style="color:var(--accent-red); font-family:'Cinzel';">ENTERING DUNGEON...</h2>
         </div>
         
-        <div class="creation-title">Dungeon RPG</div>
+        <div class="creation-title">
+            <img id="title-image" src="" alt="DUNGEON RPG">
+        </div>
         
         <div class="char-selection">
             <div class="char-card" onclick="selectJob('전사')" data-job="전사">
@@ -655,16 +662,16 @@
             <div class="input-row">
                 <input type="text" id="inp-name" placeholder="영웅의 이름" oninput="checkStartCondition()" maxlength="8" autocomplete="off">
                 <input type="image" id="btn-start" src="image/open_button.png" onclick="newGame()"
-                       onmouseover="if(!this.disabled) this.src='image/open_buttion1.png'"
+                       onmouseover="if(!this.disabled) this.src='image/open_button1.png'"
                        onmouseout="this.src='image/open_button.png'"
                        alt="던전 입장">
             </div>
             <div class="divider"></div>
             <div class="input-row">
                 <input type="text" id="load-name" placeholder="기존 영웅 이름" autocomplete="off">
-                <input type="image" id="btn-load" src="image/load_buttion.png" onclick="loadGame()"
-                       onmouseover="this.src='image/load_buttion1.png'"
-                       onmouseout="this.src='image/load_buttion.png'"
+                <input type="image" id="btn-load" src="image/load_button.png" onclick="loadGame()"
+                       onmouseover="this.src='image/load_button1.png'"
+                       onmouseout="this.src='image/load_button.png'"
                        alt="불러오기">
             </div>
         </div>
@@ -717,6 +724,9 @@
 
         window.onload = () => {
             loadRankings();
+            const titleImg = document.getElementById('title-image');
+            const randomNum = Math.floor(Math.random() * 10) + 1;
+            titleImg.src = `image/index_title${randomNum}.jpg`;
         };
 
         function startBgm() {
