@@ -88,20 +88,35 @@
         .ui-bars-center {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            width: 300px;
+            gap: 6px;
+            width: 320px;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
         }
-        .bar-row { display: flex; align-items: center; gap: 8px; }
-        .bar-label { width: 25px; text-align: right; color: #666; font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; }
-        .bar-bg { flex: 1; height: 10px; background: #111; border: 1px solid #2a2a2a; border-radius: 2px; position: relative; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.3s ease-out; border-radius: 1px; }
-        .hp-fill { background: var(--hp-grad); }
-        .mp-fill { background: var(--mp-grad); }
-        .exp-fill { background: var(--exp-grad); }
-        .bar-text { position: absolute; top: -1px; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 8px; color: rgba(255,255,255,0.7); text-shadow: 1px 1px 1px #000; }
+        .bar-row { display: flex; align-items: center; gap: 8px; position: relative; }
+        .bar-label {
+            position: absolute; left: 8px; z-index: 2;
+            color: #fff; font-family: var(--font-body); font-size: 0.7rem; font-weight: 800;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .bar-bg {
+            flex: 1; height: 14px; background: #222; border: 1px solid #444;
+            border-radius: 4px; position: relative; overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .bar-fill { height: 100%; transition: width 0.3s ease-out; border-radius: 3px; position: relative; }
+        .bar-fill::after { content:""; position:absolute; top:0; left:0; width:100%; height:50%; background:rgba(255,255,255,0.15); }
+
+        .hp-fill { background: linear-gradient(90deg, #c62828, #ff5252); }
+        .mp-fill { background: linear-gradient(90deg, #1565c0, #448aff); }
+        .exp-fill { background: linear-gradient(90deg, #6a1b9a, #e040fb); }
+
+        .bar-text {
+            position: absolute; right: 8px; top: 0; height: 100%;
+            display: flex; align-items: center; font-size: 0.65rem;
+            color: #fff; text-shadow: 1px 1px 2px #000; font-weight: bold; z-index: 2;
+        }
 
         .btn-group { display: flex; gap: 15px; }
         .menu-icon {
