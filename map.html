@@ -999,7 +999,8 @@
             triggerThunder();
         }
 
-        if (remain <= 5 * 60 * 1000 && !superBoss.alive && !localStorage.getItem('rpg_super_boss_killed')) {
+        // 최종 보스 3분 남았을 때 출현 (기존 5분에서 수정)
+        if (remain <= 3 * 60 * 1000 && !superBoss.alive && !localStorage.getItem('rpg_super_boss_killed')) {
             spawnSuperBoss();
         }
 
@@ -1227,6 +1228,7 @@
             }
         }
 
+        // 전설 아이템 특수 옵션 부여 로직 수정: 항상 부여되도록
         if (rarity === "legendary") {
              const specialOpt = LEGENDARY_SPECIAL_OPTIONS[Math.floor(Math.random() * LEGENDARY_SPECIAL_OPTIONS.length)];
              newItem.specialOption = specialOpt;
