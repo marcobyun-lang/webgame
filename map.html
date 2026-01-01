@@ -685,10 +685,12 @@
         if (player.quests.dayKillCount === undefined) player.quests.dayKillCount = 0;
         if (player.quests.nightKillCount === undefined) player.quests.nightKillCount = 0;
         if (player.quests.bossKillCount === undefined) player.quests.bossKillCount = 0;
+        if (player.quests.coinCollectCount === undefined) player.quests.coinCollectCount = 0;
         if (!player.quests.claimed) player.quests.claimed = {};
         if (player.quests.claimed.dayKill === undefined) player.quests.claimed.dayKill = false;
         if (player.quests.claimed.nightKill === undefined) player.quests.claimed.nightKill = false;
         if (player.quests.claimed.bossKill === undefined) player.quests.claimed.bossKill = false;
+        if (player.quests.claimed.coinCollect === undefined) player.quests.claimed.coinCollect = false;
 
         if (player.isAdvanced === undefined) player.isAdvanced = false;
 
@@ -1065,6 +1067,7 @@
             const dist = Math.sqrt(dx*dx + dy*dy);
             if (dist < (coin.size/2 + 16)) {
                 player.coinScore += coin.score;
+                player.quests.coinCollectCount++;
                 const sfx = coinSfx.cloneNode();
                 sfx.volume = 0.5;
                 sfx.play().catch(e=>{});
@@ -1526,7 +1529,8 @@
             { id: 'dayKill', title: '낮의 사냥꾼', desc: '낮 몬스터 5마리 처치', goal: 5, current: player.quests.dayKillCount || 0, reward: '500 G', claimed: player.quests.claimed.dayKill },
             { id: 'nightKill', title: '밤의 추적자', desc: '밤 몬스터 5마리 처치', goal: 5, current: player.quests.nightKillCount || 0, reward: '800 G', claimed: player.quests.claimed.nightKill },
             { id: 'bossKill', title: '보스 슬레이어', desc: '보스 몬스터 1마리 처치', goal: 1, current: player.quests.bossKillCount || 0, reward: '2000 G', claimed: player.quests.claimed.bossKill },
-            { id: 'enhance', title: '강화의 달인', desc: '강화 1회 성공', goal: 1, current: player.quests.enhanceCount, reward: '300 G', claimed: player.quests.claimed.enhance }
+            { id: 'enhance', title: '강화의 달인', desc: '강화 1회 성공', goal: 1, current: player.quests.enhanceCount, reward: '300 G', claimed: player.quests.claimed.enhance },
+            { id: 'coinCollect', title: '반짝이는 유혹', desc: '필드에 떨어진 코인 5개 줍기', goal: 5, current: player.quests.coinCollectCount || 0, reward: '500 G', claimed: player.quests.claimed.coinCollect }
         ];
         quests.forEach(q => {
             const div = document.createElement('div');
@@ -1543,6 +1547,7 @@
         else if (id === 'nightKill' && !player.quests.claimed.nightKill) { player.gold += 800; player.quests.claimed.nightKill = true; showConfirm("퀘스트 완료", "800 G를 획득했습니다!", null, true); }
         else if (id === 'bossKill' && !player.quests.claimed.bossKill) { player.gold += 2000; player.quests.claimed.bossKill = true; showConfirm("퀘스트 완료", "2000 G를 획득했습니다!", null, true); }
         else if (id === 'enhance' && !player.quests.claimed.enhance) { player.gold += 300; player.quests.claimed.enhance = true; showConfirm("퀘스트 완료", "300 G를 획득했습니다!", null, true); }
+        else if (id === 'coinCollect' && !player.quests.claimed.coinCollect) { player.gold += 500; player.quests.claimed.coinCollect = true; showConfirm("퀘스트 완료", "500 G를 획득했습니다!", null, true); }
         updateUI(); renderQuestList();
     }
 
