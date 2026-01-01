@@ -542,7 +542,7 @@
                 <img src="image/menu_1.png" class="menu-icon" onclick="openQuest()" alt="퀘스트" title="퀘스트">
                 <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
                 <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
-                <img src="image/menu_4.png" class="menu-icon" onclick="manualSave()" alt="저장" title="저장">
+                <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
             </div>
         </div>
     </div>
@@ -1231,7 +1231,6 @@
             }
         }
 
-        // 전설 아이템 특수 옵션 부여 로직 수정: 항상 부여되도록
         if (rarity === "legendary") {
              const specialOpt = LEGENDARY_SPECIAL_OPTIONS[Math.floor(Math.random() * LEGENDARY_SPECIAL_OPTIONS.length)];
              newItem.specialOption = specialOpt;
@@ -1734,6 +1733,10 @@
         }
         player.gold += price; player.inventory.splice(index, 1);
         renderInventory(); updateUI();
+    }
+
+    function askManualSave() {
+        showConfirm("저장 확인", "현재 진행 상황을 저장하시겠습니까?", () => manualSave());
     }
 
     async function manualSave() {
