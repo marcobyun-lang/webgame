@@ -419,6 +419,14 @@
 
         .item-icon-small { width: 32px; height: 32px; border: 1px solid var(--bag-border); border-radius: 4px; margin-right: 10px; object-fit: cover; }
         .item-header { display: flex; align-items: center; margin-bottom: 5px; }
+
+        /* Button Style */
+        .btn {
+            padding: 12px 20px; background: #222; border: 1px solid #444; color: #ddd;
+            font-family: var(--font-body); font-size: 1rem; cursor: pointer; transition: 0.2s;
+            border-radius: 4px; font-weight: bold;
+        }
+        .btn:hover { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
     </style>
 </head>
 <body>
@@ -510,7 +518,7 @@
                 <!-- 상세 점수 내역이 여기에 들어갑니다 -->
             </div>
             <div class="go-score">최종 점수: <span id="go-score-val" style="color:var(--accent-gold)">0</span></div>
-            <button class="btn btn-start" style="width:100%; padding:15px; font-size:1.2rem; margin-top: 20px;" onclick="location.href='index.html'">메인 화면으로</button>
+            <button class="btn btn-start" style="width:100%; margin-top: 20px;" onclick="location.href='index.html'">메인 화면으로</button>
         </div>
     </div>
 
@@ -602,6 +610,9 @@
     let isNight = false;
     let timeTick = 0;
     let currentWeather = "sunny"; // sunny, rain, fog, thunder
+
+    let gameLoopInterval = null;
+    let isGameOver = false;
 
     const advBgm = new Audio('song/bgm1.mp3');
 
@@ -962,6 +973,7 @@
 
     function gameLoop() {
         if(!player) return;
+        if(isGameOver) return;
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
@@ -969,6 +981,8 @@
 
         if (remain <= 0) {
             document.getElementById('game-timer').innerText = "00:00";
+            isGameOver = true;
+            clearInterval(gameLoopInterval);
             showGameOver("시간 종료! 던전이 붕괴되었습니다.");
             return;
         }
@@ -1093,6 +1107,7 @@
             clearInterval(gameLoopInterval);
             gameLoopInterval = null;
         }
+        isGameOver = true;
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const survivalTime = Math.floor((Date.now() - startTime) / 1000);
