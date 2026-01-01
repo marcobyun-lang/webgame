@@ -604,7 +604,7 @@
         
         <div class="char-selection">
             <div class="char-card" onclick="selectJob('전사')" data-job="전사">
-                <img src="image/warrior.jpg" alt="WARRIOR">
+                <img src="image/index_warrior.jpg" alt="WARRIOR">
                 <div class="char-info">
                     <p>WARRIOR</p>
                     <div class="char-desc">높은 체력과 방어력으로<br>전투를 이끄는 수호자</div>
@@ -612,7 +612,7 @@
                 <div class="selected-overlay">SELECTED!</div>
             </div>
             <div class="char-card" onclick="selectJob('도적')" data-job="도적">
-                <img src="image/rogue.jpg" alt="ROGUE">
+                <img src="image/index_rogue.jpg" alt="ROGUE">
                 <div class="char-info">
                     <p>ROGUE</p>
                     <div class="char-desc">빠른 몸놀림으로 공격을<br>회피하고 급소를 타격</div>
@@ -620,7 +620,7 @@
                 <div class="selected-overlay">SELECTED!</div>
             </div>
             <div class="char-card" onclick="selectJob('마법사')" data-job="마법사">
-                <img src="image/mage.jpg" alt="MAGE">
+                <img src="image/index_mage.jpg" alt="MAGE">
                 <div class="char-info">
                     <p>MAGE</p>
                     <div class="char-desc">강력한 마법으로 적을<br>섬멸하는 화력의 지배자</div>
@@ -911,9 +911,9 @@
 
             const jobs = ['전사', '도적', '마법사'];
             const jobInfos = {
-                '전사': { img: 'image/warrior.jpg', title: 'WARRIOR', desc: '높은 체력과 방어력으로<br>전투를 이끄는 수호자' },
-                '도적': { img: 'image/rogue.jpg', title: 'ROGUE', desc: '빠른 몸놀림으로 공격을<br>회피하고 급소를 타격' },
-                '마법사': { img: 'image/mage.jpg', title: 'MAGE', desc: '강력한 마법으로 적을<br>섬멸하는 화력의 지배자' }
+                '전사': { img: 'image/index_warrior.jpg', title: 'WARRIOR', desc: '높은 체력과 방어력으로<br>전투를 이끄는 수호자' },
+                '도적': { img: 'image/index_rogue.jpg', title: 'ROGUE', desc: '빠른 몸놀림으로 공격을<br>회피하고 급소를 타격' },
+                '마법사': { img: 'image/index_mage.jpg', title: 'MAGE', desc: '강력한 마법으로 적을<br>섬멸하는 화력의 지배자' }
             };
 
             const imgEl = document.getElementById('img-random');

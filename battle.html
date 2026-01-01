@@ -619,18 +619,18 @@
         ];
 
         const DAY_ENEMY_POOL = [
-            {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3},  
-            {f:'image/ka2.jpg', n:'리던', e:50, w:3},
-            {f:'image/ka3.jpg', n:'토끼사냥꾼 요치', e:30, w:4},
-            {f:'image/ka4.jpg', n:'곰전사 추파', e:120, w:2, type: 'bear_warrior'},
-            {f:'image/ke1.jpg', n:'엘리트 나무 병사', e:100, w:1, mult: 1.2}
+            {f:'image/ka.jpg', n:'나무 몬스터', e:70, w:3, speech: ['우워어!', '자연의 힘을 보여주마!', '내 잎사귀는 날카롭다!']},
+            {f:'image/ka2.jpg', n:'리던', e:50, w:3, speech: ['키키킥!', '내 보물 내놔!', '빠르지? 못 잡을걸!']},
+            {f:'image/ka3.jpg', n:'토끼사냥꾼 요치', e:30, w:4, speech: ['깡총!', '당근 내놔!', '귀엽다고 얕보지 마라!']},
+            {f:'image/ka4.jpg', n:'곰전사 추파', e:120, w:2, type: 'bear_warrior', speech: ['크아앙!', '힘 대결이다!', '내 발톱은 강철보다 단단해!']},
+            {f:'image/ke1.jpg', n:'엘리트 나무 병사', e:100, w:1, mult: 1.2, speech: ['숲을 지킨다!', '침입자 발견!', '단단한 껍질을 뚫어봐라!']}
         ];
         const NIGHT_ENEMY_POOL = [
-            {f:'image/monster1.jpg', n:'블루머쉬 가디언 (Bluemush Guardian)', e:150, w:3, poison: true},
-            {f:'image/monster2.jpg', n:'그로울 트렌트 (Growl Trent)', e:180, w:3},
-            {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true},
-            {f:'image/ke3.jpg', n:'마법사 홀리', e:200, w:2, type: 'mage_holly'},
-            {f:'image/ke2.jpg', n:'심연의 감시자', e:250, w:1, mult: 1.3}
+            {f:'image/monster1.jpg', n:'블루머쉬 가디언 (Bluemush Guardian)', e:150, w:3, poison: true, speech: ['포자가 퍼진다...', '어둠 속으로...', '독을 맛봐라!']},
+            {f:'image/monster2.jpg', n:'그로울 트렌트 (Growl Trent)', e:180, w:3, speech: ['그르르...', '밤의 숲은 위험해...', '뿌리로 묶어주마!']},
+            {f:'image/monster3.jpg', n:'위스프 랜턴 (Wisp Lantern)', e:120, w:4, poison: true, speech: ['반짝반짝...', '길을 잃게 해주지...', '영혼을 내놔!']},
+            {f:'image/ke3.jpg', n:'마법사 홀리', e:200, w:2, type: 'mage_holly', speech: ['마법의 힘으로!', '신성한 빛을 받아라!', '어둠을 정화하리라!']},
+            {f:'image/ke2.jpg', n:'심연의 감시자', e:250, w:1, mult: 1.3, speech: ['심연을 들여다보지 마라...', '어둠이 너를 삼킬 것이다...', '공포를 느껴라!']}
         ];
         
         const WEAPON_IMAGES = {
@@ -789,7 +789,7 @@
                 isSuperBoss = true;
                 const bossHp = parseFloat(localStorage.getItem('rpg_boss_hp') || 1500);
                 const bossMaxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 1500);
-                enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 30 + (player.level * 3), exp: 10000, img: 'image/best_boss.jpg' };
+                enemy = { name: '초강력 보스 (Ancient Overlord)', hp: bossHp, maxHp: bossMaxHp, atk: 30 + (player.level * 3), exp: 10000, img: 'image/best_boss.jpg', speech: ['감히 내게 도전하다니!', '진정한 힘을 보여주마!', '절망하라!'] };
                 localStorage.removeItem('rpg_is_super_boss');
                 playBossBgm('song/best_boss_bgm.mp3');
             } else if (isBossFlag === 'true') {
@@ -802,10 +802,10 @@
                     const nHp = Math.floor(bossHp * 1.5);
                     const nMaxHp = Math.floor(bossMaxHp * 1.5);
                     const nAtk = Math.floor(bossAtk * 1.2);
-                    enemy = { name: '심연의 군주', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 5000, img: 'image/monster_boss.jpg', isNightBoss: true };
+                    enemy = { name: '심연의 군주', hp: nHp, maxHp: nMaxHp, atk: nAtk, exp: 5000, img: 'image/monster_boss.jpg', isNightBoss: true, speech: ['어둠이 너를 삼킬 것이다!', '심연의 공포를 느껴라!', '빛은 없다!'] };
                     playBossBgm('song/monster_boss_bgm1.mp3');
                 } else {
-                    enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg' };
+                    enemy = { name: '강화된 보스 나무', hp: bossHp, maxHp: bossMaxHp, atk: bossAtk, exp: 2000, img: 'image/ka1.jpg', speech: ['숲의 분노를 느껴라!', '내 뿌리는 깊다!', '자연으로 돌아가라!'] };
                     playBossBgm('song/monster_boss_bgm.mp3');
                 }
                 localStorage.removeItem('rpg_boss_encounter'); 
@@ -826,7 +826,8 @@
                     exp: sel.e,
                     img: sel.f,
                     canPoison: sel.poison || false,
-                    type: sel.type || 'normal'
+                    type: sel.type || 'normal',
+                    speech: sel.speech || ['크르르...', '공격한다!', '먹잇감이다!']
                 };
             }
             
@@ -840,7 +841,55 @@
             updateWeatherUI();
             addLog(`<span class='log-highlight'>[${enemy.name}]</span>이(가) 나타났습니다!`);
             document.getElementById('loading-overlay').style.display = 'none';
-            update(); say('p', '전투 시작!');
+            update(); say('p', getStartSpeech(player.job));
+        }
+
+        function getStartSpeech(job) {
+            const speeches = {
+                '전사': ['전투 준비 완료!', '나의 검을 받아라!', '명예로운 전투를!'],
+                '도적': ['조용히 처리해주지.', '내 속도를 따라올 수 있을까?', '빈틈이 보이는군.'],
+                '마법사': ['마법의 힘을 보여주마!', '지식은 힘이다!', '원소들이여, 나를 따르라!'],
+                '버서커': ['피가 끓어오른다!', '다 부숴버리겠어!', '크아아아!'],
+                '가디언': ['내가 모두를 지키겠다!', '방패는 뚫리지 않는다!', '신성한 힘으로!'],
+                '어쌔신': ['그림자 속에 숨어...', '죽음은 조용히 찾아오지.', '이미 넌 죽어있다.'],
+                '섀도우': ['어둠이 너를 덮칠 것이다.', '독이 퍼지는군...', '공포를 느껴봐라.'],
+                '아크메이지': ['궁극의 마법을 보여주지!', '마나의 흐름이 느껴진다.', '파멸의 주문을 외우마!'],
+                '소서러': ['원소의 폭풍이여!', '마법은 예술이다!', '재로 만들어주지.']
+            };
+            const list = speeches[job] || ['전투 시작!'];
+            return list[Math.floor(Math.random() * list.length)];
+        }
+
+        function getAttackSpeech(job) {
+            const speeches = {
+                '전사': ['받아라!', '검의 맛을 봐라!', '하압!'],
+                '도적': ['쉿!', '놓치지 않아!', '빠르게!'],
+                '마법사': ['먹어라!', '마력탄!', '가라!'],
+                '버서커': ['으라차차!', '부숴져라!', '죽어라!'],
+                '가디언': ['물러서라!', '심판이다!', '강타!'],
+                '어쌔신': ['사라져라.', '급소다.', '끝이다.'],
+                '섀도우': ['고통을...', '독이여...', '스며든다.'],
+                '아크메이지': ['파괴하라!', '마력 방출!', '소멸해라!'],
+                '소서러': ['타올라라!', '얼어붙어라!', '찢어발겨라!']
+            };
+            const list = speeches[job] || ['공격!'];
+            return Math.random() < 0.4 ? list[Math.floor(Math.random() * list.length)] : null;
+        }
+
+        function getSkillSpeech(job) {
+             const speeches = {
+                '전사': ['강력한 일격!', '파워 스트라이크!', '검기 발산!'],
+                '도적': ['급소 찌르기!', '백스탭!', '치명타를 노린다!'],
+                '마법사': ['파이어볼!', '아이스 스피어!', '썬더 볼트!'],
+                '버서커': ['광란의 일격!', '피의 축제다!', '모조리 씹어먹어주마!'],
+                '가디언': ['실드 배쉬!', '정의의 심판!', '빛의 검이여!'],
+                '어쌔신': ['암살.', '목을 노린다.', '그림자 베기.'],
+                '섀도우': ['베놈 스트라이크!', '독무!', '죽음의 숨결.'],
+                '아크메이지': ['메테오!', '블리자드!', '체인 라이트닝!'],
+                '소서러': ['엘리멘탈 버스트!', '혼돈의 마법!', '폭주하라!']
+            };
+            const list = speeches[job] || ['스킬 발동!'];
+            return list[Math.floor(Math.random() * list.length)];
         }
 
         function playBossBgm(src) {
@@ -1134,15 +1183,18 @@
                     case '전사':
                         pStatus.defUp = 2;
                         logMsg = "🛡️ [방패 방어] 태세를 취합니다! (받는 피해 50% 감소)";
+                        say('p', '방어 태세!');
                         break;
                     case '도적':
                         pStatus.focus = 1;
                         logMsg = "👁️ [집중력 강화] 적의 약점을 노립니다! (다음 공격 치명타)";
+                        say('p', '약점을 간파했다!');
                         break;
                     case '마법사':
                         let rec = Math.floor(player.maxMp * 0.3);
                         player.mp = Math.min(player.maxMp, player.mp + rec);
                         logMsg = `💧 [마나 순환] 마나를 ${rec} 회복했습니다!`;
+                        say('p', '마나여, 차올라라!');
                         break;
                     case '버서커':
                         let cost = Math.floor(player.hp * 0.2);
@@ -1150,10 +1202,12 @@
                         pStatus.atkUp = 2;
                         logMsg = `🩸 [피의 갈증] 체력 ${cost}을 소모하여 공격력을 2배로 높입니다!`;
                         showDamage('player-frame', cost, 'player_hit');
+                        say('p', '피가 끓는다!');
                         break;
                     case '가디언':
                         pStatus.invincible = 2;
                         logMsg = "🛡️ [완전 방어] 절대 방어 태세! (2턴간 무적)";
+                        say('p', '절대 뚫리지 않는다!');
                         break;
                     case '어쌔신':
                         let dmg = Math.floor((player.stats.dex * 2.5 + player.level * 5) * 1.5);
@@ -1161,6 +1215,7 @@
                         showDamage('enemy-frame', dmg, 'crit');
                         triggerHitEffect('enemy-frame', 'crit');
                         logMsg = `🗡️ [그림자 일격] 적의 급소를 찔러 ${dmg}의 치명적인 피해!`;
+                        say('p', '죽음은 조용히...');
                         break;
                     case '섀도우':
                         if (eStatus.poison > 0) {
@@ -1172,14 +1227,17 @@
                             logMsg = "☠️ [독 확산] 적에게 맹독을 주입합니다!";
                         }
                         eStatus.poison = 3;
+                        say('p', '고통스러울 것이다...');
                         break;
                     case '아크메이지':
                         pStatus.nextSkillTriple = 1;
                         logMsg = "🔮 [마력 폭주] 마력을 한계까지 끌어올립니다! (다음 스킬 3배)";
+                        say('p', '궁극의 마법을 위해!');
                         break;
                     case '소서러':
                         pStatus.zeroMana = 2;
                         logMsg = "🌀 [원소 과부하] 마나의 흐름을 제어합니다! (스킬 소모 0)";
+                        say('p', '무한한 마력을 느껴라!');
                         break;
                     default:
                         logMsg = "특수 기술 발동!";
@@ -1237,6 +1295,9 @@
                     update(); check();
                     return;
                 }
+
+                const atkSpeech = getAttackSpeech(player.job);
+                if(atkSpeech) say('p', atkSpeech);
 
                 let critChance = 0.2;
                 if (player.job === '어쌔신') critChance = 0.35;
@@ -1382,8 +1443,10 @@
             setTimeout(() => {
                 let isCrit = false; let dmg = 0;
                 
+                const skillSpeech = getSkillSpeech(player.job);
+                say('p', skillSpeech);
+
                 if(player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') {
-                    say('p', `급소 찌르기!`);
                     let baseDmg = Math.floor(player.stats.dex * 0.5) + (player.level * 2);
                     let critChance = (player.job === '어쌔신') ? 0.55 : 0.4;
                     if (pStatus.critUp > 0) critChance = 1.0;
@@ -1417,7 +1480,6 @@
                     }
                     return;
                 } else {
-                    say('p', '강력한 스킬 발동!');
                     let vMap = {
                         '전사':'v-warrior', '마법사':'v-mage',
                         '버서커':'v-warrior1', '가디언':'v-warrior1',
@@ -1681,7 +1743,15 @@
                 } else {
                     playMotion(hitMap[jobKey], 'player-frame', 'player_hit');
                     showDamage('player-frame', dmg, 'player_hit');
-                    say('e', '받아라!');
+
+                    // 적의 대사 출력
+                    if (enemy.speech && enemy.speech.length > 0) {
+                        const randSpeech = enemy.speech[Math.floor(Math.random() * enemy.speech.length)];
+                        say('e', randSpeech);
+                    } else {
+                        say('e', '받아라!');
+                    }
+
                     addLog(`적이 공격합니다! <span style='color:red'>${dmg}</span> 피해를 입었습니다.`);
                 }
 
