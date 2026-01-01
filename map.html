@@ -562,16 +562,16 @@
     };
 
     const LEGENDARY_SPECIAL_OPTIONS = [
-        { name: "피의 갈증", desc: "공격 시 3% 확률로 피해량의 10% HP 흡수" },
-        { name: "마나의 샘", desc: "공격 시 3% 확률로 최대 MP의 5% 회복" },
-        { name: "가벼운 발걸음", desc: "회피율 +2%" },
-        { name: "강철 피부", desc: "받는 피해량 -3%" },
-        { name: "약점 간파", desc: "치명타 피해량 +5%" },
-        { name: "골드 러시", desc: "골드 획득량 +10%" },
-        { name: "성장의 가속", desc: "경험치 획득량 +5%" },
-        { name: "굳건한 의지", desc: "상태이상 저항 +10%" },
-        { name: "분노 조절", desc: "분노 획득량 +10%" },
-        { name: "재빠른 손놀림", desc: "아이템 획득 시 1% 확률로 2배 획득" }
+        { name: "피의 갈증", desc: "공격 시 10% 확률로 피해량의 20% HP 흡수", key: "l_vamp", val: 20 },
+        { name: "마나의 샘", desc: "공격 시 10% 확률로 최대 MP의 10% 회복", key: "l_mana", val: 10 },
+        { name: "가벼운 발걸음", desc: "회피율 +10%", key: "l_eva", val: 10 },
+        { name: "강철 피부", desc: "받는 피해량 -10%", key: "l_def", val: 10 },
+        { name: "약점 간파", desc: "치명타 피해량 +25%", key: "l_crit_dmg", val: 25 },
+        { name: "골드 러시", desc: "골드 획득량 +30%", key: "l_gold", val: 30 },
+        { name: "성장의 가속", desc: "경험치 획득량 +20%", key: "l_exp", val: 20 },
+        { name: "굳건한 의지", desc: "상태이상 저항 +30%", key: "l_resist", val: 30 },
+        { name: "분노 조절", desc: "분노 획득량 +20%", key: "l_rage", val: 20 },
+        { name: "재빠른 손놀림", desc: "아이템 획득 시 5% 확률로 2배 획득", key: "l_double_drop", val: 5 }
     ];
 
     let player = null;
@@ -1156,9 +1156,9 @@
         let rarityColor = "#ffffff";
         let grade = Math.floor(Math.random() * 3) + 1;
 
-        if (rand < 0.05 + chaBonus) { rarity = "legendary"; rarityColor = "#ff8000"; grade = Math.floor(Math.random() * 6) + 15; }
-        else if (rand < 0.15 + chaBonus) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
-        else if (rand < 0.4 + chaBonus) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
+        if (rand < 0.1 + chaBonus) { rarity = "legendary"; rarityColor = "#ff8000"; grade = Math.floor(Math.random() * 6) + 15; }
+        else if (rand < 0.25 + chaBonus) { rarity = "epic"; rarityColor = "#a335ee"; grade = Math.floor(Math.random() * 5) + 10; }
+        else if (rand < 0.5 + chaBonus) { rarity = "rare"; rarityColor = "#2196f3"; grade = Math.floor(Math.random() * 4) + 5; }
 
         // 전직 전에는 레전드리 드롭 불가
         if (!player.isAdvanced && rarity === "legendary") {
