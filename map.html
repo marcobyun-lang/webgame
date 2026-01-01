@@ -1037,7 +1037,7 @@
         }
 
         if (superBoss.alive) {
-            const dx = player.x - superBoss.x; const dy = player.y - boss.y;
+            const dx = player.x - superBoss.x; const dy = player.y - superBoss.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if(dist > 0) { superBoss.x += (dx / dist) * superBoss.speed; superBoss.y += (dy / dist) * superBoss.speed; }
             if(dist < 40) {
