@@ -110,7 +110,7 @@
 
         .hp-fill { background: linear-gradient(90deg, #c62828, #ff5252); }
         .mp-fill { background: linear-gradient(90deg, #1565c0, #448aff); }
-        .exp-fill { background: linear-gradient(90deg, #6a1b9a, #e040fb); }
+        .exp-fill { background: linear-gradient(90deg, #4a148c, #6a1b9a); }
 
         .bar-text {
             position: absolute; right: 8px; top: 0; height: 100%;
@@ -252,7 +252,7 @@
         .shop-gold { text-align: center; color: var(--accent-gold); font-family: var(--font-body); font-size: 1.2rem; margin-bottom: 15px; padding: 10px; border: 1px solid #333; background: #111; }
         .enhance-btn {
             margin-top: 8px; width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #ddd;
-            font-family: var(--font-body); font-size: 0.75rem; cursor: pointer; transition: 0.2s;
+            font-family: var(--font-body); font-size: 1rem; cursor: pointer; transition: 0.2s;
         }
         .enhance-btn:hover { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
         .enhance-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #111; color: #555; }
@@ -557,12 +557,13 @@
 </div>
 
 <script>
-    const DB_URL = "https://script.google.com/macros/s/AKfycbwFtbKreW0iJpUXrUs3haBJqiMREL2EQ8XhpomKe7mR6l1Q0NDjoXpe31XY6k6VPe48Iw/exec";
+    const DB_URL = "https://script.google.com/macros/s/AKfycbycfPdZbOrAUPGrAxZYi5MHRNfsfCUOc9TnK2QqXFWL4_DoL1Z3yBamItqFTOJb2NpR8A/exec";
     const CHAR_FILES = {
-        '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg',
+        '전사': 'image/warrior.jpg', '도적': 'image/rogue.jpg', '마법사': 'image/mage.jpg', '엘프 궁수': 'image/archer.jpg',
         '버서커': 'image/warrior1.jpg', '가디언': 'image/warrior1.jpg',
         '어쌔신': 'image/rogue1.jpg', '섀도우': 'image/rogue1.jpg',
-        '아크메이지': 'image/mage1.jpg', '소서러': 'image/mage1.jpg'
+        '아크메이지': 'image/mage1.jpg', '소서러': 'image/mage1.jpg',
+        '스나이퍼': 'image/archer1.jpg', '레인저': 'image/archer1.jpg'
     };
 
     const MAP_SETS = [
@@ -576,12 +577,15 @@
         '전사': ['기사의 검', '대검', '용사의 검', '심판의 도끼'],
         '도적': ['암살자의 단도', '쌍검', '그림자 비수'],
         '마법사': ['마법 지팡이', '오브', '현자의 스태프'],
+        '엘프 궁수': ['연습용 목궁', '컴포지트 보우', '윈드런너'],
         '버서커': ['광전사의 도끼', '피의 검'],
         '가디언': ['수호자의 방패검', '성기사의 망치'],
         '어쌔신': ['죽음의 인도자', '그림자 송곳니'],
         '섀도우': ['공포의 비수', '심연의 칼날'],
         '아크메이지': ['대마법사의 지팡이', '별의 조각'],
-        '소서러': ['원소의 근원', '마나의 눈']
+        '소서러': ['원소의 근원', '마나의 눈'],
+        '스나이퍼': ['저격수의 활', '정령의 활'],
+        '레인저': ['폭풍의 활', '자연의 활']
     };
 
     const LEGENDARY_SPECIAL_OPTIONS = [
@@ -727,6 +731,7 @@
             if (job === '전사' || job === '버서커' || job === '가디언') return 'image/warrior4.jpg';
             if (job === '도적' || job === '어쌔신' || job === '섀도우') return 'image/rogue4.jpg';
             if (job === '마법사' || job === '아크메이지' || job === '소서러') return 'image/mage4.jpg';
+            if (job === '엘프 궁수' || job === '스나이퍼' || job === '레인저') return 'image/archer4.jpg';
         }
         return CHAR_FILES[job] || CHAR_FILES['전사'];
     }
@@ -840,6 +845,11 @@
                 { job: '아크메이지', desc: '화력 특화. 스킬 대미지 대폭 상승.', bonus: '지능 +15, MP +100', img: 'image/mage1.jpg' },
                 { job: '소서러', desc: '효율 특화. 스킬 마나 소모량 감소.', bonus: '지능 +10, 지혜 +10', img: 'image/mage1.jpg' }
             ];
+        } else if (player.job === '엘프 궁수') {
+            options = [
+                { job: '스나이퍼', desc: '정확한 저격. 치명타 피해량 증가 및 단일 대상 극대화.', bonus: '민첩 +15, 치명타 피해량 +20%', img: 'image/archer1.jpg' },
+                { job: '레인저', desc: '광역 제압. 다수 대상 공격 및 군중 제어 특화.', bonus: '민첩 +10, 지혜 +10', img: 'image/archer1.jpg' }
+            ];
         }
 
         options.forEach(opt => {
@@ -864,6 +874,8 @@
         else if (opt.job === '섀도우') { player.stats.dex += 8; player.stats.wis += 8; }
         else if (opt.job === '아크메이지') { player.stats.int += 15; player.maxMp += 100; }
         else if (opt.job === '소서러') { player.stats.int += 10; player.stats.wis += 10; }
+        else if (opt.job === '스나이퍼') { player.stats.dex += 15; /* 치명타 피해량은 전투 로직에서 처리 */ }
+        else if (opt.job === '레인저') { player.stats.dex += 10; player.stats.wis += 10; }
         player.hp = player.maxHp; player.mp = player.maxMp;
         playerImg.src = getPlayerImage(player.job, player.inventory);
         advBgm.pause(); advBgm.currentTime = 0;
@@ -944,7 +956,13 @@
             rainThunderSfx.onended = () => { rainRuinSfx.play().catch(e => {}); };
         }
         else if (currentWeather === "fog") {
-            icon.innerText = "🌫️"; text.innerText = "안개 (조우율 상승 / 명중 변화)";
+            icon.innerText = "🌫️";
+            // 엘프 궁수일 경우 명중률 페널티를 무시하므로 텍스트도 변경
+            if (player && player.job === '엘프 궁수') {
+                text.innerText = "안개 (조우율 상승 / 명중 페널티 없음)";
+            } else {
+                text.innerText = "안개 (조우율 상승 / 명중 변화)";
+            }
             const fog = document.createElement('div');
             fog.className = 'fog-layer';
             overlay.appendChild(fog);
@@ -1272,8 +1290,8 @@
         document.getElementById('ui-hp-bar').style.width = `${Math.min(100, (player.hp/player.maxHp)*100)}%`;
         document.getElementById('ui-mp-bar').style.width = `${Math.min(100, (player.mp/player.maxMp)*100)}%`;
         document.getElementById('ui-exp-bar').style.width = `${Math.min(100, (player.exp/player.maxExp)*100)}%`;
-        document.getElementById('ui-hp-text').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
-        document.getElementById('ui-mp-text').innerText = `${Math.ceil(player.mp)}/${player.maxMp}`;
+        document.getElementById('ui-hp-text').innerText = `${Math.ceil(player.hp)}/${Math.round(player.maxHp)}`;
+        document.getElementById('ui-mp-text').innerText = `${Math.ceil(player.mp)}/${Math.round(player.maxMp)}`;
         document.getElementById('ui-exp-text').innerText = `${Math.floor(player.exp)}/${player.maxExp}`;
     }
 
@@ -1338,6 +1356,33 @@
         return 'stat-normal';
     }
 
+    function getWeaponImage(job, rarity) {
+        let baseJob = '전사';
+        if (['도적', '어쌔신', '섀도우'].includes(job)) baseJob = '도적';
+        if (['마법사', '아크메이지', '소서러'].includes(job)) baseJob = '마법사';
+        if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) baseJob = '엘프 궁수';
+
+        if (baseJob === '전사') {
+            if (rarity === 'legendary') return 'legend_warrior.jpg';
+            if (rarity === 'epic') return 'epic_warrior.jpg';
+            return 'weapon_warrior.jpg';
+        } else if (baseJob === '도적') {
+            if (rarity === 'legendary') return 'legend_rogue.jpg';
+            if (rarity === 'epic') return 'epic_rogue.jpg';
+            return 'weapon_rogue.jpg';
+        } else if (baseJob === '마법사') {
+            if (rarity === 'legendary') return 'legend_mage.jpg';
+            if (rarity === 'epic') return 'epic_mage.jpg';
+            return 'weapon_mage.jpg';
+        } else if (baseJob === '엘프 궁수') {
+            if (rarity === 'legendary') return 'legend_archer.jpg';
+            if (rarity === 'epic') return 'epic_archer.jpg';
+            if (rarity === 'rare') return 'rare_archer.jpg';
+            return 'weapon_archer.jpg';
+        }
+        return 'weapon_warrior.jpg';
+    }
+
     function renderInventory() {
         const list = document.getElementById('inv-list');
         const statusPanel = document.getElementById('inv-status-panel');
@@ -1376,7 +1421,7 @@
 
             let iconHtml = '';
             if (item.type.includes('potion') || item.type.includes('scroll') || item.type === 'weapon') {
-                let iconSrc = item.img || (item.type === 'weapon' ? 'weapon_warrior.jpg' : 'potion_hp.jpg');
+                let iconSrc = item.img || (item.type === 'weapon' ? getWeaponImage(player.job, item.rarity) : 'potion_hp.jpg');
                 iconHtml = `<img src="image/${iconSrc}" class="item-icon-small">`;
             }
 
@@ -1558,6 +1603,9 @@
     function useItem(index) {
         const item = player.inventory[index];
         if (item.type.includes('potion') || item.type.includes('scroll')) {
+            if (item.type === 'potion_gamble') { // Added check for potion_gamble
+                return showConfirm("사용 불가", "도박사의 시약은 전투 중에만 사용할 수 있습니다.", null, true);
+            }
             if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
             if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
 
@@ -1808,9 +1856,14 @@
             let eventChance = isNight ? 0.02 : 0.01; // Reduced event chance
             let encounterChance = 0.06;
 
+            // 엘프 궁수(Elf Archer)의 '정령의 눈' 패시브: 안개(Fog) 날씨의 명중률 페널티(-20%)를 무시하고 0%로 고정함.
+            // map.html에서는 명중률 페널티를 직접적으로 처리하지 않으므로,
+            // 안개 날씨의 '조우율 상승' 효과를 엘프 궁수에게는 적용하지 않도록 처리합니다.
             if (currentWeather === "fog") {
-                eventChance *= 1.5;
-                encounterChance *= 2.0;
+                if (player.job !== '엘프 궁수') {
+                    eventChance *= 1.5;
+                    encounterChance *= 2.0;
+                }
             }
 
             if (rand < eventChance) showRandomEvent();

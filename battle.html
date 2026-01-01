@@ -77,6 +77,8 @@
         .status-icon { padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #fff; }
         .status-poison { background: #4caf50; }
         .status-stun { background: #ffeb3b; color: #000; }
+        .status-wind { background: #81c784; }
+        .status-atk-up-ranger { background: #ff9800; }
 
         .speech {
             position: absolute; top: -50px; left: 50%; transform: translateX(-50%); 
@@ -466,7 +468,7 @@
         @keyframes doubleTextPop {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
             20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -100%) scale(1.5); opacity: 0; }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
         }
     </style>
 </head>
@@ -529,30 +531,42 @@
                     <img id="atk-warrior" src="image/warrior_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-rogue" src="image/rogue_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-mage" src="image/mage_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-archer" src="image/archer_atk_img.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-archer1" src="image/archer_attack.jpg" class="unit-img" style="display:none;">
                     <img id="atk-warrior-double" src="image/warrior_attack.jpg" class="unit-img" style="display:none;">
                     <img id="atk-rogue-double" src="image/rogue_attack.jpg" class="unit-img" style="display:none;">
                     <img id="atk-mage-double" src="image/mage_attack.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-archer-double" src="image/archer_attack2.jpg" class="unit-img" style="display:none;">
+                    <img id="atk-ranger-double" src="image/ranger_attack.jpg" class="unit-img" style="display:none;">
                     <img id="hit-warrior" src="image/warrior_hit.jpg" class="unit-img" style="display:none;">
                     <img id="hit-rogue" src="image/rogue_hit.jpg" class="unit-img" style="display:none;">
                     <img id="hit-mage" src="image/mage_hit.jpg" class="unit-img" style="display:none;">
+                    <img id="hit-archer" src="image/archer_hit.jpg" class="unit-img" style="display:none;">
                     <img id="crit-warrior" src="image/critical_warrior.jpg" class="unit-img" style="display:none;">
                     <img id="crit-rogue" src="image/critical_rogue.jpg" class="unit-img" style="display:none;">
                     <img id="crit-mage" src="image/critical_mage.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-archer" src="image/archer_critical.jpg" class="unit-img" style="display:none;">
+                    <img id="crit-archer-advanced" src="image/critical_archer.jpg" class="unit-img" style="display:none;">
                     <img id="crit-warrior1" src="image/warrior_critical.jpg" class="unit-img" style="display:none;">
                     <img id="crit-rogue1" src="image/rogue_critical.jpg" class="unit-img" style="display:none;">
                     <img id="crit-mage1" src="image/mage_critical.jpg" class="unit-img" style="display:none;">
                     <img id="eva-warrior" src="image/warrior_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-rogue" src="image/rogue_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-mage" src="image/mage_evasion.jpg" class="unit-img" style="display:none;">
+                    <img id="evasion-archer" src="image/archer_evasion.jpg" class="unit-img" style="display:none;">
                     <img id="eva-warrior1" src="image/warrior3.jpg" class="unit-img" style="display:none;">
                     <img id="eva-rogue1" src="image/rogue3.jpg" class="unit-img" style="display:none;">
                     <img id="eva-mage1" src="image/mage3.jpg" class="unit-img" style="display:none;">
+                    <img id="eva-archer1" src="image/archer3.jpg" class="unit-img" style="display:none;">
                     <video id="v-warrior" src="image/warrior_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-rogue" src="image/rogue_atk.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage" src="image/mage_atk.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-archer" src="image/v-archer.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-warrior1" src="image/warrior_atk1.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage1" src="image/mage_atk1.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-rogue1" src="image/rogue_atk1.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-archer1" src="image/v-archer1.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-archer2" src="image/v-archer2.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage2" src="image/mage_atk2.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-warrior2" src="image/warrior_atk2.mp4" class="unit-img" style="display:none;"></video>
                 </div>
@@ -598,7 +612,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbwFtbKreW0iJpUXrUs3haBJqiMREL2EQ8XhpomKe7mR6l1Q0NDjoXpe31XY6k6VPe48Iw/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbycfPdZbOrAUPGrAxZYi5MHRNfsfCUOc9TnK2QqXFWL4_DoL1Z3yBamItqFTOJb2NpR8A/execc";
         
         const attackSfx = new Audio('song/attack.mp3');
         const critSfx = new Audio('song/attack_1.mp3');
@@ -634,10 +648,11 @@
         ];
         
         const WEAPON_IMAGES = {
-            '전사': 'weapon_warrior.jpg', '도적': 'weapon_rogue.jpg', '마법사': 'weapon_mage.jpg',
+            '전사': 'weapon_warrior.jpg', '도적': 'weapon_rogue.jpg', '마법사': 'weapon_mage.jpg', '엘프 궁수': 'weapon_archer.jpg',
             '버서커': 'weapon_warrior.jpg', '가디언': 'weapon_warrior.jpg',
             '어쌔신': 'weapon_rogue.jpg', '섀도우': 'weapon_rogue.jpg',
-            '아크메이지': 'weapon_mage.jpg', '소서러': 'weapon_mage.jpg'
+            '아크메이지': 'weapon_mage.jpg', '소서러': 'weapon_mage.jpg',
+            '스나이퍼': 'weapon_archer.jpg', '레인저': 'weapon_archer.jpg'
         };
         const ITEM_IMAGES = {
             'hp_potion': 'potion_hp.jpg', 'potion_hp': 'potion_hp.jpg',
@@ -661,12 +676,15 @@
             '전사': ['기사의 검', '대검', '용사의 검', '심판의 도끼'],
             '도적': ['암살자의 단도', '쌍검', '그림자 비수'],
             '마법사': ['마법 지팡이', '오브', '현자의 스태프'],
+            '엘프 궁수': ['연습용 목궁', '컴포지트 보우', '윈드런너'],
             '버서커': ['광전사의 도끼', '피의 검'],
             '가디언': ['수호자의 방패검', '성기사의 망치'],
             '어쌔신': ['죽음의 인도자', '그림자 송곳니'],
             '섀도우': ['공포의 비수', '심연의 칼날'],
             '아크메이지': ['대마법사의 지팡이', '별의 조각'],
-            '소서러': ['원소의 근원', '마나의 눈']
+            '소서러': ['원소의 근원', '마나의 눈'],
+            '스나이퍼': ['저격수의 활', '정령의 활'],
+            '레인저': ['폭풍의 활', '자연의 활']
         };
 
         const LEGENDARY_SPECIAL_OPTIONS = [
@@ -704,7 +722,7 @@
         let currentWeather = "sunny";
         let isLegendary = false;
 
-        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
+        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0 };
         let eStatus = { poison: 0, stun: 0 };
         let rage = 0;
         const maxRage = 100;
@@ -735,7 +753,7 @@
             rage = player.rage;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
-            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0 };
+            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0 };
             doubleAttackCooldown = 0;
 
             if (player.specialCooldown > 0) {
@@ -743,6 +761,7 @@
             }
             specialCooldown = player.specialCooldown || 0;
             updateSpecialTooltip();
+            updateSkillTooltip();
 
             if (player.battleCurse) {
                 pStatus.stun = 1;
@@ -761,10 +780,11 @@
             };
 
             const jM = {
-                '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
+                '전사': 'warrior', '도적': 'rogue', '마법사': 'mage', '엘프 궁수': 'archer',
                 '버서커': 'warrior1', '가디언': 'warrior1',
                 '어쌔신': 'rogue1', '섀도우': 'rogue1',
-                '아크메이지': 'mage1', '소서러': 'mage1'
+                '아크메이지': 'mage1', '소서러': 'mage1',
+                '스나이퍼': 'archer1', '레인저': 'archer1'
             };
 
             let pImgSrc = `image/${jM[player.job] || 'warrior'}.jpg`;
@@ -776,12 +796,14 @@
                 if (j === '전사' || j === '버서커' || j === '가디언') pImgSrc = 'image/warrior4.jpg';
                 else if (j === '도적' || j === '어쌔신' || j === '섀도우') pImgSrc = 'image/rogue4.jpg';
                 else if (j === '마법사' || j === '아크메이지' || j === '소서러') pImgSrc = 'image/mage4.jpg';
+                else if (j === '엘프 궁수' || j === '스나이퍼' || j === '레인저') pImgSrc = 'image/archer4.jpg';
             } else if (player.isAdvanced) {
                 // 전직 상태이지만 레전드 무기가 없는 경우 전직 이미지 사용
                 const j = player.job;
                 if (j === '버서커' || j === '가디언') pImgSrc = 'image/warrior1.jpg';
                 else if (j === '어쌔신' || j === '섀도우') pImgSrc = 'image/rogue1.jpg';
                 else if (j === '아크메이지' || j === '소서러') pImgSrc = 'image/mage1.jpg';
+                else if (j === '스나이퍼' || j === '레인저') pImgSrc = 'image/archer1.jpg';
             }
 
             document.getElementById('p-img').src = pImgSrc;
@@ -854,7 +876,8 @@
             updateWeatherUI();
             addLog(`<span class='log-highlight'>[${enemy.name}]</span>이(가) 나타났습니다!`);
             document.getElementById('loading-overlay').style.display = 'none';
-            update(); say('p', getStartSpeech(player.job));
+            say('p', getStartSpeech(player.job));
+            update(); // Call update here to display initial HP/MP/Rage
         }
 
         function getStartSpeech(job) {
@@ -862,12 +885,15 @@
                 '전사': ['전투 준비 완료!', '나의 검을 받아라!', '명예로운 전투를!'],
                 '도적': ['조용히 처리해주지.', '내 속도를 따라올 수 있을까?', '빈틈이 보이는군.'],
                 '마법사': ['마법의 힘을 보여주마!', '지식은 힘이다!', '원소들이여, 나를 따르라!'],
+                '엘프 궁수': ['정령의 활시위를 당겨라!', '바람이 내 화살을 인도한다!', '숨통을 끊어주마!'],
                 '버서커': ['피가 끓어오른다!', '다 부숴버리겠어!', '크아아아!'],
                 '가디언': ['내가 모두를 지키겠다!', '방패는 뚫리지 않는다!', '신성한 힘으로!'],
                 '어쌔신': ['그림자 속에 숨어...', '죽음은 조용히 찾아오지.', '이미 넌 죽어있다.'],
                 '섀도우': ['어둠이 너를 덮칠 것이다.', '독이 퍼지는군...', '공포를 느껴봐라.'],
                 '아크메이지': ['궁극의 마법을 보여주지!', '마나의 흐름이 느껴진다.', '파멸의 주문을 외우마!'],
-                '소서러': ['원소의 폭풍이여!', '마법은 예술이다!', '재로 만들어주지.']
+                '소서러': ['원소의 폭풍이여!', '마법은 예술이다!', '재로 만들어주지.'],
+                '스나이퍼': ['심장을 꿰뚫어주마!', '단 한 발로 끝낸다!', '내 시야에 들어왔군.'],
+                '레인저': ['폭풍처럼 쏟아져라!', '화살 비를 내려주지!', '자연의 분노를 느껴라!']
             };
             const list = speeches[job] || ['전투 시작!'];
             return list[Math.floor(Math.random() * list.length)];
@@ -878,12 +904,15 @@
                 '전사': ['받아라!', '검의 맛을 봐라!', '하압!'],
                 '도적': ['쉿!', '놓치지 않아!', '빠르게!'],
                 '마법사': ['먹어라!', '마력탄!', '가라!'],
+                '엘프 궁수': ['명중!', '꿰뚫어라!', '슉!'],
                 '버서커': ['으라차차!', '부숴져라!', '죽어라!'],
                 '가디언': ['물러서라!', '심판이다!', '강타!'],
                 '어쌔신': ['사라져라.', '급소다.', '끝이다.'],
                 '섀도우': ['고통을...', '독이여...', '스며든다.'],
                 '아크메이지': ['파괴하라!', '마력 방출!', '소멸해라!'],
-                '소서러': ['타올라라!', '얼어붙어라!', '찢어발겨라!']
+                '소서러': ['타올라라!', '얼어붙어라!', '찢어발겨라!'],
+                '스나이퍼': ['심장을 꿰뚫어주마!'],
+                '레인저': ['폭풍처럼 쏟아져라!']
             };
             const list = speeches[job] || ['공격!'];
             return Math.random() < 0.4 ? list[Math.floor(Math.random() * list.length)] : null;
@@ -894,12 +923,15 @@
                 '전사': ['강력한 일격!', '파워 스트라이크!', '검기 발산!'],
                 '도적': ['급소 찌르기!', '백스탭!', '치명타를 노린다!'],
                 '마법사': ['파이어볼!', '아이스 스피어!', '썬더 볼트!'],
+                '엘프 궁수': ['바람의 화살!', '바람이여, 적을 묶어라!', '정령의 속삭임!'],
                 '버서커': ['광란의 일격!', '피의 축제다!', '모조리 씹어먹어주마!'],
                 '가디언': ['실드 배쉬!', '정의의 심판!', '빛의 검이여!'],
                 '어쌔신': ['암살.', '목을 노린다.', '그림자 베기.'],
                 '섀도우': ['베놈 스트라이크!', '독무!', '죽음의 숨결.'],
                 '아크메이지': ['메테오!', '블리자드!', '체인 라이트닝!'],
-                '소서러': ['엘리멘탈 버스트!', '혼돈의 마법!', '폭주하라!']
+                '소서러': ['엘리멘탈 버스트!', '혼돈의 마법!', '폭주하라!'],
+                '스나이퍼': ['헤드샷!', '정밀 사격!', '꿰뚫는 화살!'],
+                '레인저': ['화살 비!', '난사!', '폭우처럼 쏟아져라!']
             };
             const list = speeches[job] || ['스킬 발동!'];
             return list[Math.floor(Math.random() * list.length)];
@@ -924,6 +956,27 @@
             }
         }
 
+        function updateSkillTooltip() {
+            const btn = document.querySelector('.btn-skl');
+            let desc = "";
+            switch(player.job) {
+                case '전사': desc = "[강타] 적에게 강력한 물리 피해를 입힙니다."; break;
+                case '도적': desc = "[급소 공격] 높은 확률로 치명타 피해를 입히고, 50% 확률로 적을 중독시킵니다."; break;
+                case '마법사': desc = "[마력탄] 적에게 강력한 마법 피해를 입힙니다."; break;
+                case '엘프 궁수': desc = "[바람의 화살] 적에게 약간의 피해를 주고, 3턴간 자신의 공격에 바람 속성을 부여합니다. 바람 속성 공격은 추가 피해를 입히고 25% 확률로 적을 기절시킵니다."; break;
+                case '버서커': desc = "[광란] 적에게 매우 강력한 물리 피해를 입힙니다."; break;
+                case '가디언': desc = "[방패 강타] 적에게 물리 피해를 입히고 30% 확률로 기절시킵니다."; break;
+                case '어쌔신': desc = "[암살] 매우 높은 확률로 치명타 피해를 입힙니다."; break;
+                case '섀도우': desc = "[맹독] 높은 확률로 치명타 피해를 입히고, 100% 확률로 적을 중독시킵니다."; break;
+                case '아크메이지': desc = "[대마법] 적에게 매우 강력한 마법 피해를 입힙니다."; break;
+                case '소서러': desc = "[원소 마법] 적에게 강력한 마법 피해를 입힙니다. (마나 소모량 감소)"; break;
+                case '스나이퍼': desc = "[헤드샷] 적의 현재 체력에 비례한 추가 피해를 입히는 확정 치명타 공격입니다."; break;
+                case '레인저': desc = "[화살비] 적에게 물리 피해를 입히고, 3턴간 연속 공격 확률이 2배 증가합니다."; break;
+                default: desc = "직업 고유의 기술을 사용합니다."; break;
+            }
+            btn.title = desc;
+        }
+
         function updateSpecialTooltip() {
             const btn = document.getElementById('btn-special');
             let desc = "";
@@ -931,13 +984,16 @@
                 case '전사': desc = "[방패 방어] 2턴 동안 받는 피해량 50% 감소"; break;
                 case '도적': desc = "[집중력 강화] 다음 공격 명중률/치명타 대폭 상승"; break;
                 case '마법사': desc = "[마나 순환] 최대 MP의 30% 즉시 회복"; break;
+                case '엘프 궁수': desc = "[정령의 가호] 2턴 동안 회피율 2배 증가"; break;
                 case '버서커': desc = "[피의 갈증] HP 20% 소모, 2턴간 공격력 2배"; break;
                 case '가디언': desc = "[완전 방어] 2턴 동안 무적 (데미지 무효)"; break;
                 case '어쌔신': desc = "[그림자 일격] 방어 무시 크리티컬 공격"; break;
-                case '섀도우': desc = "[독 확산] 독 피해 즉시 입히고 재중독"; break;
-                case '아크메이지': desc = "[마력 폭주] 다음 스킬 데미지 3배 (사용 후 1턴 기절)"; break;
-                case '소서러': desc = "[원소 과부하] 2턴 동안 스킬 마나 소모 0"; break;
-                default: desc = "특수 기술"; break;
+                    case '섀도우': desc = "[독 확산] 독 피해 즉시 입히고 재중독"; break;
+                    case '아크메이지': desc = "[마력 폭주] 다음 스킬 데미지 3배 (사용 후 1턴 기절)"; break;
+                    case '소서러': desc = "[원소 과부하] 2턴 동안 스킬 마나 소모 0"; break;
+                    case '스나이퍼': desc = "[은신] 2턴 동안 적의 공격을 회피 (다음 공격 치명타)"; break;
+                    case '레인저': desc = "[야수의 눈] 3턴 동안 공격력 20% 증가"; break;
+                    default: desc = "특수 기술"; break;
             }
             btn.title = desc;
         }
@@ -947,7 +1003,14 @@
             const text = document.getElementById('weather-text');
             if (currentWeather === "sunny") { icon.innerText = "☀️"; text.innerText = "맑음"; }
             else if (currentWeather === "rain") { icon.innerText = "🌧️"; text.innerText = "비 (마법 강화)"; }
-            else if (currentWeather === "fog") { icon.innerText = "🌫️"; text.innerText = "안개 (명중 저하)"; }
+            else if (currentWeather === "fog") {
+                icon.innerText = "🌫️";
+                if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
+                    text.innerText = "안개 (명중 페널티 없음)";
+                } else {
+                    text.innerText = "안개 (명중 저하)";
+                }
+            }
             else if (currentWeather === "thunder") { icon.innerText = "⚡"; text.innerText = "뇌우"; }
         }
 
@@ -963,10 +1026,10 @@
             document.getElementById('p-mp-bar').style.width = `${Math.max(0, Math.min(100, (player.mp/player.maxMp)*100))}%`;
             document.getElementById('p-rage-bar').style.width = `${Math.min(100, (rage/maxRage)*100)}%`;
             document.getElementById('e-hp-bar').style.width = `${Math.max(0, Math.min(100, (enemy.hp/enemy.maxHp)*100))}%`;
-            document.getElementById('p-hp-text').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
-            document.getElementById('p-mp-text').innerText = `${Math.ceil(player.mp)}/${player.maxMp}`;
+            document.getElementById('p-hp-text').innerText = `${Math.max(0, Math.ceil(player.hp))}/${Math.round(player.maxHp)}`;
+            document.getElementById('p-mp-text').innerText = `${Math.max(0, Math.ceil(player.mp))}/${Math.round(player.maxMp)}`;
             document.getElementById('p-rage-text').innerText = `RAGE ${rage}/${maxRage}`;
-            document.getElementById('e-hp-text').innerText = `${Math.ceil(enemy.hp)}/${enemy.maxHp}`;
+            document.getElementById('e-hp-text').innerText = `${Math.max(0, Math.ceil(enemy.hp))}/${Math.round(enemy.maxHp)}`;
 
             const btnSpecial = document.getElementById('btn-special');
             if (specialCooldown > 0) {
@@ -994,6 +1057,10 @@
             if(pStatus.zeroMana > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">마나0(${pStatus.zeroMana}턴)</span>`;
             if(pStatus.skillDmgUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#2979ff;">스킬강화(${pStatus.skillDmgUp}턴)</span>`;
             if(pStatus.critUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#ff1744;">광기(${pStatus.critUp}턴)</span>`;
+            if(pStatus.doubleAttackChance > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#00e676;">연속공격(${pStatus.doubleAttackChance}턴)</span>`;
+            if(pStatus.windAttribute > 0) pStatusEl.innerHTML += `<span class="status-icon status-wind">바람(${pStatus.windAttribute}턴)</span>`;
+            if(pStatus.atkUpRanger > 0) pStatusEl.innerHTML += `<span class="status-icon status-atk-up-ranger">공격력업(${pStatus.atkUpRanger}턴)</span>`;
+
 
             const eStatusEl = document.getElementById('e-status');
             eStatusEl.innerHTML = '';
@@ -1074,13 +1141,14 @@
             const jM = {
                 '버서커': 'warrior', '가디언': 'warrior',
                 '어쌔신': 'rogue', '섀도우': 'rogue',
-                '아크메이지': 'mage', '소서러': 'mage'
+                '아크메이지': 'mage', '소서러': 'mage',
+                '스나이퍼': 'archer', '레인저': 'archer'
             };
 
             let base = jM[player.job];
             if (base) {
                 if (effectType === 'crit') {
-                    const critMap = { 'warrior': 'crit-warrior1', 'rogue': 'crit-rogue1', 'mage': 'crit-mage1' };
+                    const critMap = { 'warrior': 'crit-warrior1', 'rogue': 'crit-rogue1', 'mage': 'crit-mage1', 'archer': 'crit-archer-advanced' };
                     const cImg = document.getElementById(critMap[base]);
                     if (cImg) {
                         pImg.style.display = 'none'; cImg.style.display = 'block';
@@ -1094,7 +1162,7 @@
                 }
 
                 if (effectType === 'evade') {
-                    const evaMap = { 'warrior': 'eva-warrior1', 'rogue': 'eva-rogue1', 'mage': 'eva-mage1' };
+                    const evaMap = { 'warrior': 'eva-warrior1', 'rogue': 'eva-rogue1', 'mage': 'eva-mage1', 'archer': 'eva-archer1' };
                     const eImg = document.getElementById(evaMap[base]);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
@@ -1111,7 +1179,14 @@
                     if (base === 'mage') {
                         pImg.src = mageAttackToggle ? 'image/mage3.jpg' : 'image/mage2.jpg';
                         mageAttackToggle = !mageAttackToggle;
-                    } else {
+                    } else if (base === 'archer') {
+                        const atkImg = document.getElementById('atk-archer1');
+                        pImg.style.display = 'none'; atkImg.style.display = 'block';
+                        setTimeout(() => {
+                            atkImg.style.display = 'none'; pImg.style.display = 'block';
+                        }, 1000);
+                    }
+                    else {
                         pImg.src = `image/${base}2.jpg`;
                     }
                 }
@@ -1121,6 +1196,7 @@
                         if (base === 'warrior') pImg.src = 'image/warrior4.jpg';
                         else if (base === 'rogue') pImg.src = 'image/rogue4.jpg';
                         else if (base === 'mage') pImg.src = 'image/mage4.jpg';
+                        else if (base === 'archer') pImg.src = 'image/archer4.jpg';
                         else pImg.src = `image/${base}1.jpg`;
                     } else {
                         pImg.src = `image/${base}1.jpg`;
@@ -1129,7 +1205,7 @@
 
             } else { // 전직 안한 경우
                 if (effectType === 'crit') {
-                    const critMap = { '전사': 'crit-warrior', '도적': 'crit-rogue', '마법사': 'crit-mage' };
+                    const critMap = { '전사': 'crit-warrior', '도적': 'crit-rogue', '마법사': 'crit-mage', '엘프 궁수': 'crit-archer' };
                     const cImg = document.getElementById(critMap[player.job || '전사']);
                     if (cImg) {
                         pImg.style.display = 'none'; cImg.style.display = 'block';
@@ -1140,7 +1216,7 @@
                         }, 1000);
                     }
                 } else if (effectType === 'evade') {
-                    const evaMap = { '전사': 'eva-warrior', '도적': 'eva-rogue', '마법사': 'eva-mage' };
+                    const evaMap = { '전사': 'eva-warrior', '도적': 'eva-rogue', '마법사': 'eva-mage', '엘프 궁수': 'evasion-archer' };
                     const eImg = document.getElementById(evaMap[player.job || '전사']);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
@@ -1209,6 +1285,11 @@
                         logMsg = `💧 [마나 순환] 마나를 ${rec} 회복했습니다!`;
                         say('p', '마나여, 차올라라!');
                         break;
+                    case '엘프 궁수':
+                        pStatus.evasionUp = 2; // 2턴간 회피율 2배 증가
+                        logMsg = "🍃 [정령의 가호] 정령의 가호로 2턴간 회피율이 2배 증가합니다!";
+                        say('p', '정령이여, 나를 보호하소서!');
+                        break;
                     case '버서커':
                         let cost = Math.floor(player.hp * 0.2);
                         player.hp -= cost;
@@ -1252,6 +1333,17 @@
                         logMsg = "🌀 [원소 과부하] 마나의 흐름을 제어합니다! (스킬 소모 0)";
                         say('p', '무한한 마력을 느껴라!');
                         break;
+                    case '스나이퍼':
+                        pStatus.invis = 2; // 2턴간 적의 공격 회피 (무적과 유사)
+                        pStatus.focus = 1; // 다음 공격 치명타
+                        logMsg = "👻 [은신] 2턴간 적의 공격을 회피하고 다음 공격은 치명타가 됩니다!";
+                        say('p', '사라져라!');
+                        break;
+                    case '레인저':
+                        pStatus.atkUpRanger = 3; // 3턴간 공격력 20% 증가
+                        logMsg = "🐺 [야수의 눈] 3턴간 공격력이 20% 증가합니다!";
+                        say('p', '사냥의 시간이다!');
+                        break;
                     default:
                         logMsg = "특수 기술 발동!";
                         break;
@@ -1270,10 +1362,11 @@
             isActing = true;
             const jobKey = player.job || '전사'; 
             const imgMap = {
-                '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage',
+                '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage', '엘프 궁수':'atk-archer',
                 '버서커':'atk-warrior', '가디언':'atk-warrior',
                 '어쌔신':'atk-rogue', '섀도우':'atk-rogue',
-                '아크메이지':'atk-mage', '소서러':'atk-mage'
+                '아크메이지':'atk-mage', '소서러':'atk-mage',
+                '스나이퍼':'atk-archer1', '레인저':'atk-archer1'
             };
             
             playAttackSfx();
@@ -1290,15 +1383,21 @@
 
             // Double Attack Check
             let isDoubleAttack = false;
-            const advancedJobs = ['버서커', '가디언', '어쌔신', '섀도우', '아크메이지', '소서러'];
-            if (advancedJobs.includes(player.job) && doubleAttackCooldown === 0 && Math.random() < 0.08) {
+            const advancedJobs = ['버서커', '가디언', '어쌔신', '섀도우', '아크메이지', '소서러', '스나이퍼', '레인저'];
+            let doubleAttackBaseChance = 0.08;
+            if (pStatus.doubleAttackChance > 0) doubleAttackBaseChance *= 2; // 레인저 스킬 효과
+
+            if (advancedJobs.includes(player.job) && doubleAttackCooldown === 0 && Math.random() < doubleAttackBaseChance) {
                 isDoubleAttack = true;
                 doubleAttackCooldown = Math.floor(Math.random() * 2) + 2;
             }
 
             setTimeout(() => {
                 let enemyEvadeChance = isBossBattle ? 0.1 : 0.05;
-                if (currentWeather === "fog") enemyEvadeChance += 0.15;
+                // 엘프 궁수 계열은 안개 날씨 명중률 페널티 무시
+                if (currentWeather === "fog" && !(player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저')) {
+                    enemyEvadeChance += 0.15;
+                }
 
                 if (Math.random() < enemyEvadeChance && !isFocused) {
                     addLog("<span class='log-evade'>적이 공격을 회피했습니다!</span>");
@@ -1314,11 +1413,33 @@
 
                 let critChance = 0.2;
                 if (player.job === '어쌔신') critChance = 0.35;
+                if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') critChance = 0.25; // 궁수 기본 치명타율
                 if (isFocused) critChance = 1.0;
                 if (pStatus.critUp > 0) critChance = 1.0;
 
                 let isCrit = Math.random() < critChance;
                 let dmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
+
+                // 궁수 계열은 민첩 스탯 기반 공격력
+                if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
+                    dmg = Math.floor(player.stats.dex/2.0) + (player.level*2) + 5 + (player.bonusAtk||0);
+                }
+
+                // 바람의 화살 효과 적용
+                if (pStatus.windAttribute > 0) {
+                    const windDmg = Math.floor(player.stats.int * 0.5);
+                    dmg += windDmg;
+                    addLog(`바람 속성 추가 피해 <span class='log-dmg'>${windDmg}</span>!`);
+                    if (Math.random() < 0.25) { // 25% 확률로 기절
+                        eStatus.stun = 1;
+                        addLog("바람의 힘으로 적이 기절했습니다!");
+                    }
+                }
+
+                // 레인저 야수의 눈 효과 적용
+                if (pStatus.atkUpRanger > 0) {
+                    dmg = Math.floor(dmg * 1.2); // 20% 공격력 증가
+                }
 
                 if (isBerserk) dmg *= 2;
 
@@ -1353,6 +1474,7 @@
             let msg = "";
             let atkImg = "";
             let effectType = "normal";
+            let dmgCorrection = 1.0;
 
             if (['버서커', '가디언'].includes(job)) {
                 msg = "한번 더 ! 강력한 일격!";
@@ -1366,70 +1488,106 @@
                 msg = "마력이 넘쳐흐른다 !";
                 atkImg = "image/mage_attack.jpg";
                 effectType = "big";
+            } else if (job === '스나이퍼') {
+                msg = "심장을 꿰뚫어주마!";
+                atkImg = "image/archer_attack2.jpg";
+                effectType = "crit"; // 스나이퍼는 더블 어택도 치명타처럼 연출
+                dmgCorrection = 0.8;
+            } else if (job === '레인저') {
+                msg = "폭풍처럼 쏟아져라!";
+                atkImg = "image/ranger_attack.jpg";
+                effectType = "normal";
+                dmgCorrection = 0.4;
             }
 
             say('p', msg);
 
-            // 더블 어택 시각 효과 추가
-            const container = document.getElementById('game-container');
-            const flash = document.createElement('div');
-            flash.className = 'double-attack-flash';
-            container.appendChild(flash);
-            setTimeout(() => flash.remove(), 200);
-
-            const textEffect = document.createElement('div');
-            textEffect.className = 'double-attack-text';
-            textEffect.innerText = "DOUBLE ATTACK!";
-            container.appendChild(textEffect);
-            setTimeout(() => textEffect.remove(), 1000);
-
-            const pImg = document.getElementById('p-img');
-            pImg.src = atkImg;
-
-            playAttackSfx();
-
             setTimeout(() => {
-                let dmgRatio = (Math.random() * 0.4) + 0.3;
-                let baseDmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
+                // 더블 어택 시각 효과 추가
+                const container = document.getElementById('game-container');
+                const flash = document.createElement('div');
+                flash.className = 'double-attack-flash';
+                container.appendChild(flash);
+                setTimeout(() => flash.remove(), 200);
 
-                if (pStatus.atkUp > 0) baseDmg *= 2;
+                const textEffect = document.createElement('div');
+                textEffect.className = 'double-attack-text';
+                textEffect.innerText = "DOUBLE ATTACK!";
+                container.appendChild(textEffect);
+                setTimeout(() => textEffect.remove(), 1000);
 
-                let dmg = Math.floor(baseDmg * dmgRatio);
+                const pImg = document.getElementById('p-img');
+                pImg.src = atkImg;
 
-                triggerHitEffect('enemy-frame', effectType);
-
-                enemy.hp -= dmg;
-                showDamage('enemy-frame', dmg, 'normal');
-                addLog(`연속 공격! <span class='log-dmg'>${dmg}</span>의 추가 피해!`);
+                playAttackSfx();
 
                 setTimeout(() => {
-                    if (isLegendary) {
-                         const jM = {
-                            '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
-                            '버서커': 'warrior', '가디언': 'warrior',
-                            '어쌔신': 'rogue', '섀도우': 'rogue',
-                            '아크메이지': 'mage', '소서러': 'mage'
-                        };
-                        let base = jM[player.job];
-                        if (base === 'warrior') pImg.src = 'image/warrior4.jpg';
-                        else if (base === 'rogue') pImg.src = 'image/rogue4.jpg';
-                        else if (base === 'mage') pImg.src = 'image/mage4.jpg';
-                        else pImg.src = `image/${base}1.jpg`;
-                    } else {
-                         const jM = {
-                            '전사': 'warrior', '도적': 'rogue', '마법사': 'mage',
-                            '버서커': 'warrior1', '가디언': 'warrior1',
-                            '어쌔신': 'rogue1', '섀도우': 'rogue1',
-                            '아크메이지': 'mage1', '소서러': 'mage1'
-                        };
-                        let base = jM[player.job] || 'warrior';
-                        pImg.src = `image/${base}.jpg`;
-                    }
-                }, 800); // 모션 유지 시간 증가
+                    let dmgRatio = (Math.random() * 0.4) + 0.3;
+                    let baseDmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
 
-                update();
-                check();
-            }, 400); // 타격 타이밍 조절
+                    // 궁수 계열은 민첩 스탯 기반 공격력
+                    if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
+                        baseDmg = Math.floor(player.stats.dex/2.0) + (player.level*2) + 5 + (player.bonusAtk||0);
+                    }
+
+                    // 바람의 화살 효과 적용
+                    if (pStatus.windAttribute > 0) {
+                        const windDmg = Math.floor(player.stats.int * 0.5);
+                        baseDmg += windDmg;
+                        addLog(`바람 속성 추가 피해 <span class='log-dmg'>${windDmg}</span>!`);
+                        if (Math.random() < 0.25) { // 25% 확률로 기절
+                            eStatus.stun = 1;
+                            addLog("바람의 힘으로 적이 기절했습니다!");
+                        }
+                    }
+
+                    // 레인저 야수의 눈 효과 적용
+                    if (pStatus.atkUpRanger > 0) {
+                        baseDmg = Math.floor(baseDmg * 1.2); // 20% 공격력 증가
+                    }
+
+                    if (pStatus.atkUp > 0) baseDmg *= 2;
+
+                    let dmg = Math.floor(baseDmg * dmgRatio * dmgCorrection);
+
+                    triggerHitEffect('enemy-frame', effectType);
+
+                    enemy.hp -= dmg;
+                    showDamage('enemy-frame', dmg, 'normal');
+                    addLog(`연속 공격! <span class='log-dmg'>${dmg}</span>의 추가 피해!`);
+
+                    setTimeout(() => {
+                        if (isLegendary) {
+                             const jM = {
+                                '전사': 'warrior', '도적': 'rogue', '마법사': 'mage', '엘프 궁수': 'archer',
+                                '버서커': 'warrior', '가디언': 'warrior',
+                                '어쌔신': 'rogue', '섀도우': 'rogue',
+                                '아크메이지': 'mage', '소서러': 'mage',
+                                '스나이퍼': 'archer', '레인저': 'archer'
+                            };
+                            let base = jM[player.job];
+                            if (base === 'warrior') pImg.src = 'image/warrior4.jpg';
+                            else if (base === 'rogue') pImg.src = 'image/rogue4.jpg';
+                            else if (base === 'mage') pImg.src = 'image/mage4.jpg';
+                            else if (base === 'archer') pImg.src = 'image/archer4.jpg';
+                            else pImg.src = `image/${base}1.jpg`;
+                        } else {
+                             const jM = {
+                                '전사': 'warrior', '도적': 'rogue', '마법사': 'mage', '엘프 궁수': 'archer',
+                                '버서커': 'warrior1', '가디언': 'warrior1',
+                                '어쌔신': 'rogue1', '섀도우': 'rogue1',
+                                '아크메이지': 'mage1', '소서러': 'mage1',
+                                '스나이퍼': 'archer1', '레인저': 'archer1'
+                            };
+                            let base = jM[player.job] || 'warrior';
+                            pImg.src = `image/${base}.jpg`;
+                        }
+                    }, 800); // 모션 유지 시간 증가
+
+                    update();
+                    check();
+                }, 400); // 타격 타이밍 조절
+            }, 800); // 말풍선 딜레이
         }
 
         function skl() {
@@ -1439,6 +1597,8 @@
             let costRate = 0.6;
             if (player.job === '소서러') costRate = 0.3;
             if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우') costRate = 0.4;
+            if (player.job === '엘프 궁수' || player.job === '레인저') costRate = 0.3; // 궁수 스킬 마나 소모율
+            if (player.job === '스나이퍼') costRate = 0.7; // 스나이퍼 헤드샷 마나 소모율 증가
 
             if (pStatus.zeroMana > 0 || pStatus.nextSkillZeroCost > 0) costRate = 0;
 
@@ -1492,6 +1652,33 @@
                         applySkillDmg(player.job, dmg, isCrit);
                     }
                     return;
+                } else if (player.job === '엘프 궁수') {
+                    const v = document.getElementById('v-archer'); const pImg = document.getElementById('p-img');
+                    if(v) {
+                        v.pause();
+                        v.currentTime = 0;
+                        pImg.style.display='none'; v.style.display='block'; v.play();
+                        v.onended = () => {
+                            v.style.display='none'; pImg.style.display='block';
+                            applySkillDmg(player.job);
+                        }
+                    } else {
+                        applySkillDmg(player.job);
+                    }
+                    return;
+                } else if (player.job === '스나이퍼' || player.job === '레인저') {
+                    const vMap = {
+                        '스나이퍼':'v-archer1',
+                        '레인저':'v-archer2'
+                    };
+                    const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
+                    if(v) {
+                        v.pause();
+                        v.currentTime = 0;
+                        pImg.style.display='none'; v.style.display='block'; v.play();
+                        v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
+                    } else applySkillDmg(player.job);
+                    return;
                 } else {
                     let vMap = {
                         '전사':'v-warrior', '마법사':'v-mage',
@@ -1510,7 +1697,7 @@
                     const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
                     if(v) {
                         v.pause();
-                        v.currentTime = 0; // Reset video to start
+                        v.currentTime = 0;
                         pImg.style.display='none'; v.style.display='block'; v.play();
                         v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
                     } else applySkillDmg(player.job);
@@ -1523,7 +1710,7 @@
             let isCrit = preCalcCrit;
             let dmg = preCalcDmg;
 
-            if (dmg === 0) { // If not pre-calculated (for non-rogue classes)
+            if (dmg === 0) {
                 isCrit = Math.random() < 0.2;
                 if (pStatus.critUp > 0) isCrit = true;
                 let multiplier = 2.0;
@@ -1532,6 +1719,12 @@
                 else if (job === '아크메이지') multiplier = 4.5;
                 else if (job === '전사' || job === '가디언') multiplier = 2.5;
                 else if (job === '마법사' || job === '소서러') multiplier = 2.2;
+                else if (job === '엘프 궁수') {
+                    multiplier = 0.5; // 약한 데미지
+                    isCrit = false; // 크리티컬 없음
+                }
+                else if (job === '스나이퍼') multiplier = 1.5; // 스나이퍼 헤드샷 데미지 계수 감소
+                else if (job === '레인저') multiplier = 1.0;
 
                 if (currentWeather === "rain" && (job === '마법사' || job === '아크메이지' || job === '소서러')) {
                     multiplier *= 1.3;
@@ -1541,23 +1734,31 @@
                 if(job === '전사' || job === '버서커' || job === '가디언') {
                     dmg = (player.stats.str * multiplier) + (player.level * 4);
                     if (job === '가디언' && Math.random() < 0.3) { eStatus.stun = 1; addLog("적을 기절시켰습니다!"); }
+                } else if (job === '엘프 궁수') {
+                    dmg = (player.stats.dex * multiplier) + (player.level * 1);
+                    pStatus.windAttribute = 3;
+                    addLog("🍃 [바람의 화살] 3턴간 공격에 바람 속성이 부여됩니다!");
+                } else if (job === '스나이퍼') {
+                    dmg = (enemy.hp * 0.1) + (player.stats.dex * multiplier) + (player.level * 2); // 스나이퍼 헤드샷 레벨 계수 감소
+                    isCrit = true;
+                } else if (job === '레인저') {
+                    dmg = (player.stats.dex * multiplier) + (player.level * 2);
+                    pStatus.doubleAttackChance = 3;
+                    addLog("레인저의 [화살 비]! 3턴간 연속 공격 확률이 2배 증가합니다!");
                 } else {
                     dmg = (player.stats.int * multiplier) + (player.level * 5);
                 }
 
-                // Berserk check
                 if (pStatus.atkUp > 0 && (job === '버서커' || job === '전사')) dmg *= 2;
 
                 dmg += (player.bonusAtk||0);
                 if(isCrit) { dmg = Math.floor(dmg*2); playCritSfx(); }
             }
 
-            // Skill Dmg Up (Focus Potion)
             if (pStatus.skillDmgUp > 0) {
                 dmg = Math.floor(dmg * 1.5);
             }
 
-            // Archmage Triple
             if (pStatus.nextSkillTriple > 0) {
                 dmg *= 3;
                 pStatus.nextSkillTriple = 0;
@@ -1569,10 +1770,13 @@
                 triggerScreenShake(true);
             }
 
-            triggerHitEffect('enemy-frame', isCrit?'crit':'big');
-            enemy.hp -= dmg; 
-            showDamage('enemy-frame', dmg, isCrit?'crit':'normal'); 
-            addLog(`스킬 적중! <span class='log-dmg'>${dmg}</span> 피해!`);
+            if (dmg > 0) {
+                triggerHitEffect('enemy-frame', isCrit?'crit':'big');
+                enemy.hp -= dmg;
+                showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
+                addLog(`스킬 적중! <span class='log-dmg'>${dmg}</span> 피해!`);
+            }
+
             update(); check();
         }
 
@@ -1585,17 +1789,15 @@
             player.rage = 0;
             update();
 
-            // 분노 발동 이펙트
             const pFrame = document.getElementById('player-frame');
             pFrame.classList.add('rage-active-aura');
 
             say('p', '분노의 일격!!!');
             playCritSfx();
 
-            // Show Rage Kill Effect
             const killImg = document.getElementById('rage-kill-img');
 
-            const baseJobs = ['전사', '도적', '마법사'];
+            const baseJobs = ['전사', '도적', '마법사', '엘프 궁수'];
             if (!baseJobs.includes(player.job)) {
                 killImg.src = 'image/damage_kill1.jpg';
             } else {
@@ -1608,12 +1810,31 @@
             setTimeout(() => {
                 let dmg = (Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0)) * 3;
 
+                if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
+                    dmg = (Math.floor(player.stats.dex/2.0) + (player.level*2) + 5 + (player.bonusAtk||0)) * 3;
+                }
+
+                if (pStatus.windAttribute > 0) {
+                    const windDmg = Math.floor(player.stats.int * 0.5);
+                    dmg += windDmg;
+                    addLog(`바람 속성 추가 피해 <span class='log-dmg'>${windDmg}</span>!`);
+                    if (Math.random() < 0.25) {
+                        eStatus.stun = 1;
+                        addLog("바람의 힘으로 적이 기절했습니다!");
+                    }
+                }
+
+                if (pStatus.atkUpRanger > 0) {
+                    dmg = Math.floor(dmg * 1.2);
+                }
+
                 const jobKey = player.job || '전사';
                 const imgMap = {
-                    '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage',
+                    '전사':'atk-warrior', '도적':'atk-rogue', '마법사':'atk-mage', '엘프 궁수':'atk-archer',
                     '버서커':'atk-warrior', '가디언':'atk-warrior',
                     '어쌔신':'atk-rogue', '섀도우':'atk-rogue',
-                    '아크메이지':'atk-mage', '소서러':'atk-mage'
+                    '아크메이지':'atk-mage', '소서러':'atk-mage',
+                    '스나이퍼':'atk-archer', '레인저':'atk-archer'
                 };
 
                 if (isLegendary && (player.job === '전사' || player.job === '버서커' || player.job === '가디언')) {
@@ -1625,7 +1846,6 @@
                 showDamage('enemy-frame', dmg, 'crit');
                 addLog(`분노 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 치명적인 피해를 입혔습니다!`);
 
-                // 이펙트 제거
                 setTimeout(() => {
                     pFrame.classList.remove('rage-active-aura');
                 }, 1000);
@@ -1648,6 +1868,11 @@
             if (pStatus.zeroMana > 0) pStatus.zeroMana--;
             if (pStatus.skillDmgUp > 0) pStatus.skillDmgUp--;
             if (pStatus.critUp > 0) pStatus.critUp--;
+            if (pStatus.evasionUp > 0) pStatus.evasionUp--;
+            if (pStatus.doubleAttackChance > 0) pStatus.doubleAttackChance--;
+            if (pStatus.invis > 0) pStatus.invis--;
+            if (pStatus.windAttribute > 0) pStatus.windAttribute--;
+            if (pStatus.atkUpRanger > 0) pStatus.atkUpRanger--;
         }
 
         function eTurn() {
@@ -1680,7 +1905,13 @@
 
             let evadeChance = (player.stats.dex / 100) + (player.level * 0.005);
             if (player.job === '어쌔신' || player.job === '섀도우') evadeChance += 0.1;
-            if (currentWeather === "fog") evadeChance += 0.1;
+            if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') evadeChance += 0.05; // 궁수 기본 회피율 보너스
+            if (pStatus.evasionUp > 0) evadeChance *= 2; // 엘프 궁수 특수기 효과
+            if (pStatus.invis > 0) evadeChance = 1.0; // 스나이퍼 은신
+
+            if (currentWeather === "fog" && !(player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저')) {
+                evadeChance += 0.1;
+            }
             evadeChance = Math.min(0.4, evadeChance);
 
             if (Math.random() < evadeChance) {
@@ -1707,7 +1938,6 @@
                 isCrit = true;
             }
 
-            // Special damage logic for new monsters
             if (enemy.type === 'bear_warrior') {
                 if (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') {
                     dmg = Math.floor(dmg * 1.3);
@@ -1715,13 +1945,13 @@
                 }
             } else if (enemy.type === 'mage_holly') {
                 if (player.job === '도적' || player.job === '어쌔신' || player.job === '섀도우' ||
-                    player.job === '전사' || player.job === '버서커' || player.job === '가디언') {
+                    player.job === '전사' || player.job === '버서커' || player.job === '가디언' ||
+                    player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
                     dmg = Math.floor(dmg * 1.3);
-                    addLog("<span style='color:purple'>마법사 홀리가 근접 직업에게 추가 피해를 입힙니다!</span>");
+                    addLog("<span style='color:purple'>마법사 홀리가 물리 직업에게 추가 피해를 입힙니다!</span>");
                 }
             }
 
-            // Apply Defense Buffs
             if (pStatus.invincible > 0) {
                 dmg = 0;
                 addLog("완전 방어로 공격을 무효화했습니다!");
@@ -1734,17 +1964,18 @@
                 player.hp -= dmg;
 
                 const cha = player.stats.cha || 10;
-                const chaRageBonus = (cha - 10) * 0.5; // 0.5 extra rage per CHA point above 10
+                const chaRageBonus = (cha - 10) * 0.005;
                 rage = Math.min(maxRage, rage + Math.floor(dmg * 1.5 + chaRageBonus));
                 player.rage = rage;
 
                 playDamageSfx();
                 const jobKey = player.job || '전사';
                 const hitMap = {
-                    '전사':'hit-warrior', '도적':'hit-rogue', '마법사':'hit-mage',
+                    '전사':'hit-warrior', '도적':'hit-rogue', '마법사':'hit-mage', '엘프 궁수':'hit-archer',
                     '버서커':'hit-warrior', '가디언':'hit-warrior',
                     '어쌔신':'hit-rogue', '섀도우':'hit-rogue',
-                    '아크메이지':'hit-mage', '소서러':'hit-mage'
+                    '아크메이지':'hit-mage', '소서러':'hit-mage',
+                    '스나이퍼':'hit-archer', '레인저':'hit-archer'
                 };
 
                 if (isCrit) {
@@ -1757,7 +1988,6 @@
                     playMotion(hitMap[jobKey], 'player-frame', 'player_hit');
                     showDamage('player-frame', dmg, 'player_hit');
 
-                    // 적의 대사 출력
                     if (enemy.speech && enemy.speech.length > 0) {
                         const randSpeech = enemy.speech[Math.floor(Math.random() * enemy.speech.length)];
                         say('e', randSpeech);
@@ -1796,8 +2026,7 @@
         }
 
         function showGameOver(msg) {
-            isActing = true; // 게임 종료 후 버튼 비활성화
-            // 배경 버튼들 명시적 비활성화
+            isActing = true;
             document.querySelectorAll('.btns .btn').forEach(btn => {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
@@ -1850,7 +2079,6 @@
             document.querySelector('.gameover-title').innerText = msg;
             document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
-            // Send Ranking Data
             sendRankingData(totalScore, survivalTime);
 
             localStorage.removeItem('rpg_temp_player');
@@ -1864,6 +2092,7 @@
             let baseJob = '전사';
             if (['도적', '어쌔신', '섀도우'].includes(job)) baseJob = '도적';
             if (['마법사', '아크메이지', '소서러'].includes(job)) baseJob = '마법사';
+            if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) baseJob = '엘프 궁수';
 
             if (baseJob === '전사') {
                 if (rarity === 'legendary') return 'legend_warrior.jpg';
@@ -1877,6 +2106,11 @@
                 if (rarity === 'legendary') return 'legend_mage.jpg';
                 if (rarity === 'epic') return 'epic_mage.jpg';
                 return 'weapon_mage.jpg';
+            } else if (baseJob === '엘프 궁수') {
+                if (rarity === 'legendary') return 'legend_archer.jpg';
+                if (rarity === 'epic') return 'epic_archer.jpg';
+                if (rarity === 'rare') return 'rare_archer.jpg';
+                return 'weapon_archer.jpg';
             }
             return 'weapon_warrior.jpg';
         }
@@ -1912,7 +2146,6 @@
             const cha = player.stats.cha || 10;
             const chaDropBonus = (cha - 10) * 0.005;
 
-            // Helper to generate random potion/scroll
             const generateConsumable = () => {
                 const r = Math.random();
                 const ns = isNight ? "_night" : "";
@@ -1958,7 +2191,6 @@
                 return { item, rarity };
             };
 
-            // 1. Primary Drop
             const rand = Math.random();
             if (isBossBattle && rand < 0.5 + chaDropBonus) {
                 const jobList = DROP_TABLE[player.job] || DROP_TABLE['전사'];
@@ -2022,14 +2254,11 @@
                 drops.push({ item: item, rarity: 'rare' });
             }
 
-            // 2. Secondary Drop (Double Drop)
             if (drops.length > 0 && Math.random() < 0.05 + (chaDropBonus/2)) {
-                // Double drop is usually a consumable
                 drops.push(generateConsumable());
                 addLog("<span style='color:#ffd700; font-weight:bold;'>🍀 행운! 아이템을 하나 더 발견했습니다!</span>");
             }
 
-            // Process Drops
             let bestDrop = null;
             const rarityWeight = { 'legendary': 4, 'epic': 3, 'rare': 2, 'common': 1 };
 
@@ -2057,7 +2286,6 @@
                 const imgEl = document.getElementById('drop-item-img');
                 imgEl.src = `image/${bestDrop.displayImg}`;
 
-                // Reset classes
                 imgEl.className = 'drop-item-effect';
                 if (bestDrop.rarity === 'legendary') imgEl.classList.add('border-legendary');
                 else if (bestDrop.rarity === 'epic') imgEl.classList.add('border-epic');
@@ -2081,12 +2309,22 @@
         
         function showLevelUpModal() {
             playLevelupSfx();
-            const modal = document.getElementById('levelup-modal'); const oldLv = player.level; const oldHp = player.maxHp; const oldMp = player.maxMp;
-            player.level++; player.exp -= player.maxExp; player.maxExp = Math.floor(player.maxExp*1.5); player.maxHp+=10; player.maxMp+=5; player.hp=player.maxHp; player.mp=player.maxMp;
+            const modal = document.getElementById('levelup-modal');
+            const oldLv = player.level;
+            const oldHp = player.maxHp;
+            const oldMp = player.maxMp;
+            player.level++;
+            player.exp -= player.maxExp;
+            player.maxExp = Math.floor(player.maxExp * 1.5);
+            player.maxHp += 10;
+            player.maxMp += 5;
+            player.hp = player.maxHp;
+            player.mp = player.maxMp;
             player.traitPoints = (player.traitPoints || 0) + 2;
-            document.getElementById('old-lv').innerText = oldLv; document.getElementById('new-lv').innerText = player.level;
-            document.getElementById('stat-hp').innerHTML = `${oldHp} <span class='stat-up'>▷ ${player.maxHp} (+10)</span>`;
-            document.getElementById('stat-mp').innerHTML = `${oldMp} <span class='stat-up'>▷ ${player.maxMp} (+5)</span>`;
+            document.getElementById('old-lv').innerText = oldLv;
+            document.getElementById('new-lv').innerText = player.level;
+            document.getElementById('stat-hp').innerHTML = `${Math.round(oldHp)} <span class='stat-up'>▷ ${Math.round(player.maxHp)} (+10)</span>`;
+            document.getElementById('stat-mp').innerHTML = `${Math.round(oldMp)} <span class='stat-up'>▷ ${Math.round(player.maxMp)} (+5)</span>`;
 
             const btn = document.getElementById('lv-confirm-btn');
             if (player.level >= 5 && !player.isAdvanced) {

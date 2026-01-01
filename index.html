@@ -627,6 +627,14 @@
                 </div>
                 <div class="selected-overlay">SELECTED!</div>
             </div>
+            <div class="char-card" onclick="selectJob('엘프 궁수')" data-job="엘프 궁수">
+                <img src="image/index_archer.jpg" alt="ELF ARCHER">
+                <div class="char-info">
+                    <p>ELF ARCHER</p>
+                    <div class="char-desc">정령의 힘을 빌어 적의<br>약점을 꿰뚫는 명사수</div>
+                </div>
+                <div class="selected-overlay">SELECTED!</div>
+            </div>
             <!-- Random Card -->
             <div class="char-card" onclick="selectRandomJob()" id="card-random">
                 <img src="image/dice_image.jpg" alt="RANDOM" id="img-random">
@@ -709,7 +717,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbwFtbKreW0iJpUXrUs3haBJqiMREL2EQ8XhpomKe7mR6l1Q0NDjoXpe31XY6k6VPe48Iw/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbycfPdZbOrAUPGrAxZYi5MHRNfsfCUOc9TnK2QqXFWL4_DoL1Z3yBamItqFTOJb2NpR8A/exec";
         const player = { name: "", job: "", stats: null, level: 1, exp: 0, maxExp: 100, hp: 0, maxHp: 0, mp: 0, maxMp: 0, x: 480, y: 325 };
         let rollCount = 5;
         let isRandomRolling = false;
@@ -836,7 +844,8 @@
                 const mainStats = {
                     '전사': ['str', 'con'],
                     '도적': ['dex'],
-                    '마법사': ['int', 'wis']
+                    '마법사': ['int', 'wis'],
+                    '엘프 궁수': ['dex']
                 };
 
                 const currentMain = mainStats[tempJob];
@@ -909,11 +918,12 @@
             const randomCard = document.getElementById('card-random');
             randomCard.classList.add('selected');
 
-            const jobs = ['전사', '도적', '마법사'];
+            const jobs = ['전사', '도적', '마법사', '엘프 궁수'];
             const jobInfos = {
                 '전사': { img: 'image/index_warrior.jpg', title: 'WARRIOR', desc: '높은 체력과 방어력으로<br>전투를 이끄는 수호자' },
                 '도적': { img: 'image/index_rogue.jpg', title: 'ROGUE', desc: '빠른 몸놀림으로 공격을<br>회피하고 급소를 타격' },
-                '마법사': { img: 'image/index_mage.jpg', title: 'MAGE', desc: '강력한 마법으로 적을<br>섬멸하는 화력의 지배자' }
+                '마법사': { img: 'image/index_mage.jpg', title: 'MAGE', desc: '강력한 마법으로 적을<br>섬멸하는 화력의 지배자' },
+                '엘프 궁수': { img: 'image/index_archer.jpg', title: 'ELF ARCHER', desc: '정령의 힘을 빌어 적의<br>약점을 꿰뚫는 명사수' }
             };
 
             const imgEl = document.getElementById('img-random');
@@ -923,7 +933,7 @@
             // 슬롯 애니메이션
             let idx = 0;
             const slotInterval = setInterval(() => {
-                const job = jobs[idx % 3];
+                const job = jobs[idx % jobs.length];
                 imgEl.src = jobInfos[job].img;
                 titleEl.innerText = jobInfos[job].title;
                 idx++;
@@ -937,7 +947,7 @@
                 clearInterval(slotInterval);
 
                 // 랜덤 결과 선택
-                const finalJob = jobs[Math.floor(Math.random() * 3)];
+                const finalJob = jobs[Math.floor(Math.random() * jobs.length)];
                 player.job = finalJob;
 
                 // UI 업데이트
@@ -951,7 +961,8 @@
                 const mainStats = {
                     '전사': ['str', 'con'],
                     '도적': ['dex'],
-                    '마법사': ['int', 'wis']
+                    '마법사': ['int', 'wis'],
+                    '엘프 궁수': ['dex']
                 };
                 const currentMain = mainStats[finalJob];
                 player.stats = {
@@ -1006,9 +1017,9 @@
             player.name = document.getElementById('inp-name').value.trim();
             if (!player.name) return alert("영웅의 이름을 입력하세요!");
 
-            player.maxHp = (player.stats.con * 2) + (player.job === '전사' ? 20 : 10);
+            player.maxHp = (player.stats.con * 1.7) + (player.job === '전사' ? 20 : (player.job === '엘프 궁수' ? 10 : 10)); // 엘프 궁수 HP 공식 적용
             player.hp = player.maxHp;
-            player.maxMp = (player.stats.int * 1.5) + player.stats.wis + (player.job === '마법사' ? 30 : 10);
+            player.maxMp = (player.stats.int * 1.2) + (player.stats.wis * 1.5) + (player.job === '마법사' ? 30 : (player.job === '엘프 궁수' ? 30 : 10)); // 엘프 궁수 MP 공식 적용
             player.mp = player.maxMp;
 
             player.inventory = [{name:'체력 물약', type:'potion_hp', desc:'HP +50 회복', val:50, img: 'potion_hp.jpg'}];
@@ -1064,7 +1075,7 @@
             };
             const guides = {
                 'str': '근력은 육체의 힘과 파괴력을 상징합니다.<br><br>• 기본 <strong>물리 공격력</strong>이 상승합니다.<br>• <strong style="color:#ff8080">전사 계열</strong> 스킬의 피해량이 증가합니다.<br>• 강력한 물리 데미지를 위해 필수적인 스탯입니다.',
-                'dex': '민첩성은 신속한 움직임과 정교함을 상징합니다.<br><br>• 공격 <strong>명중률</strong>과 <strong>회피율</strong>이 상승합니다.<br>• <strong>치명타(Critical)</strong> 발생 확률이 증가합니다.<br>• <strong style="color:#a0ff80">도적 계열</strong>의 공격력과 스킬 효율을 높여줍니다.',
+                'dex': '민첩성은 신속한 움직임과 정교함을 상징합니다.<br><br>• 공격 <strong>명중률</strong>과 <strong>회피율</strong>이 상승합니다.<br>• <strong>치명타(Critical)</strong> 발생 확률이 증가합니다.<br>• <strong style="color:#a0ff80">도적 계열</strong>의 공격력과 스킬 효율을 높여줍니다.<br>• <strong style="color:#a0ff80">엘프 궁수 계열</strong>의 공격력과 스킬 효율을 높여줍니다.',
                 'con': '체력은 끈질긴 생명력과 지구력을 상징합니다.<br><br>• <strong>최대 생명력(HP)</strong>이 크게 증가합니다.<br>• 물리 방어력 보너스를 제공하여 생존력을 높입니다.<br>• 모든 직업에게 안정적인 전투를 보장합니다.',
                 'int': '지능은 마법적 지식과 사고력을 상징합니다.<br><br>• <strong>마법 공격력</strong>이 대폭 상승합니다.<br>• <strong>최대 마나(MP)</strong> 보유량이 증가합니다.<br>• <strong style="color:#80a0ff">마법사 계열</strong>의 스킬 위력을 결정짓습니다.',
                 'wis': '지혜는 통찰력과 정신적 저항력을 상징합니다.<br><br>• 적의 마법 공격에 대한 <strong>마법 저항력</strong>이 상승합니다.<br>• 최대 마나(MP)가 소폭 증가합니다.<br>• 상태이상 공격에 저항할 확률이 오릅니다.',

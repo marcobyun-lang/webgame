@@ -1,11 +1,71 @@
 // Code.gs
 
+function doGet(e) {
+  let response;
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 랭킹 데이터 요청
+    if (e.parameter.type === 'ranking') {
+      let rankSheet = ss.getSheetByName('Ranking');
+      // 시트가 없거나 데이터가 없으면 빈 배열 반환
+      if (!rankSheet || rankSheet.getLastRow() <= 1) {
+        response = ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        const data = rankSheet.getDataRange().getValues();
+        let rankings = [];
+
+        // 상위 10개 데이터 가져오기 (헤더 제외)
+        const numRows = Math.min(data.length, 11);
+        for (let i = 1; i < numRows; i++) {
+          // 이름이 있는 경우만 추가
+          if (data[i][0]) {
+            rankings.push({
+              name: data[i][0],
+              score: Number(data[i][1] || 0), // 숫자로 변환하여 전송
+              job: data[i][2],
+              level: Number(data[i][3] || 1),
+              bossKills: Number(data[i][5] || 0)
+            });
+          }
+        }
+        response = ContentService.createTextOutput(JSON.stringify(rankings)).setMimeType(ContentService.MimeType.JSON);
+      }
+    } else {
+        // 일반 캐릭터 데이터 불러오기
+        let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
+        const name = e.parameter.name;
+        const data = sheet.getDataRange().getValues();
+
+        let found = false;
+        for (let i = 1; i < data.length; i++) {
+            if (data[i][0] == name) {
+                response = ContentService.createTextOutput(data[i][1]).setMimeType(ContentService.MimeType.JSON);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            response = ContentService.createTextOutput(JSON.stringify({ error: "Not Found" })).setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+  } catch (err) {
+    response = ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return response.setHeader('Access-Control-Allow-Origin', '*');
+}
+
 // 1. 데이터 저장 (POST 요청)
 function doPost(e) {
+  let response;
   const lock = LockService.getScriptLock();
   // 30초 락 시도 (동시성 제어) - 실패 시 에러 반환
   if (!lock.tryLock(30000)) {
-    return ContentService.createTextOutput(JSON.stringify({result: "error", error: "Server Busy"})).setMimeType(ContentService.MimeType.JSON);
+    response = ContentService.createTextOutput(JSON.stringify({result: "error", error: "Server Busy"}))
+        .setMimeType(ContentService.MimeType.JSON);
+    return response.setHeader('Access-Control-Allow-Origin', '*');
   }
 
   try {
@@ -13,14 +73,17 @@ function doPost(e) {
     const contents = e.postData.contents;
 
     if (!contents) {
-      return ContentService.createTextOutput(JSON.stringify({result: "error", error: "No content"})).setMimeType(ContentService.MimeType.JSON);
+      response = ContentService.createTextOutput(JSON.stringify({result: "error", error: "No content"}))
+          .setMimeType(ContentService.MimeType.JSON);
+      return response.setHeader('Access-Control-Allow-Origin', '*');
     }
 
     const params = JSON.parse(contents);
 
     // 랭킹 저장 요청인지 확인
     if (params.type === 'ranking') {
-      return saveRanking(ss, params);
+      response = saveRanking(ss, params);
+      return response.setHeader('Access-Control-Allow-Origin', '*');
     }
 
     // 일반 캐릭터 데이터 저장
@@ -45,13 +108,16 @@ function doPost(e) {
       sheet.appendRow([name, jsonData, new Date()]);
     }
 
-    return ContentService.createTextOutput(JSON.stringify({result: "success"})).setMimeType(ContentService.MimeType.JSON);
+    response = ContentService.createTextOutput(JSON.stringify({result: "success"}))
+        .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+    response = ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()}))
+        .setMimeType(ContentService.MimeType.JSON);
   } finally {
     lock.releaseLock();
   }
+  return response.setHeader('Access-Control-Allow-Origin', '*');
 }
 
 // 랭킹 저장 함수
@@ -119,59 +185,10 @@ function saveRanking(ss, params) {
       rankSheet.deleteRows(12, rankSheet.getLastRow() - 11);
     }
 
-    return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Ranking Updated"})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Ranking Updated"}))
+        .setMimeType(ContentService.MimeType.JSON);
   } catch (e) {
-    return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-
-// 2. 데이터 불러오기 (GET 요청)
-function doGet(e) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    // 랭킹 데이터 요청
-    if (e.parameter.type === 'ranking') {
-      let rankSheet = ss.getSheetByName('Ranking');
-      // 시트가 없거나 데이터가 없으면 빈 배열 반환
-      if (!rankSheet || rankSheet.getLastRow() <= 1) {
-        return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-      }
-
-      const data = rankSheet.getDataRange().getValues();
-      let rankings = [];
-
-      // 상위 10개 데이터 가져오기 (헤더 제외)
-      const numRows = Math.min(data.length, 11);
-      for (let i = 1; i < numRows; i++) {
-        // 이름이 있는 경우만 추가
-        if (data[i][0]) {
-          rankings.push({
-            name: data[i][0],
-            score: Number(data[i][1] || 0), // 숫자로 변환하여 전송
-            job: data[i][2],
-            level: Number(data[i][3] || 1),
-            bossKills: Number(data[i][5] || 0)
-          });
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify(rankings)).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // 일반 캐릭터 데이터 불러오기
-    let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
-    const name = e.parameter.name;
-    const data = sheet.getDataRange().getValues();
-
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == name) {
-        return ContentService.createTextOutput(data[i][1]).setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-
-    return ContentService.createTextOutput(JSON.stringify({ error: "Not Found" })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()}))
+        .setMimeType(ContentService.MimeType.JSON);
   }
 }
