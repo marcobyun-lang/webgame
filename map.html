@@ -669,6 +669,7 @@
     };
 
     function initData() {
+        if (!player.name) player.name = localStorage.getItem('rpg_player_name');
         if (!player.inventory) player.inventory = [];
         if (!player.bonusAtk) player.bonusAtk = 0;
         if (player.bonusDef === undefined) player.bonusDef = 0;
@@ -1124,12 +1125,14 @@
         updateUI();
     }
 
-    function showGameOver(msg) {
+    async function showGameOver(msg) {
         if (gameLoopInterval) {
             clearInterval(gameLoopInterval);
             gameLoopInterval = null;
         }
         isGameOver = true;
+
+        if (!player.name) player.name = localStorage.getItem('rpg_player_name') || "Unknown";
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const survivalTime = Math.floor((Date.now() - startTime) / 1000);
@@ -1167,7 +1170,7 @@
             <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
-            <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
+            <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} (점) <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
             <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
         `;
 
@@ -1175,19 +1178,23 @@
         document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
         // Send Ranking Data
-        fetch(DB_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({
-                type: 'ranking',
-                name: player.name,
-                score: totalScore,
-                job: player.job,
-                level: player.level,
-                bossKills: bossKills // 신규 추가 필드
-            })
-        });
+        try {
+            await fetch(DB_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    type: 'ranking',
+                    name: player.name,
+                    score: totalScore,
+                    job: player.job,
+                    level: player.level,
+                    bossKills: bossKills
+                })
+            });
+        } catch (e) {
+            console.error("Ranking update failed:", e);
+        }
 
         localStorage.removeItem('rpg_temp_player');
         localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
