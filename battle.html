@@ -779,9 +779,11 @@
                 dayKillCount: 0,
                 nightKillCount: 0,
                 bossKillCount: 0,
+                superBossKillCount: 0,
                 enhanceCount: 0,
                 claimed: { kill: false, dayKill: false, nightKill: false, bossKill: false, enhance: false }
             };
+            if (player.quests.superBossKillCount === undefined) player.quests.superBossKillCount = 0;
 
             const jM = {
                 '전사': 'warrior', '도적': 'rogue', '마법사': 'mage', '엘프 궁수': 'archer',
@@ -2053,8 +2055,9 @@
             const sec = survivalTime % 60;
 
             const kills = player.quests.killCount || 0;
-            const bossKills = player.quests.bossKillCount || 0;
-            const normalKills = Math.max(0, kills - bossKills);
+            const midBossKills = player.quests.bossKillCount || 0;
+            const superBossKills = player.quests.superBossKillCount || 0;
+            const normalKills = Math.max(0, kills - midBossKills - superBossKills);
 
             let itemValue = 0;
             player.inventory.forEach(item => {
@@ -2068,18 +2071,20 @@
             });
 
             const lvScore = player.level * 1000;
-            const bossScore = bossKills * 2000;
+            const midBossScore = midBossKills * 2000;
+            const superBossScore = superBossKills * 10000;
             const normalScore = normalKills * 10;
             const goldScore = Math.floor(player.gold * 0.1);
             const survivalScore = survivalTime;
             const coinScore = player.coinScore || 0;
 
-            const totalScore = lvScore + bossScore + normalScore + goldScore + itemValue + survivalScore + coinScore;
+            const totalScore = lvScore + midBossScore + superBossScore + normalScore + goldScore + itemValue + survivalScore + coinScore;
 
             const statsContainer = document.getElementById('go-stats-container');
             statsContainer.innerHTML = `
                 <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">💀 보스 처치</div><div class="go-val">${bossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${bossScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">💀 최종 보스 처치</div><div class="go-val">${superBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${superBossScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">💀 중간 보스 처치</div><div class="go-val">${midBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${midBossScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
@@ -2133,11 +2138,12 @@
             if (isBossBattle) {
                 if (isSuperBoss) {
                     localStorage.setItem('rpg_super_boss_killed', 'true');
+                    player.quests.superBossKillCount = (player.quests.superBossKillCount || 0) + 1;
                 } else {
                     localStorage.setItem('rpg_boss_death_time', Date.now());
+                    player.quests.bossKillCount = (player.quests.bossKillCount || 0) + 1;
                 }
                 localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
-                player.quests.bossKillCount = (player.quests.bossKillCount || 0) + 1;
             } else {
                 if (isNight) player.quests.nightKillCount = (player.quests.nightKillCount || 0) + 1;
                 else player.quests.dayKillCount = (player.quests.dayKillCount || 0) + 1;
