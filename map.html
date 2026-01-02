@@ -795,9 +795,18 @@
 
     function spawnCoin() {
         if (coins.length < 30) {
-            const isSmall = Math.random() < 0.7;
-            const size = isSmall ? 20 : 30;
-            const score = isSmall ? Math.floor(Math.random() * 41) + 10 : Math.floor(Math.random() * 51) + 50;
+            const r = Math.random();
+            let size, score;
+            if (r < 0.7) { // Small (70%)
+                size = 20;
+                score = Math.floor(Math.random() * 41) + 10;
+            } else if (r < 0.95) { // Medium (25%)
+                size = 30;
+                score = Math.floor(Math.random() * 51) + 50;
+            } else { // Large (5%)
+                size = 45;
+                score = Math.floor(Math.random() * 301) + 200; // 200-500
+            }
             coins.push({
                 x: Math.random() * 900 + 30,
                 y: Math.random() * 600 + 30,
