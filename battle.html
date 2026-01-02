@@ -122,20 +122,20 @@
         }
         .btn::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(255,255,255,0.2), transparent); }
         
-        .btn-atk { background: linear-gradient(to bottom, #c62828, #8e0000); }
+        .btn-atk { background: linear-gradient(to bottom, #c62828, #8e0000); border-color: #ff5252; }
         .btn-atk:hover { background: linear-gradient(to bottom, #ef5350, #c62828); transform: translateY(-3px); box-shadow: 0 0 20px rgba(211, 47, 47, 0.6); }
         
-        .btn-def { background: linear-gradient(to bottom, #1565c0, #0d47a1); }
+        .btn-def { background: linear-gradient(to bottom, #1565c0, #0d47a1); border-color: #42a5f5; }
         .btn-def:hover { background: linear-gradient(to bottom, #42a5f5, #1565c0); transform: translateY(-3px); box-shadow: 0 0 20px rgba(33, 150, 243, 0.6); }
 
-        .btn-skl { background: linear-gradient(to bottom, #00897b, #004d40); }
+        .btn-skl { background: linear-gradient(to bottom, #00897b, #004d40); border-color: #26a69a; }
         .btn-skl:hover { background: linear-gradient(to bottom, #26a69a, #00897b); transform: translateY(-3px); box-shadow: 0 0 20px rgba(38, 166, 154, 0.6); }
         
-        .btn-special { background: linear-gradient(to bottom, #7b1fa2, #4a148c); }
+        .btn-special { background: linear-gradient(to bottom, #7b1fa2, #4a148c); border-color: #ab47bc; }
         .btn-special:hover { background: linear-gradient(to bottom, #ab47bc, #7b1fa2); transform: translateY(-3px); box-shadow: 0 0 20px rgba(123, 31, 162, 0.6); }
         .btn-special:disabled { filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
 
-        .btn-item { background: linear-gradient(to bottom, #2e7d32, #1b5e20); }
+        .btn-item { background: linear-gradient(to bottom, #2e7d32, #1b5e20); border-color: #66bb6a; }
         .btn-item:hover { background: linear-gradient(to bottom, #66bb6a, #2e7d32); transform: translateY(-3px); box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
 
         .btn-run { background: linear-gradient(to bottom, #424242, #212121); border-color: #555; }
@@ -216,32 +216,14 @@
             gap: 10px;
         }
         .battle-item-row {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
+            display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; cursor: pointer; transition: background 0.2s;
         }
-        .battle-item-row:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .battle-item-icon {
-            width: 32px; height: 32px; margin-right: 10px; border: 1px solid #444;
-        }
-        .battle-item-info {
-            flex: 1; text-align: left;
-        }
-        .battle-item-name {
-            font-weight: bold; color: #eee; font-size: 0.9rem;
-        }
-        .battle-item-desc {
-            font-size: 0.7rem; color: #aaa;
-        }
-        .battle-item-count {
-            font-weight: bold; color: var(--accent-gold); margin-left: 10px;
-        }
+        .battle-item-row:hover { background: rgba(255, 255, 255, 0.1); }
+        .battle-item-icon { width: 32px; height: 32px; margin-right: 10px; border: 1px solid #444; }
+        .battle-item-info { flex: 1; text-align: left; }
+        .battle-item-name { font-weight: bold; color: #eee; font-size: 0.9rem; }
+        .battle-item-desc { font-size: 0.7rem; color: #aaa; }
+        .battle-item-count { font-weight: bold; color: var(--accent-gold); margin-left: 10px; }
 
         @keyframes shakeSmall { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-4px, 4px); } 50% { transform: translate(4px, -4px); } 75% { transform: translate(-4px, -4px); } }
         .hit-small { animation: shakeSmall 0.3s ease-out; }
@@ -289,11 +271,11 @@
             0% { transform: translate(0, 0); }
             10% { transform: translate(-15px, -15px); }
             20% { transform: translate(15px, 15px); }
-            30% { transform: translate(-15px, 15px); }
+            30% { transform: translate(-15px, -15px); }
             40% { transform: translate(15px, -15px); }
             50% { transform: translate(-15px, -15px); }
             60% { transform: translate(15px, 15px); }
-            70% { transform: translate(-15px, 15px); }
+            70% { transform: translate(-15px, -15px); }
             80% { transform: translate(15px, -15px); }
             90% { transform: translate(-15px, -15px); }
             100% { transform: translate(0, 0); }
@@ -485,21 +467,68 @@
             100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
         }
 
-        /* Defense Aura Effect */
+        /* --- [신규] 직업별 방어 이펙트 스타일 --- */
+
+        /* 공통 기반 스타일 */
         .defense-aura {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 220px; height: 220px;
+            width: 200px; height: 200px;
+            pointer-events: none; z-index: 15; display: none;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(41, 121, 255, 0.2) 0%, rgba(41, 121, 255, 0.1) 50%, transparent 70%);
-            border: 2px solid rgba(41, 121, 255, 0.5);
-            box-shadow: 0 0 30px rgba(41, 121, 255, 0.6), inset 0 0 30px rgba(41, 121, 255, 0.4);
-            z-index: 5; pointer-events: none;
-            animation: defensePulse 2s infinite ease-in-out;
-            display: none;
         }
-        @keyframes defensePulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+
+        /* 1. 전사 계열: 아이언 실드 (단단한 금빛/강철 방패 느낌) */
+        .def-warrior {
+            background: radial-gradient(circle, transparent 40%, rgba(255, 215, 0, 0.1) 60%, rgba(255, 215, 0, 0.4) 100%);
+            border: 4px solid #ffd700;
+            box-shadow: 0 0 20px #ffd700, inset 0 0 20px #b8860b;
+            animation: shieldPulse 1.5s infinite alternate;
+        }
+        @keyframes shieldPulse {
+            0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 15px #ffd700; opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 30px #ffd700; opacity: 1; }
+        }
+
+        /* 2. 도적 계열: 연막/그림자 (회피, 은신 느낌) */
+        .def-rogue {
+            background: radial-gradient(circle, rgba(0,0,0,0.5) 0%, transparent 70%);
+            box-shadow: 0 0 40px 20px rgba(0, 0, 0, 0.8);
+            border: none;
+            filter: blur(5px);
+            animation: smokeMove 2s infinite linear;
+        }
+        @keyframes smokeMove {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0.6; }
+        }
+
+        /* 3. 마법사 계열: 마나 배리어 (신비로운 육각형/원형 결계) */
+        .def-mage {
+            background: rgba(41, 121, 255, 0.1);
+            border: 2px dashed #00e5ff;
+            box-shadow: 0 0 20px #2979ff, inset 0 0 30px #2979ff;
+            animation: barrierRotate 3s infinite linear;
+        }
+        @keyframes barrierRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); border-color: #00e5ff; }
+            50% { border-color: #2979ff; opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) rotate(360deg); border-color: #00e5ff; }
+        }
+
+        /* 4. 궁수 계열: 바람의 장막/집중 (초록빛 바람 느낌) */
+        .def-archer {
+            background: transparent;
+            border-top: 4px solid #00e676;
+            border-bottom: 4px solid #00e676;
+            border-radius: 50%;
+            box-shadow: 0 0 25px #00e676;
+            animation: windSpin 1s infinite ease-in-out;
+        }
+        @keyframes windSpin {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0.7; }
         }
     </style>
 </head>
@@ -1414,26 +1443,42 @@
 
             let logMsg = "🛡️ 방어 태세를 취합니다!";
 
-            // Show Defense Aura
+            // --- [수정된 이펙트 적용 로직] ---
             const aura = document.getElementById('p-defense-aura');
-            aura.style.display = 'block';
-            setTimeout(() => { aura.style.display = 'none'; }, 2000);
 
-            // 직업별 즉시 효과 처리
+            // 기존 클래스 초기화 (기본 클래스만 남김)
+            aura.className = 'defense-aura';
+
+            // 직업별 클래스 추가
             if (['전사', '버서커', '가디언'].includes(job)) {
+                aura.classList.add('def-warrior');
                 pStatus.counterReady = true;
-                logMsg = "🛡️ 방어 및 반격 준비! (피해 60% 감소)";
-            } else if (['도적', '어쌔신', '섀도우'].includes(job)) {
+                logMsg = "🛡️ [철벽 방어] 방패를 들어 올려 반격을 준비합니다! (피해 60% 감소)";
+            }
+            else if (['도적', '어쌔신', '섀도우'].includes(job)) {
+                aura.classList.add('def-rogue');
                 pStatus.evasionBoost = 1;
-                logMsg = "💨 민첩하게 움직여 회피를 준비합니다! (회피율 +30%)";
-            } else if (['마법사', '아크메이지', '소서러'].includes(job)) {
+                logMsg = "💨 [연막 은신] 그림자 속으로 몸을 숨깁니다! (회피율 +30%)";
+            }
+            else if (['마법사', '아크메이지', '소서러'].includes(job)) {
+                aura.classList.add('def-mage');
                 let rec = Math.floor(player.maxMp * 0.15);
                 player.mp = Math.min(player.maxMp, player.mp + rec);
-                logMsg = `💧 명상을 통해 마나를 ${rec} 회복했습니다!`;
-            } else if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) {
-                pStatus.aiming = 1;
-                logMsg = "🎯 적의 움직임을 주시하며 조준합니다! (다음 턴 치명타 확률 UP)";
+                logMsg = `💧 [마나 장막] 마력을 회복하며 보호막을 펼칩니다! (MP +${rec})`;
             }
+            else if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) {
+                aura.classList.add('def-archer');
+                pStatus.aiming = 1;
+                logMsg = "🎯 [바람의 집중] 적의 움직임을 읽고 조준합니다! (다음 치명타 확률 증가)";
+            } else {
+                aura.classList.add('def-warrior');
+            }
+
+            // 이펙트 표시
+            aura.style.display = 'block';
+
+            // 2초 뒤 사라지게 설정
+            setTimeout(() => { aura.style.display = 'none'; }, 2000);
 
             addLog(logMsg);
             say('p', '방어!');
@@ -2711,6 +2756,65 @@
             document.getElementById('effect-modal').style.display = 'none';
             update();
             setTimeout(eTurn, 1500);
+        }
+
+        function def() {
+            if(isActing) return;
+            if(pStatus.stun > 0) { addLog("기절 상태라 방어할 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
+
+            isActing = true;
+            const job = player.job;
+            pStatus.defUp = 1;
+
+            let logMsg = "🛡️ 방어 태세를 취합니다!";
+
+            // --- [수정된 이펙트 적용 로직] ---
+            const aura = document.getElementById('p-defense-aura');
+
+            // 기존 클래스 초기화 (기본 클래스만 남김)
+            aura.className = 'defense-aura';
+
+            // 직업별 클래스 추가
+            if (['전사', '버서커', '가디언'].includes(job)) {
+                aura.classList.add('def-warrior');
+                pStatus.counterReady = true;
+                logMsg = "🛡️ [철벽 방어] 방패를 들어 올려 반격을 준비합니다! (피해 60% 감소)";
+            }
+            else if (['도적', '어쌔신', '섀도우'].includes(job)) {
+                aura.classList.add('def-rogue');
+                pStatus.evasionBoost = 1;
+                logMsg = "💨 [연막 은신] 그림자 속으로 몸을 숨깁니다! (회피율 +30%)";
+            }
+            else if (['마법사', '아크메이지', '소서러'].includes(job)) {
+                aura.classList.add('def-mage');
+                let rec = Math.floor(player.maxMp * 0.15);
+                player.mp = Math.min(player.maxMp, player.mp + rec);
+                logMsg = `💧 [마나 장막] 마력을 회복하며 보호막을 펼칩니다! (MP +${rec})`;
+            }
+            else if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) {
+                aura.classList.add('def-archer');
+                pStatus.aiming = 1;
+                logMsg = "🎯 [바람의 집중] 적의 움직임을 읽고 조준합니다! (다음 치명타 확률 증가)";
+            } else {
+                // 혹시 모를 예외(기본)
+                aura.classList.add('def-warrior');
+            }
+
+            // 이펙트 표시
+            aura.style.display = 'block';
+
+            // 2초 뒤 사라지게 설정 (턴이 넘어가면 어차피 갱신되지만, 시각적 깔끔함을 위해)
+            setTimeout(() => { aura.style.display = 'none'; }, 2000);
+            // -------------------------------
+
+            addLog(logMsg);
+            say('p', '방어!');
+            playItemSfx();
+
+            setTimeout(() => {
+                update();
+                eTurn();
+            }, 800);
         }
     </script>
 </body>
