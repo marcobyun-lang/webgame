@@ -726,7 +726,7 @@
         let currentWeather = "sunny";
         let isLegendary = false;
 
-        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0 };
+        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0 };
         let eStatus = { poison: 0, stun: 0 };
         let rage = 0;
         const maxRage = 100;
@@ -757,7 +757,7 @@
             rage = player.rage;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
-            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0 };
+            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0 };
             doubleAttackCooldown = 0;
 
             if (player.specialCooldown > 0) {
@@ -1065,6 +1065,7 @@
             if(pStatus.windAttribute > 0) pStatusEl.innerHTML += `<span class="status-icon status-wind">바람(${pStatus.windAttribute}턴)</span>`;
             if(pStatus.atkUpRanger > 0) pStatusEl.innerHTML += `<span class="status-icon status-atk-up-ranger">공격력업(${pStatus.atkUpRanger}턴)</span>`;
             if(pStatus.invis > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#9c27b0;">은신(${pStatus.invis}턴)</span>`;
+            if(pStatus.evasionUp > 0) pStatusEl.innerHTML += `<span class="status-icon" style="background:#81c784; color:#000;">가호(${pStatus.evasionUp}턴)</span>`;
 
 
             const eStatusEl = document.getElementById('e-status');
