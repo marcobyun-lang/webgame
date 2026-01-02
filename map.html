@@ -57,6 +57,7 @@
             flex-direction: column;
             position: relative;
             border-radius: 4px;
+            transition: width 0.1s, height 0.1s;
         }
 
         .game-ui-top {
@@ -130,7 +131,7 @@
         .menu-icon:active { transform: scale(0.95); }
 
         .canvas-wrapper { flex: 1; background: #000; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
-        canvas { image-rendering: pixelated; }
+        canvas { image-rendering: pixelated; transition: width 0.1s, height 0.1s; }
 
         .modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -374,7 +375,7 @@
             position: absolute; background: rgba(255,255,255,0.4); width: 1px; height: 15px;
             animation: rainFall 0.8s linear infinite;
         }
-        @keyframes rainFall { to { transform: translateY(720px); } }
+        @keyframes rainFall { to { transform: translateY(1000px); } }
 
         .fog-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -427,6 +428,23 @@
             border-radius: 4px; font-weight: bold;
         }
         .btn:hover { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
+
+        /* Size Control UI */
+        #size-control-overlay {
+            position: absolute; top: 100px; right: 20px;
+            background: rgba(0,0,0,0.8); border: 1px solid var(--accent-gold);
+            padding: 15px; border-radius: 8px; display: none; flex-direction: column;
+            gap: 12px; z-index: 1000; align-items: center; width: 120px;
+        }
+        .size-btn {
+            width: 100%; height: 40px; background: #333; border: 1px solid #555;
+            color: #fff; font-size: 0.9rem; font-weight: bold; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; border-radius: 4px;
+            font-family: var(--font-body);
+        }
+        .size-btn:hover { background: var(--accent-gold); color: #000; }
+        .size-btn:active { transform: scale(0.95); }
+        .size-label { font-size: 0.8rem; color: var(--accent-gold); font-family: var(--font-body); font-weight: bold; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -446,6 +464,15 @@
         <img id="event-img" src="image/bm.jpg" alt="Event">
         <div id="event-text">보물 발견!</div>
         <div id="event-reward"></div>
+    </div>
+
+    <div id="size-control-overlay">
+        <div class="size-label">화면 크기 조절</div>
+        <div class="size-btn" id="size-up-btn">확대 (▲)</div>
+        <div class="size-btn" id="size-down-btn">축소 (▼)</div>
+        <div class="size-btn" id="size-full-btn">전체 화면</div>
+        <div class="size-btn" id="size-reset-btn">기본 크기</div>
+        <div class="size-btn" id="size-close-btn" style="background:#8b0000; margin-top:5px;">닫기</div>
     </div>
 
     <div id="inventory-modal" class="modal">
@@ -543,6 +570,7 @@
                 <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
                 <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
                 <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
+                <img src="image/open_button.png" class="menu-icon" onclick="toggleSizeControl()" alt="화면 조절" title="화면 조절">
             </div>
         </div>
     </div>
@@ -614,6 +642,14 @@
     let isNight = false;
     let timeTick = 0;
     let currentWeather = "sunny"; // sunny, rain, fog, thunder
+
+    // Size Control Variables
+    let currentScale = parseFloat(localStorage.getItem('rpg_map_scale') || 1.0);
+    const MIN_SCALE = 1.0;
+    const MAX_SCALE = 3.0;
+    const SCALE_STEP = 0.1;
+    let isSizeControlling = false;
+    let pauseStartTime = 0;
 
     let gameLoopInterval = null;
     let isGameOver = false;
@@ -700,8 +736,9 @@
         if (player.isAdvanced === undefined) player.isAdvanced = false;
 
         // Boundary check on load
-        if (player.x === undefined || player.x < 16 || player.x > 944) player.x = 480;
-        if (player.y === undefined || player.y < 16 || player.y > 624) player.y = 320;
+        const canvas = document.getElementById('gameCanvas');
+        if (player.x === undefined || player.x < 16 || player.x > canvas.width - 16) player.x = canvas.width / 2;
+        if (player.y === undefined || player.y < 16 || player.y > canvas.height - 16) player.y = canvas.height / 2;
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
@@ -742,6 +779,8 @@
         const currentSet = MAP_SETS[mapSetIndex];
         mapImg.src = isNight ? currentSet.night : currentSet.day;
 
+        applyScale();
+
         mapImg.onload = () => {
             document.getElementById('loading-overlay').style.display = 'none';
             fieldBgm.play().catch(e => console.log("BGM play failed:", e));
@@ -773,27 +812,153 @@
         };
         updateUI();
         window.addEventListener('keydown', move);
+
+        // Size Control Events
+        document.getElementById('size-up-btn').onclick = () => changeScale(SCALE_STEP);
+        document.getElementById('size-down-btn').onclick = () => changeScale(-SCALE_STEP);
+        document.getElementById('size-reset-btn').onclick = () => {
+            const oldScale = currentScale;
+            currentScale = 1.0;
+            localStorage.setItem('rpg_map_scale', 1.0);
+            rescalePositions(oldScale, currentScale);
+            applyScale();
+        };
+        document.getElementById('size-full-btn').onclick = () => {
+            const oldScale = currentScale;
+            const winW = window.innerWidth - 40;
+            const winH = window.innerHeight - 120;
+            const scaleW = winW / 960;
+            const scaleH = winH / 640;
+            currentScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.min(scaleW, scaleH)));
+            localStorage.setItem('rpg_map_scale', currentScale);
+            rescalePositions(oldScale, currentScale);
+            applyScale();
+        };
+        document.getElementById('size-close-btn').onclick = () => toggleSizeControl();
+    }
+
+    function toggleSizeControl() {
+        const overlay = document.getElementById('size-control-overlay');
+        isSizeControlling = (overlay.style.display !== 'flex');
+        overlay.style.display = isSizeControlling ? 'flex' : 'none';
+
+        if (isSizeControlling) {
+            pauseStartTime = Date.now();
+            fieldBgm.volume = 0.05;
+        } else {
+            const pauseDuration = Date.now() - pauseStartTime;
+            const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
+            localStorage.setItem('rpg_start_time', startTime + pauseDuration);
+            fieldBgm.volume = 0.15;
+        }
+    }
+
+    function changeScale(delta) {
+        const oldScale = currentScale;
+        currentScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, currentScale + delta));
+        localStorage.setItem('rpg_map_scale', currentScale);
+        rescalePositions(oldScale, currentScale);
+        applyScale();
+    }
+
+    function rescalePositions(oldScale, newScale) {
+        const ratio = newScale / oldScale;
+
+        // Rescale Player
+        player.x *= ratio;
+        player.y *= ratio;
+
+        // Rescale Boss
+        boss.x *= ratio;
+        boss.y *= ratio;
+
+        // Rescale Super Boss
+        superBoss.x *= ratio;
+        superBoss.y *= ratio;
+
+        // Rescale Field Items
+        fieldItems.forEach(item => {
+            item.x *= ratio;
+            item.y *= ratio;
+        });
+
+        // Rescale Treasure Boxes
+        treasureBoxes.forEach(box => {
+            box.x *= ratio;
+            box.y *= ratio;
+        });
+
+        // Rescale Coins
+        coins.forEach(coin => {
+            coin.x *= ratio;
+            coin.y *= ratio;
+        });
+
+        // Rescale Floating Texts
+        floatingTexts.forEach(ft => {
+            ft.x *= ratio;
+            ft.y *= ratio;
+        });
+    }
+
+    function applyScale() {
+        const container = document.getElementById('game-container');
+        const canvas = document.getElementById('gameCanvas');
+
+        const baseWidth = 960;
+        const baseHeight = 640;
+        const uiHeight = 80;
+
+        const newWidth = baseWidth * currentScale;
+        const newHeight = baseHeight * currentScale;
+
+        container.style.width = newWidth + 'px';
+        container.style.height = (newHeight + uiHeight) + 'px';
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        // Boundary check for player
+        if (player.x > canvas.width - 16) player.x = canvas.width - 16;
+        if (player.y > canvas.height - 16) player.y = canvas.height - 16;
+
+        updateWeatherUI();
+        draw(); // Redraw immediately to reflect changes
     }
 
     function spawnFieldItem() {
+        if (isSizeControlling || isGameOver) {
+            setTimeout(spawnFieldItem, 1000);
+            return;
+        }
+        const canvas = document.getElementById('gameCanvas');
         if (fieldItems.length < 6) {
             const rand = Math.random();
             let type = 'potion';
             if (rand < 0.05) type = 'shoes';
 
-            fieldItems.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30, type: type });
+            fieldItems.push({ x: Math.random() * (canvas.width - 100) + 50, y: Math.random() * (canvas.height - 100) + 50, type: type });
         }
         setTimeout(spawnFieldItem, 8000);
     }
 
     function spawnTreasureBox() {
+        if (isSizeControlling || isGameOver) {
+            setTimeout(spawnTreasureBox, 1000);
+            return;
+        }
+        const canvas = document.getElementById('gameCanvas');
         if (treasureBoxes.length < 2) {
-            treasureBoxes.push({ x: Math.random() * 900 + 30, y: Math.random() * 600 + 30 });
+            treasureBoxes.push({ x: Math.random() * (canvas.width - 100) + 50, y: Math.random() * (canvas.height - 100) + 50 });
         }
         setTimeout(spawnTreasureBox, Math.random() * 30000 + 30000);
     }
 
     function spawnCoin() {
+        if (isSizeControlling || isGameOver) {
+            setTimeout(spawnCoin, 1000);
+            return;
+        }
+        const canvas = document.getElementById('gameCanvas');
         if (coins.length < 30) {
             const r = Math.random();
             let size, score;
@@ -808,8 +973,8 @@
                 score = Math.floor(Math.random() * 301) + 200; // 200-500
             }
             coins.push({
-                x: Math.random() * 900 + 30,
-                y: Math.random() * 600 + 30,
+                x: Math.random() * (canvas.width - 100) + 50,
+                y: Math.random() * (canvas.height - 100) + 50,
                 size: size,
                 score: score,
                 creationTime: Date.now(),
@@ -949,6 +1114,7 @@
         const icon = document.getElementById('weather-icon');
         const text = document.getElementById('weather-text');
         const overlay = document.getElementById('weather-overlay');
+        const canvas = document.getElementById('gameCanvas');
         overlay.innerHTML = '';
 
         if (currentWeather === "sunny") { icon.innerText = "☀️"; text.innerText = "맑음"; }
@@ -957,7 +1123,7 @@
             for(let i=0; i<50; i++) {
                 const drop = document.createElement('div');
                 drop.className = 'rain-drop';
-                drop.style.left = Math.random() * 960 + 'px';
+                drop.style.left = Math.random() * canvas.width + 'px';
                 drop.style.animationDelay = Math.random() * 0.8 + 's';
                 overlay.appendChild(drop);
             }
@@ -983,7 +1149,8 @@
     }
 
     function spawnBossDefault() {
-        boss.x = player.x > 480 ? 100 : 800; boss.y = player.y > 320 ? 100 : 600; boss.alive = true;
+        const canvas = document.getElementById('gameCanvas');
+        boss.x = player.x > canvas.width / 2 ? 100 : canvas.width - 100; boss.y = player.y > canvas.height / 2 ? 100 : canvas.height - 100; boss.alive = true;
         boss.maxHp = 400 + (player.level * 30);
         boss.hp = boss.maxHp;
         localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
@@ -991,8 +1158,9 @@
     }
 
     function spawnSuperBoss() {
+        const canvas = document.getElementById('gameCanvas');
         superBoss.alive = true;
-        superBoss.x = 480; superBoss.y = 320;
+        superBoss.x = canvas.width / 2; superBoss.y = canvas.height / 2;
         superBoss.hp = 1500;
         superBoss.maxHp = 1500;
 
@@ -1004,6 +1172,10 @@
     function gameLoop() {
         if(!player) return;
         if(isGameOver) return;
+        if(isSizeControlling) {
+            draw(); // Keep drawing even when paused to show scale changes
+            return;
+        }
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
@@ -1038,7 +1210,7 @@
             const dx = player.x - boss.x; const dy = player.y - boss.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if(dist > 0) { boss.x += (dx / dist) * boss.speed; boss.y += (dy / dist) * boss.speed; }
-            if(dist < 30) {
+            if(dist < 30 * currentScale) {
                 saveBossPos();
                 localStorage.setItem('rpg_boss_encounter', 'true');
                 localStorage.setItem('rpg_temp_player', JSON.stringify(player));
@@ -1050,7 +1222,7 @@
             const dx = player.x - superBoss.x; const dy = player.y - superBoss.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             if(dist > 0) { superBoss.x += (dx / dist) * superBoss.speed; superBoss.y += (dy / dist) * superBoss.speed; }
-            if(dist < 40) {
+            if(dist < 40 * currentScale) {
                 saveBossPos();
                 localStorage.setItem('rpg_boss_encounter', 'true');
                 localStorage.setItem('rpg_boss_hp', superBoss.hp);
@@ -1064,7 +1236,8 @@
         fieldItems = fieldItems.filter(item => {
             const dx = player.x - item.x; const dy = player.y - item.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 25) {
+            const scale = currentScale;
+            if (dist < 25 * scale) {
                 const ns = isNight ? "_night" : "";
                 if (item.type === 'potion') {
                     const img = 'potion_hp' + ns + '.jpg';
@@ -1081,7 +1254,8 @@
         treasureBoxes = treasureBoxes.filter(box => {
             const dx = player.x - box.x; const dy = player.y - box.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 30) {
+            const scale = currentScale;
+            if (dist < 30 * scale) {
                 getTreasure();
                 return false;
             }
@@ -1093,13 +1267,14 @@
             if (now - coin.creationTime > coin.lifeTime) return false;
             const dx = player.x - coin.x; const dy = player.y - coin.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < (coin.size/2 + 16)) {
+            const scale = currentScale;
+            if (dist < (coin.size/2 + 16) * scale) {
                 player.coinScore += coin.score;
                 player.quests.coinCollectCount++;
                 const sfx = coinSfx.cloneNode();
                 sfx.volume = 0.5;
                 sfx.play().catch(e=>{});
-                addFloatingText(player.x, player.y - 30, `+${coin.score}`, '#ffd700');
+                addFloatingText(player.x, player.y - 30 * scale, `+${coin.score}`, '#ffd700');
                 return false;
             }
             return true;
@@ -1312,34 +1487,53 @@
     }
 
     function draw() {
-        const ctx = document.getElementById('gameCanvas').getContext('2d');
-        ctx.clearRect(0, 0, 960, 640);
-        ctx.drawImage(mapImg, 0, 0, 960, 640);
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scale = currentScale;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
+
         fieldItems.forEach(item => {
             let img = potionImg;
             if (item.type === 'shoes') img = shoesImg;
             else if (item.type === 'attack') img = atkImg;
             else if (item.type === 'defense') img = defImg;
-            ctx.drawImage(img, item.x - 12, item.y - 12, 24, 24);
+            const size = 24 * scale;
+            ctx.drawImage(img, item.x - size/2, item.y - size/2, size, size);
         });
-        treasureBoxes.forEach(box => { ctx.drawImage(treasureBoxImg, box.x - 15, box.y - 15, 30, 30); });
+
+        treasureBoxes.forEach(box => {
+            const size = 30 * scale;
+            ctx.drawImage(treasureBoxImg, box.x - size/2, box.y - size/2, size, size);
+        });
 
         const cImg = isNight ? coinImgNight : coinImgDay;
         coins.forEach(coin => {
-            ctx.drawImage(cImg, coin.x - coin.size/2, coin.y - coin.size/2, coin.size, coin.size);
+            const size = coin.size * scale;
+            ctx.drawImage(cImg, coin.x - size/2, coin.y - size/2, size, size);
         });
 
-        ctx.drawImage(playerImg, player.x - 16, player.y - 16, 32, 32);
-        if(boss.alive) ctx.drawImage(boss.img, boss.x - 25, boss.y - 25, 50, 50);
-        if(superBoss.alive) ctx.drawImage(superBoss.img, superBoss.x - 40, superBoss.y - 40, 80, 80);
+        const pSize = 32 * scale;
+        ctx.drawImage(playerImg, player.x - pSize/2, player.y - pSize/2, pSize, pSize);
 
-        ctx.font = "bold 16px 'Noto Serif KR'";
+        if(boss.alive) {
+            const bSize = 50 * scale;
+            ctx.drawImage(boss.img, boss.x - bSize/2, boss.y - bSize/2, bSize, bSize);
+        }
+
+        if(superBoss.alive) {
+            const sbSize = 80 * scale;
+            ctx.drawImage(superBoss.img, superBoss.x - sbSize/2, superBoss.y - sbSize/2, sbSize, sbSize);
+        }
+
+        ctx.font = `bold ${16 * scale}px 'Noto Serif KR'`;
         ctx.textAlign = "center";
         const now = Date.now();
         floatingTexts.forEach(ft => {
             const elapsed = now - ft.startTime;
             const alpha = 1 - (elapsed / ft.lifeTime);
-            const lift = (elapsed / ft.lifeTime) * 30;
+            const lift = (elapsed / ft.lifeTime) * 30 * scale;
             ctx.fillStyle = ft.color;
             ctx.globalAlpha = alpha;
             ctx.fillText(ft.text, ft.x, ft.y - lift);
@@ -1859,14 +2053,17 @@
 
     function move(e) {
         if(document.querySelector('.modal[style*="flex"]')) return;
+        if(isSizeControlling) return; // Pause movement during size control
+
+        const canvas = document.getElementById('gameCanvas');
         let s = player.moveSpeed || 12;
         if (currentWeather === "rain") s *= 0.7;
 
         let m = false;
         if (e.key === "ArrowUp") { player.y = Math.max(16, player.y - s); m = true; }
-        if (e.key === "ArrowDown") { player.y = Math.min(624, player.y + s); m = true; }
+        if (e.key === "ArrowDown") { player.y = Math.min(canvas.height - 16, player.y + s); m = true; }
         if (e.key === "ArrowLeft") { player.x = Math.max(16, player.x - s); m = true; }
-        if (e.key === "ArrowRight") { player.x = Math.min(944, player.x + s); m = true; }
+        if (e.key === "ArrowRight") { player.x = Math.min(canvas.width - 16, player.x + s); m = true; }
         if (m) {
             const rand = Math.random();
             let eventChance = isNight ? 0.02 : 0.01; // Reduced event chance

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>DUNGEON RPG - Battle</title>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Inter:wght@400;600&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --bg-color: #050505; 
@@ -18,6 +18,13 @@
             --font-combat: 'Black Han Sans', sans-serif;
             --font-ui: 'Noto Serif KR', serif;
             --font-eng: 'Cinzel', serif;
+
+            /* Button Colors */
+            --btn-atk: #d32f2f;
+            --btn-def: #1976d2;
+            --btn-skl: #009688;
+            --btn-special: #7b1fa2;
+            --btn-item: #388e3c;
         }
 
         body { 
@@ -104,32 +111,35 @@
         .log-dmg { color: var(--danger); font-weight: bold; }
         .log-evade { color: var(--accent-gold); font-weight: bold; }
 
-        .btns { display: flex; gap: 20px; z-index: 20; }
+        .btns { display: flex; gap: 15px; z-index: 20; flex-wrap: wrap; justify-content: center; }
         .btn { 
-            padding: 12px 35px; border: 2px solid #333; font-family: var(--font-combat); 
-            font-size: 1.3rem; cursor: pointer; color: #ccc; transition: all 0.2s; 
+            padding: 12px 25px; border: 2px solid rgba(255,255,255,0.2); font-family: var(--font-combat);
+            font-size: 1.1rem; cursor: pointer; color: #fff; transition: all 0.2s;
             text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-radius: 6px;
             position: relative; overflow: hidden;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            min-width: 120px;
         }
-        .btn::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(255,255,255,0.1), transparent); }
+        .btn::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(255,255,255,0.2), transparent); }
         
-        .btn-atk { background: linear-gradient(to bottom, #8b0000, #520000); border-color: #b71c1c; }
-        .btn-atk:hover { background: linear-gradient(to bottom, #d32f2f, #8b0000); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(211, 47, 47, 0.6); }
+        .btn-atk { background: linear-gradient(to bottom, #c62828, #8e0000); }
+        .btn-atk:hover { background: linear-gradient(to bottom, #ef5350, #c62828); transform: translateY(-3px); box-shadow: 0 0 20px rgba(211, 47, 47, 0.6); }
         
-        .btn-skl { background: linear-gradient(to bottom, #1a237e, #000051); border-color: #304ffe; }
-        .btn-skl:hover { background: linear-gradient(to bottom, #304ffe, #1a237e); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(48, 79, 254, 0.6); }
-        
-        .btn-item { background: linear-gradient(to bottom, #1b5e20, #003300); border-color: #2e7d32; }
-        .btn-item:hover { background: linear-gradient(to bottom, #2e7d32, #1b5e20); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
+        .btn-def { background: linear-gradient(to bottom, #1565c0, #0d47a1); }
+        .btn-def:hover { background: linear-gradient(to bottom, #42a5f5, #1565c0); transform: translateY(-3px); box-shadow: 0 0 20px rgba(33, 150, 243, 0.6); }
 
-        .btn-run { background: linear-gradient(to bottom, #333, #111); border-color: #555; }
-        .btn-run:hover { background: linear-gradient(to bottom, #555, #333); transform: translateY(-3px); color: #fff; }
-
-        /* Special Button Style */
-        .btn-special { background: linear-gradient(to bottom, #6a1b9a, #4a148c); border-color: #7b1fa2; }
-        .btn-special:hover { background: linear-gradient(to bottom, #8e24aa, #6a1b9a); transform: translateY(-3px); color: #fff; box-shadow: 0 0 20px rgba(123, 31, 162, 0.6); }
+        .btn-skl { background: linear-gradient(to bottom, #00897b, #004d40); }
+        .btn-skl:hover { background: linear-gradient(to bottom, #26a69a, #00897b); transform: translateY(-3px); box-shadow: 0 0 20px rgba(38, 166, 154, 0.6); }
+        
+        .btn-special { background: linear-gradient(to bottom, #7b1fa2, #4a148c); }
+        .btn-special:hover { background: linear-gradient(to bottom, #ab47bc, #7b1fa2); transform: translateY(-3px); box-shadow: 0 0 20px rgba(123, 31, 162, 0.6); }
         .btn-special:disabled { filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
+
+        .btn-item { background: linear-gradient(to bottom, #2e7d32, #1b5e20); }
+        .btn-item:hover { background: linear-gradient(to bottom, #66bb6a, #2e7d32); transform: translateY(-3px); box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
+
+        .btn-run { background: linear-gradient(to bottom, #424242, #212121); border-color: #555; }
+        .btn-run:hover { background: linear-gradient(to bottom, #757575, #424242); transform: translateY(-3px); color: #fff; }
 
         .btn-rage {
             background: linear-gradient(to bottom, #e65100, #bf360c); border-color: #ff9800;
@@ -144,7 +154,7 @@
 
         .modal-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 520px; 
-            background: rgba(30, 30, 35, 0.98); /* Changed from rgba(15, 15, 20, 0.98) */
+            background: rgba(30, 30, 35, 0.98);
             border: 2px solid var(--accent-gold); display: none;
             flex-direction: column; align-items: center; padding: 40px; z-index: 1000; 
             box-shadow: 0 0 80px rgba(0,0,0,1); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 8px; 
@@ -157,7 +167,7 @@
         }
         .result-content {
             width: 100%; text-align: center; margin-bottom: 25px; color: #eee; font-family: var(--font-ui);
-            text-shadow: 1px 1px 2px #000; /* Added text-shadow */
+            text-shadow: 1px 1px 2px #000;
         }
         .result-row { margin: 12px 0; font-size: 1.2rem; display: flex; justify-content: space-between; padding: 0 40px; }
         
@@ -474,6 +484,23 @@
             20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
         }
+
+        /* Defense Aura Effect */
+        .defense-aura {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(41, 121, 255, 0.2) 0%, rgba(41, 121, 255, 0.1) 50%, transparent 70%);
+            border: 2px solid rgba(41, 121, 255, 0.5);
+            box-shadow: 0 0 30px rgba(41, 121, 255, 0.6), inset 0 0 30px rgba(41, 121, 255, 0.4);
+            z-index: 5; pointer-events: none;
+            animation: defensePulse 2s infinite ease-in-out;
+            display: none;
+        }
+        @keyframes defensePulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -531,6 +558,7 @@
                 <div id="p-speech" class="speech"></div>
                 <div id="player-frame" class="unit-frame" style="border-color:#2979ff;">
                     <div id="p-cure" class="cure-effect"></div>
+                    <div id="p-defense-aura" class="defense-aura"></div>
                     <img id="p-img" class="unit-img">
                     <img id="atk-warrior" src="image/warrior_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-rogue" src="image/rogue_atk_img.jpg" class="unit-img" style="display:none;">
@@ -606,6 +634,7 @@
         
         <div class="btns">
             <button class="btn btn-atk" onclick="atk()">⚔️ 공격</button>
+            <button class="btn btn-def" onclick="def()">🛡️ 방어</button>
             <button class="btn btn-skl" onclick="skl()">⚡ 스킬</button>
             <button id="btn-special" class="btn btn-special" onclick="specialAtk()">🌟 특수기</button>
             <button class="btn btn-item" onclick="openItemModal()">💊 아이템</button>
@@ -726,7 +755,7 @@
         let currentWeather = "sunny";
         let isLegendary = false;
 
-        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0 };
+        let pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0, counterReady: false, evasionBoost: 0, aiming: 0 };
         let eStatus = { poison: 0, stun: 0 };
         let rage = 0;
         const maxRage = 100;
@@ -757,7 +786,7 @@
             rage = player.rage;
             currentWeather = localStorage.getItem('rpg_current_weather') || "sunny";
 
-            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0 };
+            pStatus = { poison: 0, stun: 0, defUp: 0, focus: 0, atkUp: 0, invincible: 0, nextSkillTriple: 0, zeroMana: 0, invis: 0, skillDmgUp: 0, critUp: 0, nextSkillZeroCost: 0, doubleAttackChance: 0, windAttribute: 0, atkUpRanger: 0, evasionUp: 0, counterReady: false, evasionBoost: 0, aiming: 0 };
             doubleAttackCooldown = 0;
 
             if (player.specialCooldown > 0) {
@@ -766,6 +795,7 @@
             specialCooldown = player.specialCooldown || 0;
             updateSpecialTooltip();
             updateSkillTooltip();
+            updateDefenseTooltip();
 
             if (player.battleCurse) {
                 pStatus.stun = 1;
@@ -1001,6 +1031,17 @@
                     case '레인저': desc = "[야수의 눈] 3턴 동안 공격력 20% 증가"; break;
                     default: desc = "특수 기술"; break;
             }
+            btn.title = desc;
+        }
+
+        function updateDefenseTooltip() {
+            const btn = document.querySelector('.btn-def');
+            let desc = "";
+            const job = player.job;
+            if (['전사', '버서커', '가디언'].includes(job)) desc = "[방어] 피해 60% 감소 및 피격 시 반격 발동";
+            else if (['도적', '어쌔신', '섀도우'].includes(job)) desc = "[방어] 회피율 +30% 증가 및 회피 시 분노 충전";
+            else if (['마법사', '아크메이지', '소서러'].includes(job)) desc = "[방어] 마나(MP) 15% 즉시 회복";
+            else if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) desc = "[방어] 다음 공격 치명타 확률 +20% (조우)";
             btn.title = desc;
         }
 
@@ -1363,6 +1404,47 @@
             }, 500);
         }
 
+        function def() {
+            if(isActing) return;
+            if(pStatus.stun > 0) { addLog("기절 상태라 방어할 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
+
+            isActing = true;
+            const job = player.job;
+            pStatus.defUp = 1;
+
+            let logMsg = "🛡️ 방어 태세를 취합니다!";
+
+            // Show Defense Aura
+            const aura = document.getElementById('p-defense-aura');
+            aura.style.display = 'block';
+            setTimeout(() => { aura.style.display = 'none'; }, 2000);
+
+            // 직업별 즉시 효과 처리
+            if (['전사', '버서커', '가디언'].includes(job)) {
+                pStatus.counterReady = true;
+                logMsg = "🛡️ 방어 및 반격 준비! (피해 60% 감소)";
+            } else if (['도적', '어쌔신', '섀도우'].includes(job)) {
+                pStatus.evasionBoost = 1;
+                logMsg = "💨 민첩하게 움직여 회피를 준비합니다! (회피율 +30%)";
+            } else if (['마법사', '아크메이지', '소서러'].includes(job)) {
+                let rec = Math.floor(player.maxMp * 0.15);
+                player.mp = Math.min(player.maxMp, player.mp + rec);
+                logMsg = `💧 명상을 통해 마나를 ${rec} 회복했습니다!`;
+            } else if (['엘프 궁수', '스나이퍼', '레인저'].includes(job)) {
+                pStatus.aiming = 1;
+                logMsg = "🎯 적의 움직임을 주시하며 조준합니다! (다음 턴 치명타 확률 UP)";
+            }
+
+            addLog(logMsg);
+            say('p', '방어!');
+            playItemSfx();
+
+            setTimeout(() => {
+                update();
+                eTurn();
+            }, 800);
+        }
+
         function atk() { 
             if(isActing) return;
             if(pStatus.stun > 0) { addLog("기절 상태라 공격할 수 없습니다!"); pStatus.stun--; update(); setTimeout(eTurn, 1500); return; }
@@ -1428,6 +1510,11 @@
                 if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') critChance = 0.25; // 궁수 기본 치명타율
                 if (isFocused) critChance = 1.0;
                 if (pStatus.critUp > 0) critChance = 1.0;
+                if (pStatus.aiming > 0) {
+                    critChance += 0.2;
+                    pStatus.aiming = 0;
+                    addLog("🎯 조준 사격! 치명타 확률이 증가합니다.");
+                }
 
                 let isCrit = Math.random() < critChance;
                 let dmg = Math.floor(player.stats.str/1.8) + (player.level*2) + 5 + (player.bonusAtk||0);
@@ -1636,6 +1723,11 @@
                     let baseDmg = Math.floor(player.stats.dex * 0.5) + (player.level * 2);
                     let critChance = (player.job === '어쌔신') ? 0.55 : 0.4;
                     if (pStatus.critUp > 0) critChance = 1.0;
+                    if (pStatus.aiming > 0) {
+                        critChance += 0.2;
+                        pStatus.aiming = 0;
+                        addLog("🎯 조준 사격! 치명타 확률이 증가합니다.");
+                    }
                     isCrit = Math.random() < critChance;
                     if (isCrit) {
                         dmg = (baseDmg * 4) + (player.bonusAtk||0);
@@ -1726,6 +1818,10 @@
             if (dmg === 0) {
                 isCrit = Math.random() < 0.2;
                 if (pStatus.critUp > 0) isCrit = true;
+                if (pStatus.aiming > 0) {
+                    isCrit = true; // 궁수 조준 시 스킬도 크리티컬 보정 (간소화)
+                    pStatus.aiming = 0;
+                }
                 let multiplier = 2.0;
 
                 if (job === '버서커') multiplier = 4.0;
@@ -1886,6 +1982,8 @@
             if (pStatus.invis > 0) pStatus.invis--;
             if (pStatus.windAttribute > 0) pStatus.windAttribute--;
             if (pStatus.atkUpRanger > 0) pStatus.atkUpRanger--;
+            if (pStatus.evasionBoost > 0) pStatus.evasionBoost--;
+            pStatus.counterReady = false; // Reset counter each turn
         }
 
         function eTurn() {
@@ -1921,11 +2019,12 @@
             if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') evadeChance += 0.05; // 궁수 기본 회피율 보너스
             if (pStatus.evasionUp > 0) evadeChance *= 2; // 엘프 궁수 특수기 효과
             if (pStatus.invis > 0) evadeChance = 1.0; // 스나이퍼 은신
+            if (pStatus.evasionBoost > 0) evadeChance += 0.3; // 도적 방어 보너스
 
             if (currentWeather === "fog" && !(player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저')) {
                 evadeChance += 0.1;
             }
-            evadeChance = Math.min(0.4, evadeChance);
+            evadeChance = Math.min(0.7, evadeChance); // Max evade chance increased for defense boost
 
             if (Math.random() < evadeChance) {
                 addLog("<span class='log-evade'>적의 공격을 회피했습니다!</span>");
@@ -1934,6 +2033,12 @@
                 playMotion('', 'player-frame', 'evade');
                 showDamage('player-frame', 0, 'evade');
                 playEnemyAttackMotion();
+
+                if (pStatus.evasionBoost > 0) {
+                    rage = Math.min(maxRage, rage + 20);
+                    addLog("회피 성공! 분노가 <span style='color:orange'>20</span> 충전되었습니다.");
+                }
+
                 tickPlayerBuffs();
                 update(); isActing = false;
                 return;
@@ -1969,8 +2074,21 @@
                 dmg = 0;
                 addLog("완전 방어로 공격을 무효화했습니다!");
             } else if (pStatus.defUp > 0) {
-                dmg = Math.floor(dmg * 0.5);
-                addLog("방패 방어로 피해가 반감되었습니다.");
+                let reduction = 0.5;
+                if (['전사', '버서커', '가디언'].includes(player.job)) reduction = 0.4; // 전사 계열 60% 감소
+                dmg = Math.floor(dmg * reduction);
+                addLog("방어로 인해 피해가 크게 감소했습니다.");
+
+                // 전사 반격 로직
+                if (pStatus.counterReady && dmg > 0) {
+                    setTimeout(() => {
+                        let counterDmg = Math.floor((player.stats.str/2) + player.level);
+                        enemy.hp -= counterDmg;
+                        showDamage('enemy-frame', counterDmg, 'normal');
+                        addLog(`⚔️ 반격! 적에게 <span class='log-dmg'>${counterDmg}</span>의 피해를 돌려주었습니다!`);
+                        update();
+                    }, 500);
+                }
             }
 
             if (dmg > 0) {
