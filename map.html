@@ -122,15 +122,15 @@
 
         .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
             position: absolute;
-            right: 20px;
+            left: calc(50% + 175px);
             top: 50%;
             transform: translateY(-50%);
         }
         .menu-icon {
-            width: 42px; height: 42px; cursor: pointer; transition: all 0.2s;
+            width: 50px; height: 50px; cursor: pointer; transition: all 0.2s;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         .menu-icon:hover {
@@ -170,6 +170,11 @@
         #shop-list-container { flex: 1; overflow-y: auto; padding-right: 10px; }
         #shop-list-container::-webkit-scrollbar { width: 8px; }
         #shop-list-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        #quest-modal { width: 500px; height: 550px; }
+        #quest-modal .modal-body { overflow-y: auto; }
+        #quest-modal .modal-body::-webkit-scrollbar { width: 6px; }
+        #quest-modal .modal-body::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
         #quest-modal { width: 500px; height: 550px; }
         #quest-modal .modal-body { overflow-y: auto; }
@@ -2091,7 +2096,7 @@
             let encounterChance = 0.06;
 
             // 엘프 궁수(Elf Archer)의 '정령의 눈' 패시브: 안개(Fog) 날씨의 명중률 페널티(-20%)를 무시하고 0%로 고정함.
-            // map.html에서는 명중률 페널티를 직접적으로 처리하지 않으므로,
+            // map.html에서는 명중률 페념티를 직접적으로 처리하지 않으므로,
             // 안개 날씨의 '조우율 상승' 효과를 엘프 궁수에게는 적용하지 않도록 처리합니다.
             if (currentWeather === "fog") {
                 if (player.job !== '엘프 궁수') {
