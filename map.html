@@ -735,10 +735,9 @@
 
         if (player.isAdvanced === undefined) player.isAdvanced = false;
 
-        // Boundary check on load
-        const canvas = document.getElementById('gameCanvas');
-        if (player.x === undefined || player.x < 16 || player.x > canvas.width - 16) player.x = canvas.width / 2;
-        if (player.y === undefined || player.y < 16 || player.y > canvas.height - 16) player.y = canvas.height / 2;
+        // Boundary check on load - Moved to after applyScale to handle scaled coordinates correctly
+        if (player.x === undefined) player.x = 480;
+        if (player.y === undefined) player.y = 320;
 
         const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
         const elapsed = Date.now() - startTime;
@@ -781,6 +780,11 @@
 
         applyScale();
 
+        // Boundary check after scale is applied
+        const canvas = document.getElementById('gameCanvas');
+        if (player.x < 16 || player.x > canvas.width - 16) player.x = canvas.width / 2;
+        if (player.y < 16 || player.y > canvas.height - 16) player.y = canvas.height / 2;
+
         mapImg.onload = () => {
             document.getElementById('loading-overlay').style.display = 'none';
             fieldBgm.play().catch(e => console.log("BGM play failed:", e));
@@ -791,14 +795,14 @@
                 localStorage.removeItem('rpg_boss_ran_away');
                 boss.alive = false;
                 setTimeout(spawnBossDefault, 10000);
+            } else if (savedX) { // Check saved position first to avoid reset after normal mob battle
+                boss.x = parseFloat(savedX); boss.y = parseFloat(localStorage.getItem('rpg_boss_y')); boss.alive = true;
+                boss.hp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
+                boss.maxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 400 + (player.level * 30));
             } else if (deathTime) {
                 const diff = Date.now() - parseInt(deathTime);
                 if (diff < 10000) { boss.alive = false; setTimeout(spawnBossDefault, 10000 - diff); }
                 else { localStorage.removeItem('rpg_boss_death_time'); spawnBossDefault(); }
-            } else if (savedX) {
-                boss.x = parseFloat(savedX); boss.y = parseFloat(localStorage.getItem('rpg_boss_y')); boss.alive = true;
-                boss.hp = parseFloat(localStorage.getItem('rpg_boss_hp') || 400 + (player.level * 30));
-                boss.maxHp = parseFloat(localStorage.getItem('rpg_boss_max_hp') || 400 + (player.level * 30));
             } else {
                 boss.alive = false; setTimeout(spawnBossDefault, 15000);
             }
@@ -1154,6 +1158,7 @@
         boss.maxHp = 400 + (player.level * 30);
         boss.hp = boss.maxHp;
         localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
+        localStorage.removeItem('rpg_boss_death_time');
         localStorage.setItem('rpg_boss_hp', boss.hp); localStorage.setItem('rpg_boss_max_hp', boss.maxHp);
     }
 
@@ -1816,10 +1821,16 @@
             if (item.type === 'potion_gamble') { // Added check for potion_gamble
                 return showConfirm("사용 불가", "도박사의 시약은 전투 중에만 사용할 수 있습니다.", null, true);
             }
-            if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
-            if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
+            if (item.type === 'potion_full') {
+                if (player.hp >= player.maxHp && player.mp >= player.maxMp) return showConfirm("사용 불가", "이미 체력과 마나가 가득 찼습니다.", null, true);
+                player.hp = player.maxHp;
+                player.mp = player.maxMp;
+                potionSfx.play().catch(e => {});
+            } else if (player.hp >= player.maxHp && item.name.includes('체력')) return showConfirm("사용 불가", "체력이 가득 찼습니다.", null, true);
+            else if (player.mp >= player.maxMp && item.name.includes('마나')) return showConfirm("사용 불가", "마나가 가득 찼습니다.", null, true);
 
-            if (item.name.includes('체력')) { player.hp = Math.min(player.hp + item.val, player.maxHp); potionSfx.play().catch(e => {}); }
+            if (item.type === 'potion_full') { /* already handled above */ }
+            else if (item.name.includes('체력')) { player.hp = Math.min(player.hp + item.val, player.maxHp); potionSfx.play().catch(e => {}); }
             else if (item.name.includes('마나')) { player.mp = Math.min(player.mp + item.val, player.maxMp); potionSfx.play().catch(e => {}); }
             else if (item.name.includes('경험치')) {
                 player.exp += item.val;
