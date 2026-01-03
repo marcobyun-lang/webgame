@@ -724,24 +724,24 @@
             </div>
         </div>
 
-        <div class="ranking-section">
+        <!-- 순위표 영역 -->
+        <div id="ranking-container" class="ranking-section">
             <button class="btn-score-guide" onclick="showScoreGuide()">점수 산정 가이드</button>
-            <div class="ranking-title">HALL OF FAME</div>
-            <table class="ranking-table">
-                <thead>
-                    <tr>
-                        <th>RANK</th>
-                        <th>NAME</th>
-                        <th>JOB</th>
-                        <th>LEVEL</th>
-                        <th>SCORE</th>
-                    </tr>
-                </thead>
-                <tbody id="ranking-body">
-                    <tr><td colspan="5" style="color:#666; padding:20px;">순위표를 불러오는 중...</td></tr>
-                </tbody>
-            </table>
+            <div id="ranking-overall">
+                <div class="ranking-title">HALL OF FAME</div>
+                <table class="ranking-table">
+                    <tbody id="ranking-body">
+                        <tr><td colspan="5" style="color:#666; padding:20px;">순위표를 불러오는 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- 직업별 순위표 영역 -->
+        <div id="ranking-warrior" class="ranking-section"></div>
+        <div id="ranking-rogue" class="ranking-section"></div>
+        <div id="ranking-mage" class="ranking-section"></div>
+        <div id="ranking-archer" class="ranking-section"></div>
     </div>
 
     <!-- Guide Modal -->
@@ -758,7 +758,7 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbzXcsngw4319YoBVGTmtuoXnpC66ZGlBQm5F2Hxw17n1_EEMazrftUD6gYsMYzQTV0YAg/exec";
+        const DB_URL = "https://script.google.com/macros/s/AKfycbyKMCAL5zwR_s7EdiXJ2Gz1eF66UVJeMiL03UdMrF_lCCmNhoORVf6ZjK_WiVsqP2ra/exec";
         const player = { name: "", job: "", stats: null, level: 1, exp: 0, maxExp: 100, hp: 0, maxHp: 0, mp: 0, maxMp: 0, x: 480, y: 325 };
         let rollCount = 5;
         let isRandomRolling = false;
@@ -790,32 +790,62 @@
 
         async function loadRankings() {
             try {
-                const res = await fetch(`${DB_URL}?type=ranking`);
-                const rankings = await res.json();
-                const body = document.getElementById('ranking-body');
-                body.innerHTML = '';
+                const res = await fetch(`${DB_URL}?type=allRankings`);
+                const data = await res.json();
 
-                if (!rankings || rankings.length === 0) {
-                    body.innerHTML = '<tr><td colspan="5" style="color:#666; padding:20px;">기록된 영웅이 없습니다.</td></tr>';
-                    return;
-                }
+                renderRankingTable(data.overall, 'ranking-overall', 'HALL OF FAME');
+                renderRankingTable(data.warrior, 'ranking-warrior', 'WARRIOR RANKING');
+                renderRankingTable(data.rogue, 'ranking-rogue', 'ROGUE RANKING');
+                renderRankingTable(data.mage, 'ranking-mage', 'MAGE RANKING');
+                renderRankingTable(data.archer, 'ranking-archer', 'ARCHER RANKING');
 
-                rankings.forEach((r, i) => {
-                    const tr = document.createElement('tr');
-                    const rankClass = i === 0 ? 'rank-1' : (i === 1 ? 'rank-2' : (i === 2 ? 'rank-3' : 'rank-other'));
-                    tr.innerHTML = `
-                        <td class="rank-num ${rankClass}">${i + 1}</td>
-                        <td class="${rankClass}">${r.name}</td>
-                        <td style="color:#aaa;">${r.job}</td>
-                        <td style="color:#aaa;">LV.${r.level}</td>
-                        <td class="rank-score">${parseInt(r.score).toLocaleString()}</td>
-                    `;
-                    body.appendChild(tr);
-                });
             } catch (e) {
                 console.error("Ranking Load Error:", e);
                 document.getElementById('ranking-body').innerHTML = '<tr><td colspan="5" style="color:#666; padding:20px;">순위표를 불러오지 못했습니다.</td></tr>';
             }
+        }
+
+        function renderRankingTable(dataArray, targetElementId, title) {
+            const target = document.getElementById(targetElementId);
+            if (!target) return;
+
+            let html = `<div class="ranking-title">${title}</div>`;
+            html += `
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>NAME</th>
+                            <th>JOB</th>
+                            <th>LEVEL</th>
+                            <th>SCORE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            if (!dataArray || dataArray.length === 0) {
+                html += '<tr><td colspan="5" style="color:#666; padding:20px;">기록된 영웅이 없습니다.</td></tr>';
+            } else {
+                dataArray.forEach((r, i) => {
+                    const rankClass = i === 0 ? 'rank-1' : (i === 1 ? 'rank-2' : (i === 2 ? 'rank-3' : 'rank-other'));
+                    html += `
+                        <tr>
+                            <td class="rank-num ${rankClass}">${i + 1}</td>
+                            <td class="${rankClass}">${r.name}</td>
+                            <td style="color:#aaa;">${r.job}</td>
+                            <td style="color:#aaa;">LV.${r.level}</td>
+                            <td class="rank-score">${parseInt(r.score).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            target.innerHTML = html;
         }
 
         function rollDice(isMainStat) {

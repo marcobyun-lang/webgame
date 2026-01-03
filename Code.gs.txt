@@ -5,32 +5,16 @@ function doGet(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 랭킹 데이터 요청
-    if (e.parameter.type === 'ranking') {
-      let rankSheet = ss.getSheetByName('Ranking');
-      // 시트가 없거나 데이터가 없으면 빈 배열 반환
-      if (!rankSheet || rankSheet.getLastRow() <= 1) {
-        output = ContentService.createTextOutput(JSON.stringify([]));
-      } else {
-        const data = rankSheet.getDataRange().getValues();
-        let rankings = [];
-
-        // 상위 10개 데이터 가져오기 (헤더 제외)
-        const numRows = Math.min(data.length, 11);
-        for (let i = 1; i < numRows; i++) {
-          // 이름이 있는 경우만 추가
-          if (data[i][0]) {
-            rankings.push({
-              name: data[i][0],
-              score: Number(data[i][1] || 0), // 숫자로 변환하여 전송
-              job: data[i][2],
-              level: Number(data[i][3] || 1),
-              bossKills: Number(data[i][5] || 0)
-            });
-          }
-        }
-        output = ContentService.createTextOutput(JSON.stringify(rankings));
-      }
+    // 랭킹 데이터 요청 (전체 및 직업별 통합)
+    if (e.parameter.type === 'ranking' || e.parameter.type === 'allRankings') {
+      const result = {
+        overall: getRankingsFromSheet(ss, 'Ranking'),
+        warrior: getRankingsFromSheet(ss, 'warrior'),
+        rogue: getRankingsFromSheet(ss, 'rogue'),
+        mage: getRankingsFromSheet(ss, 'mage'),
+        archer: getRankingsFromSheet(ss, 'archer')
+      };
+      output = ContentService.createTextOutput(JSON.stringify(result));
     } else {
         // 일반 캐릭터 데이터 불러오기
         let sheet = ss.getSheetByName('시트1') || ss.getSheets()[0];
@@ -55,6 +39,30 @@ function doGet(e) {
   }
 
   return output.setMimeType(ContentService.MimeType.JSON).setHeader('Access-Control-Allow-Origin', '*');
+}
+
+// 시트에서 랭킹 데이터를 읽어오는 헬퍼 함수
+function getRankingsFromSheet(ss, sheetName) {
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+
+  const data = sheet.getDataRange().getValues();
+  let rankings = [];
+
+  // 상위 10개 데이터 가져오기 (헤더 제외)
+  const numRows = Math.min(data.length, 11);
+  for (let i = 1; i < numRows; i++) {
+    if (data[i][0]) {
+      rankings.push({
+        name: data[i][0],
+        score: Number(data[i][1] || 0),
+        job: data[i][2],
+        level: Number(data[i][3] || 1),
+        bossKills: Number(data[i][5] || 0)
+      });
+    }
+  }
+  return rankings;
 }
 
 // 1. 데이터 저장 (POST 요청)
@@ -118,66 +126,19 @@ function doPost(e) {
 // 랭킹 저장 함수
 function saveRanking(ss, params) {
   try {
-    let rankSheet = ss.getSheetByName('Ranking');
-    if (!rankSheet) {
-      rankSheet = ss.insertSheet('Ranking');
-      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
-    }
+    // 1. 전체 랭킹 저장
+    updateSheetRanking(ss, 'Ranking', params);
 
-    if (rankSheet.getLastRow() === 0) {
-      rankSheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
-    }
-
-    const data = rankSheet.getDataRange().getValues();
-    let rowIndex = -1;
-    const playerName = params.name || "Unknown";
-
-    // Find existing player
-    for (let i = 1; i < data.length; i++) { // Start from 1 to skip header
-      if (data[i][0] == playerName) {
-        rowIndex = i + 1;
-        break;
-      }
-    }
-
-    const newScore = Number(params.score || 0);
-
-    if (rowIndex > 0) { // Player exists
-      const oldScore = Number(data[rowIndex - 1][1] || 0);
-      if (newScore > oldScore) {
-        // Update row
-        rankSheet.getRange(rowIndex, 1, 1, 6).setValues([[
-          playerName,
-          newScore,
-          params.job || "Novice",
-          Number(params.level || 1),
-          new Date(),
-          Number(params.bossKills || 0)
-        ]]);
-      }
-    } else { // New player
-      // Append new row
-      rankSheet.appendRow([
-        playerName,
-        newScore,
-        params.job || "Novice",
-        Number(params.level || 1),
-        new Date(),
-        Number(params.bossKills || 0)
-      ]);
-    }
-
-    // 정렬 및 상위 10개 유지
-    const lastRow = rankSheet.getLastRow();
-    if (lastRow > 1) {
-      const lastCol = rankSheet.getLastColumn();
-      const range = rankSheet.getRange(2, 1, lastRow - 1, lastCol);
-      range.sort({column: 2, ascending: false}); // Score(2열) 기준 내림차순
-    }
-
-    // 10위 밖 데이터 삭제 (헤더 1줄 + 데이터 10줄 = 11줄 유지)
-    if (rankSheet.getLastRow() > 11) {
-      rankSheet.deleteRows(12, rankSheet.getLastRow() - 11);
+    // 2. 직업별 랭킹 저장
+    const jobSheetMap = {
+      '전사': 'warrior',
+      '도적': 'rogue',
+      '마법사': 'mage',
+      '엘프 궁수': 'archer'
+    };
+    const targetSheetName = jobSheetMap[params.job];
+    if (targetSheetName) {
+      updateSheetRanking(ss, targetSheetName, params);
     }
 
     return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Ranking Updated"}))
@@ -187,5 +148,65 @@ function saveRanking(ss, params) {
     return ContentService.createTextOutput(JSON.stringify({result: "error", error: e.toString()}))
         .setMimeType(ContentService.MimeType.JSON)
         .setHeader('Access-Control-Allow-Origin', '*');
+  }
+}
+
+// 특정 시트의 랭킹을 업데이트하는 함수
+function updateSheetRanking(ss, sheetName, params) {
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['Name', 'Score', 'Job', 'Level', 'UpdatedAt', 'BossKills']);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  let rowIndex = -1;
+  const playerName = params.name || "Unknown";
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] == playerName) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+
+  const newScore = Number(params.score || 0);
+
+  if (rowIndex > 0) {
+    const oldScore = Number(data[rowIndex - 1][1] || 0);
+    if (newScore > oldScore) {
+      sheet.getRange(rowIndex, 1, 1, 6).setValues([[
+        playerName,
+        newScore,
+        params.job || "Novice",
+        Number(params.level || 1),
+        new Date(),
+        Number(params.bossKills || 0)
+      ]]);
+    }
+  } else {
+    sheet.appendRow([
+      playerName,
+      newScore,
+      params.job || "Novice",
+      Number(params.level || 1),
+      new Date(),
+      Number(params.bossKills || 0)
+    ]);
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    const lastCol = sheet.getLastColumn();
+    const range = sheet.getRange(2, 1, lastRow - 1, lastCol);
+    range.sort({column: 2, ascending: false});
+  }
+
+  if (sheet.getLastRow() > 11) {
+    sheet.deleteRows(12, sheet.getLastRow() - 11);
   }
 }
