@@ -628,6 +628,7 @@
                     <video id="v-rogue1" src="image/rogue_atk1.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-archer1" src="image/v-archer1.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-archer2" src="image/v-archer2.mp4" class="unit-img" style="display:none;"></video>
+                    <video id="v-archer3" src="image/v-archer3.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-mage2" src="image/mage_atk2.mp4" class="unit-img" style="display:none;"></video>
                     <video id="v-warrior2" src="image/warrior_atk2.mp4" class="unit-img" style="display:none;"></video>
                 </div>
@@ -1802,8 +1803,14 @@
                         applySkillDmg(player.job, dmg, isCrit);
                     }
                     return;
-                } else if (player.job === '엘프 궁수') {
-                    const v = document.getElementById('v-archer'); const pImg = document.getElementById('p-img');
+                } else if (player.job === '엘프 궁수' || player.job === '스나이퍼' || player.job === '레인저') {
+                    let vId = 'v-archer';
+                    if (player.job === '스나이퍼') vId = 'v-archer1';
+                    else if (player.job === '레인저') vId = 'v-archer2';
+
+                    if (isLegendary) vId = 'v-archer3';
+
+                    const v = document.getElementById(vId); const pImg = document.getElementById('p-img');
                     if(v) {
                         v.pause();
                         v.currentTime = 0;
@@ -1815,19 +1822,6 @@
                     } else {
                         applySkillDmg(player.job);
                     }
-                    return;
-                } else if (player.job === '스나이퍼' || player.job === '레인저') {
-                    const vMap = {
-                        '스나이퍼':'v-archer1',
-                        '레인저':'v-archer2'
-                    };
-                    const v = document.getElementById(vMap[jobKey]); const pImg = document.getElementById('p-img');
-                    if(v) {
-                        v.pause();
-                        v.currentTime = 0;
-                        pImg.style.display='none'; v.style.display='block'; v.play();
-                        v.onended = () => { v.style.display='none'; pImg.style.display='block'; applySkillDmg(player.job); }
-                    } else applySkillDmg(player.job);
                     return;
                 } else {
                     let vMap = {

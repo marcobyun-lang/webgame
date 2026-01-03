@@ -122,15 +122,15 @@
 
         .btn-group {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
             position: absolute;
-            left: calc(50% + 175px);
+            left: calc(50% + 170px);
             top: 50%;
             transform: translateY(-50%);
         }
         .menu-icon {
-            width: 50px; height: 50px; cursor: pointer; transition: all 0.2s;
+            width: 45px; height: 45px; cursor: pointer; transition: all 0.2s;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         .menu-icon:hover {
@@ -170,11 +170,6 @@
         #shop-list-container { flex: 1; overflow-y: auto; padding-right: 10px; }
         #shop-list-container::-webkit-scrollbar { width: 8px; }
         #shop-list-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-
-        #quest-modal { width: 500px; height: 550px; }
-        #quest-modal .modal-body { overflow-y: auto; }
-        #quest-modal .modal-body::-webkit-scrollbar { width: 6px; }
-        #quest-modal .modal-body::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
         #quest-modal { width: 500px; height: 550px; }
         #quest-modal .modal-body { overflow-y: auto; }
@@ -455,7 +450,7 @@
 
         /* Size Control UI */
         #size-control-overlay {
-            position: absolute; top: 160px; right: 20px;
+            position: absolute; top: 20px; right: 20px;
             background: rgba(0,0,0,0.8); border: 1px solid var(--accent-gold);
             padding: 15px; border-radius: 8px; display: none; flex-direction: column;
             gap: 12px; z-index: 1000; align-items: center; width: 120px;
@@ -653,6 +648,8 @@
     ];
 
     let player = null;
+    let keysPressed = {};
+    let distAccumulator = 0;
     let playerImg = new Image();
     let mapImg = new Image();
     let mapSetIndex = 0;
@@ -838,7 +835,16 @@
             spawnCoin();
         };
         updateUI();
-        window.addEventListener('keydown', move);
+        window.addEventListener('keydown', e => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                keysPressed[e.key] = true;
+            }
+        });
+        window.addEventListener('keyup', e => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                keysPressed[e.key] = false;
+            }
+        });
 
         // Size Control Events
         document.getElementById('size-up-btn').onclick = () => changeScale(SCALE_STEP);
@@ -1219,6 +1225,8 @@
 
         if(document.querySelector('.modal[style*="flex"]')) return;
 
+        handleMovement();
+
         const m = Math.floor(remain / 60000);
         const s = Math.floor((remain % 60000) / 1000);
         document.getElementById('game-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
@@ -1265,7 +1273,10 @@
             const dx = player.x - item.x; const dy = player.y - item.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
             const scale = currentScale;
-            if (dist < 25 * scale) {
+            let pickupDist = 25 * scale;
+            if (item.type === 'shoes') pickupDist = 35 * scale; // Larger pickup radius for shoes
+
+            if (dist < pickupDist) {
                 const ns = isNight ? "_night" : "";
                 if (item.type === 'potion') {
                     const img = 'potion_hp' + ns + '.jpg';
@@ -1524,10 +1535,14 @@
 
         fieldItems.forEach(item => {
             let img = potionImg;
-            if (item.type === 'shoes') img = shoesImg;
+            let size = 24 * scale;
+            if (item.type === 'shoes') {
+                img = shoesImg;
+                size = 45 * scale; // Large coin size
+            }
             else if (item.type === 'attack') img = atkImg;
             else if (item.type === 'defense') img = defImg;
-            const size = 24 * scale;
+
             ctx.drawImage(img, item.x - size/2, item.y - size/2, size, size);
         });
 
@@ -2077,40 +2092,68 @@
         updateUI();
     }
 
-    function move(e) {
+    function handleMovement() {
         if(document.querySelector('.modal[style*="flex"]')) return;
-        if(isSizeControlling) return; // Pause movement during size control
+        if(isSizeControlling) return;
 
         const canvas = document.getElementById('gameCanvas');
         let s = player.moveSpeed || 12;
         if (currentWeather === "rain") s *= 0.7;
 
-        let m = false;
-        if (e.key === "ArrowUp") { player.y = Math.max(16, player.y - s); m = true; }
-        if (e.key === "ArrowDown") { player.y = Math.min(canvas.height - 16, player.y + s); m = true; }
-        if (e.key === "ArrowLeft") { player.x = Math.max(16, player.x - s); m = true; }
-        if (e.key === "ArrowRight") { player.x = Math.min(canvas.width - 16, player.x + s); m = true; }
-        if (m) {
-            const rand = Math.random();
-            let eventChance = isNight ? 0.02 : 0.01; // Reduced event chance
-            let encounterChance = 0.06;
+        let dx = 0;
+        let dy = 0;
 
-            // 엘프 궁수(Elf Archer)의 '정령의 눈' 패시브: 안개(Fog) 날씨의 명중률 페널티(-20%)를 무시하고 0%로 고정함.
-            // map.html에서는 명중률 페념티를 직접적으로 처리하지 않으므로,
-            // 안개 날씨의 '조우율 상승' 효과를 엘프 궁수에게는 적용하지 않도록 처리합니다.
-            if (currentWeather === "fog") {
-                if (player.job !== '엘프 궁수') {
-                    eventChance *= 1.5;
-                    encounterChance *= 2.0;
+        if (keysPressed["ArrowUp"]) dy -= 1;
+        if (keysPressed["ArrowDown"]) dy += 1;
+        if (keysPressed["ArrowLeft"]) dx -= 1;
+        if (keysPressed["ArrowRight"]) dx += 1;
+
+        if (dx !== 0 || dy !== 0) {
+            if (dx !== 0 && dy !== 0) {
+                const factor = 0.7071;
+                dx *= factor;
+                dy *= factor;
+            }
+
+            const oldX = player.x;
+            const oldY = player.y;
+
+            player.x += dx * s;
+            player.y += dy * s;
+
+            player.x = Math.max(16, Math.min(canvas.width - 16, player.x));
+            player.y = Math.max(16, Math.min(canvas.height - 16, player.y));
+
+            if (player.x !== oldX || player.y !== oldY) {
+                const moveDist = Math.sqrt(Math.pow(player.x - oldX, 2) + Math.pow(player.y - oldY, 2));
+                distAccumulator += moveDist;
+                if (distAccumulator >= 30) {
+                    distAccumulator = 0;
+                    checkEncounters();
                 }
             }
+        }
+    }
 
-            if (rand < eventChance) showRandomEvent();
-            else if (rand < encounterChance) {
-                saveBossPos(); localStorage.removeItem('rpg_boss_encounter');
-                localStorage.setItem('rpg_is_night', isNight);
-                localStorage.setItem('rpg_temp_player', JSON.stringify(player)); location.href = 'battle.html';
+    function checkEncounters() {
+        const rand = Math.random();
+        let eventChance = isNight ? 0.02 : 0.01;
+        let encounterChance = 0.06;
+
+        if (currentWeather === "fog") {
+            if (player.job !== '엘프 궁수') {
+                eventChance *= 1.5;
+                encounterChance *= 2.0;
             }
+        }
+
+        if (rand < eventChance) showRandomEvent();
+        else if (rand < encounterChance) {
+            saveBossPos();
+            localStorage.removeItem('rpg_boss_encounter');
+            localStorage.setItem('rpg_is_night', isNight);
+            localStorage.setItem('rpg_temp_player', JSON.stringify(player));
+            location.href = 'battle.html';
         }
     }
 
@@ -2120,17 +2163,11 @@
         document.getElementById('mobile-controls').style.display = 'grid';
     }
 
-    let moveTimer = null;
     function handleMobilePress(key) {
-        if (moveTimer) clearInterval(moveTimer);
-        move({key: key});
-        moveTimer = setInterval(() => {
-            move({key: key});
-        }, 100);
+        keysPressed[key] = true;
     }
-    function handleMobileRelease() {
-        if (moveTimer) clearInterval(moveTimer);
-        moveTimer = null;
+    function handleMobileRelease(key) {
+        keysPressed[key] = false;
     }
 
     const dPadButtons = [
@@ -2143,10 +2180,10 @@
     dPadButtons.forEach(btn => {
         const el = document.getElementById(btn.id);
         el.addEventListener('touchstart', (e) => { e.preventDefault(); handleMobilePress(btn.key); }, {passive: false});
-        el.addEventListener('touchend', (e) => { e.preventDefault(); handleMobileRelease(); });
+        el.addEventListener('touchend', (e) => { e.preventDefault(); handleMobileRelease(btn.key); });
         el.addEventListener('mousedown', (e) => { handleMobilePress(btn.key); });
-        el.addEventListener('mouseup', (e) => { handleMobileRelease(); });
-        el.addEventListener('mouseleave', (e) => { handleMobileRelease(); });
+        el.addEventListener('mouseup', (e) => { handleMobileRelease(btn.key); });
+        el.addEventListener('mouseleave', (e) => { handleMobileRelease(btn.key); });
     });
 </script>
 </body>
