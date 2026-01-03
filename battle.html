@@ -534,6 +534,24 @@
             50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0.7; }
         }
+
+        /* [신규] 크리티컬 히트 이펙트 스타일 */
+        .crit-effect-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            width: 180px;
+            z-index: 25;
+            pointer-events: none;
+            animation: critPop 0.6s ease-out forwards;
+        }
+
+        @keyframes critPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.0); }
+        }
     </style>
 </head>
 <body>
@@ -1216,6 +1234,15 @@
             else if (type === 'crit') frame.classList.add('crit-action');
             else if (type === 'evade') frame.classList.add('evasion-action');
         }
+
+        function showCritEffect(targetId) {
+            const frame = document.getElementById(targetId);
+            const img = document.createElement('img');
+            img.src = 'image/criti_1.png';
+            img.className = 'crit-effect-img';
+            frame.appendChild(img);
+            setTimeout(() => img.remove(), 600);
+        }
         
         function playMotion(imgId, targetFrameId, effectType) {
             const pImg = document.getElementById('p-img');
@@ -1390,6 +1417,7 @@
                         let dmg = Math.floor((player.stats.dex * 2.5 + player.level * 5) * 1.5);
                         enemy.hp -= dmg;
                         showDamage('enemy-frame', dmg, 'crit');
+                        showCritEffect('enemy-frame');
                         triggerHitEffect('enemy-frame', 'crit');
                         logMsg = `🗡️ [그림자 일격] 적의 급소를 찔러 ${dmg}의 치명적인 피해!`;
                         say('p', '죽음은 조용히...');
@@ -1606,6 +1634,7 @@
                 playMotion(imgMap[jobKey], 'enemy-frame', isCrit?'crit':'normal');
                 enemy.hp -= dmg; 
                 showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
+                if (isCrit) showCritEffect('enemy-frame');
                 addLog(`적에게 <span class='log-dmg'>${dmg}</span>의 피해를 입혔습니다!`);
 
                 if (isDoubleAttack && enemy.hp > 0) {
@@ -1926,6 +1955,7 @@
                 triggerHitEffect('enemy-frame', isCrit?'crit':'big');
                 enemy.hp -= dmg;
                 showDamage('enemy-frame', dmg, isCrit?'crit':'normal');
+                if (isCrit) showCritEffect('enemy-frame');
                 addLog(`스킬 적중! <span class='log-dmg'>${dmg}</span> 피해!`);
             }
 
@@ -1996,6 +2026,7 @@
                 playMotion(imgMap[jobKey], 'enemy-frame', 'crit');
                 enemy.hp -= dmg;
                 showDamage('enemy-frame', dmg, 'crit');
+                showCritEffect('enemy-frame');
                 addLog(`분노 공격! 적에게 <span class='log-dmg'>${dmg}</span>의 치명적인 피해를 입혔습니다!`);
 
                 setTimeout(() => {
@@ -2156,6 +2187,7 @@
                     triggerScreenShake(true);
                     playMotion(hitMap[jobKey], 'player-frame', 'big');
                     showDamage('player-frame', dmg, 'player_hit');
+                    showCritEffect('player-frame');
                     say('e', '크하하하!');
                     addLog(`<span style='color:red; font-weight:bold; font-size:1.2rem;'>치명상! ${dmg} 피해!</span>`);
                 } else {
