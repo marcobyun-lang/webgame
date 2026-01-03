@@ -193,13 +193,17 @@
         .btn-confirm:hover { background: #ffea00; transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 234, 0, 0.5); }
 
         /* GameOver Modal */
-        #gameover-modal { width: 520px; height: auto; z-index: 1000; border: 2px solid var(--danger); display: none; }
-        .gameover-title { font-family: var(--font-combat); font-size: 2.5rem; color: var(--danger); text-align: center; margin-bottom: 20px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
-        .gameover-stats { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; box-sizing: border-box; }
-        .go-row { display: flex; justify-content: space-between; margin: 12px 0; font-size: 1.1rem; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        #gameover-modal { width: 560px; height: auto; z-index: 1000; border: 3px solid var(--danger); display: none; padding: 20px 30px; box-sizing: border-box; overflow: hidden; }
+        .gameover-title { font-family: var(--font-combat); font-size: 2.4rem; color: var(--danger); text-align: center; margin-bottom: 15px; text-shadow: 0 0 15px rgba(211, 47, 47, 0.5); }
+        .gameover-stats {
+            background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box;
+            border-top: 2px solid rgba(255,255,255,0.1); border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .go-row { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; }
+        .go-row:last-child { border-bottom: none; }
         .go-label { display: flex; align-items: center; gap: 8px; }
         .go-val { color: var(--accent-gold); font-weight: bold; }
-        .go-score { font-size: 2rem; color: #fff; text-align: center; margin-top: 15px; border-top: 2px solid #444; padding-top: 15px; font-family: var(--font-combat); letter-spacing: 2px; }
+        .go-score { font-size: 1.8rem; color: #fff; text-align: center; margin-top: 5px; border-top: 2px solid #555; padding-top: 10px; font-family: var(--font-combat); letter-spacing: 2px; }
 
         /* Item Modal Styles */
         #item-modal {
@@ -2234,8 +2238,9 @@
             const goldScore = Math.floor(player.gold * 0.1);
             const survivalScore = survivalTime;
             const coinScore = player.coinScore || 0;
+            const merchantScore = player.merchantUsed ? 1000 : 0;
 
-            const totalScore = lvScore + midBossScore + superBossScore + normalScore + goldScore + itemValue + survivalScore + coinScore;
+            const totalScore = lvScore + midBossScore + superBossScore + normalScore + goldScore + itemValue + survivalScore + coinScore + merchantScore;
 
             const statsContainer = document.getElementById('go-stats-container');
             statsContainer.innerHTML = `
@@ -2246,6 +2251,7 @@
                 <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
+                <div class="go-row"><div class="go-label">🎰 고블린 상인 조우</div><div class="go-val">${player.merchantUsed ? '완료' : '미발견'} <span style="color:#888; font-size:0.8rem;">+${merchantScore.toLocaleString()}</span></div></div>
                 <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
             `;
 
