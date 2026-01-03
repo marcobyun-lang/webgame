@@ -49,7 +49,7 @@
 
         #game-container {
             width: 960px;
-            height: 720px;
+            height: 780px;
             background: #000;
             border: 1px solid #333;
             box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
@@ -61,7 +61,7 @@
         }
 
         .game-ui-top {
-            height: 80px;
+            height: 140px;
             background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
             border-bottom: 1px solid #333;
             display: flex;
@@ -93,7 +93,8 @@
             width: 320px;
             position: absolute;
             left: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
         .bar-row { display: flex; align-items: center; gap: 8px; position: relative; }
         .bar-label {
@@ -119,7 +120,15 @@
             color: #fff; text-shadow: 1px 1px 2px #000; font-weight: bold; z-index: 2;
         }
 
-        .btn-group { display: flex; gap: 10px; align-items: center; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
         .menu-icon {
             width: 42px; height: 42px; cursor: pointer; transition: all 0.2s;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
@@ -359,17 +368,26 @@
         .rarity-legendary { color: var(--rarity-legendary) !important; text-shadow: 0 0 10px rgba(255, 128, 0, 0.7); }
 
         /* Weather Effects */
-        #weather-ui {
-            position: absolute; top: 90px; right: 20px;
-            background: rgba(0,0,0,0.7); border: 1px solid #444; padding: 5px 20px;
-            border-radius: 30px; display: flex; align-items: center; gap: 15px;
-            font-family: var(--font-body); font-size: 0.85rem; color: #fff; z-index: 15;
+        #weather-display {
+            position: absolute;
+            top: 150px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            z-index: 21;
+            white-space: nowrap;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .weather-icon { font-size: 1.2rem; }
+        .weather-icon { font-size: 1.1rem; }
+        #weather-text { font-size: 0.75rem; color: #fff; }
 
         #weather-overlay {
-            position: absolute; top: 80px; left: 0; width: 100%; height: calc(100% - 80px);
+            position: absolute; top: 140px; left: 0; width: 100%; height: calc(100% - 140px);
             pointer-events: none; z-index: 10; overflow: hidden;
         }
         .rain-drop {
@@ -454,17 +472,11 @@
     <div id="enhance-effect">강화 성공!</div>
     <div id="boss-warning">⚠️ 경고: 초강력 보스가 필드에 출현했습니다!</div>
 
-    <div id="weather-ui">
+    <div id="weather-display">
         <span class="weather-icon" id="weather-icon">☀️</span>
         <span id="weather-text">맑음</span>
-        <div class="btn-group">
-            <img src="image/menu_5.png" class="menu-icon" onclick="toggleSizeControl()" alt="화면 조절" title="화면 조절">
-            <img src="image/menu_1.png" class="menu-icon" onclick="openQuest()" alt="퀘스트" title="퀘스트">
-            <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
-            <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
-            <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
-        </div>
     </div>
+
     <div id="weather-overlay"></div>
     <div id="thunder-flash" class="thunder-flash"></div>
 
@@ -572,8 +584,12 @@
             <div class="bar-row"><span class="bar-label">EXP</span><div class="bar-bg"><div id="ui-exp-bar" class="bar-fill exp-fill"></div><span id="ui-exp-text" class="bar-text"></span></div></div>
         </div>
 
-        <div style="display:flex; align-items:center;">
-            <!-- 버튼 그룹이 날씨 UI로 이동됨 -->
+        <div class="btn-group">
+            <img src="image/menu_1.png" class="menu-icon" onclick="openQuest()" alt="퀘스트" title="퀘스트">
+            <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
+            <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
+            <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
+            <img src="image/menu_5.png" class="menu-icon" onclick="toggleSizeControl()" alt="화면 조절" title="화면 조절">
         </div>
     </div>
     <div class="canvas-wrapper"><canvas id="gameCanvas" width="960" height="640"></canvas></div>
@@ -913,7 +929,7 @@
 
         const baseWidth = 960;
         const baseHeight = 640;
-        const uiHeight = 80;
+        const uiHeight = 140;
 
         const newWidth = baseWidth * currentScale;
         const newHeight = baseHeight * currentScale;
@@ -1897,15 +1913,7 @@
         }
 
         // 간단하게 프롬프트나 컨펌으로 처리하기엔 복잡하므로,
-        // 기존 상점 모달을 재활용하거나 새로운 모달을 띄워야 함.
-        // 여기서는 간단히 confirm으로 첫 번째 장비부터 순회하며 물어보는 방식보다는
-        // 스크롤 사용 시 장비 선택 모달을 띄우는 것이 좋음.
-        // 하지만 현재 구조상 복잡하므로,
-        // 스크롤 사용 시 -> [강화] 모달처럼 장비 리스트를 띄우고 선택하게 하는 방식을 사용.
-
-        toggleModal('inventory-modal'); // 인벤토리 닫기
-
-        // 임시로 shop-modal을 재활용하여 장비 선택 유도
+        // 기존 상점 모달을 재활용하여 장비 선택 유도
         const modal = document.getElementById('shop-modal');
         const list = document.getElementById('shop-list');
         const title = modal.querySelector('h2');
