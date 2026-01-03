@@ -119,9 +119,9 @@
             color: #fff; text-shadow: 1px 1px 2px #000; font-weight: bold; z-index: 2;
         }
 
-        .btn-group { display: flex; gap: 15px; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
         .menu-icon {
-            width: 48px; height: 48px; cursor: pointer; transition: all 0.2s;
+            width: 42px; height: 42px; cursor: pointer; transition: all 0.2s;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         .menu-icon:hover {
@@ -361,9 +361,10 @@
         /* Weather Effects */
         #weather-ui {
             position: absolute; top: 90px; right: 20px;
-            background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 8px 15px;
-            border-radius: 20px; display: flex; align-items: center; gap: 10px;
+            background: rgba(0,0,0,0.7); border: 1px solid #444; padding: 5px 20px;
+            border-radius: 30px; display: flex; align-items: center; gap: 15px;
             font-family: var(--font-body); font-size: 0.85rem; color: #fff; z-index: 15;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .weather-icon { font-size: 1.2rem; }
 
@@ -431,7 +432,7 @@
 
         /* Size Control UI */
         #size-control-overlay {
-            position: absolute; top: 100px; right: 20px;
+            position: absolute; top: 160px; right: 20px;
             background: rgba(0,0,0,0.8); border: 1px solid var(--accent-gold);
             padding: 15px; border-radius: 8px; display: none; flex-direction: column;
             gap: 12px; z-index: 1000; align-items: center; width: 120px;
@@ -456,6 +457,13 @@
     <div id="weather-ui">
         <span class="weather-icon" id="weather-icon">☀️</span>
         <span id="weather-text">맑음</span>
+        <div class="btn-group">
+            <img src="image/menu_5.png" class="menu-icon" onclick="toggleSizeControl()" alt="화면 조절" title="화면 조절">
+            <img src="image/menu_1.png" class="menu-icon" onclick="openQuest()" alt="퀘스트" title="퀘스트">
+            <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
+            <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
+            <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
+        </div>
     </div>
     <div id="weather-overlay"></div>
     <div id="thunder-flash" class="thunder-flash"></div>
@@ -565,13 +573,7 @@
         </div>
 
         <div style="display:flex; align-items:center;">
-            <div class="btn-group">
-                <img src="image/menu_1.png" class="menu-icon" onclick="openQuest()" alt="퀘스트" title="퀘스트">
-                <img src="image/menu_2.png" class="menu-icon" onclick="openInventory()" alt="가방" title="가방">
-                <img src="image/menu_3.png" class="menu-icon" onclick="openShop()" alt="강화" title="강화">
-                <img src="image/menu_4.png" class="menu-icon" onclick="askManualSave()" alt="저장" title="저장">
-                <img src="image/menu_5.png" class="menu-icon" onclick="toggleSizeControl()" alt="화면 조절" title="화면 조절">
-            </div>
+            <!-- 버튼 그룹이 날씨 UI로 이동됨 -->
         </div>
     </div>
     <div class="canvas-wrapper"><canvas id="gameCanvas" width="960" height="640"></canvas></div>
