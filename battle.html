@@ -253,7 +253,7 @@
             40% { transform: translate(-10px, 10px) rotate(-5deg) scale(1.1); }
             100% { transform: translate(0, 0) scale(1); }
         }
-        .evasion-action { animation: evasionShake 1.0s ease-out; z-index: 50; }
+        .evade-action { animation: evasionShake 1.0s ease-out; z-index: 50; }
 
         /* Screen Shake Effect */
         @keyframes screenShake {
@@ -552,6 +552,18 @@
             20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1.0); }
         }
+
+        /* [신규] 스코어 계산 중 오버레이 */
+        #score-calculating-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .calc-text {
+            font-family: var(--font-combat); font-size: 2.5rem; color: var(--accent-gold);
+            margin-top: 20px; letter-spacing: 3px; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -566,6 +578,12 @@
 
         <div id="loading-overlay"><div class="spinner"></div><h2 id="loading-text" style="color:var(--accent-red); font-family:var(--font-eng);">BATTLE START</h2></div>
         
+        <!-- 스코어 계산 중 오버레이 추가 -->
+        <div id="score-calculating-overlay">
+            <div class="spinner"></div>
+            <div class="calc-text">스코어 계산 중...</div>
+        </div>
+
         <div id="result-modal" class="modal-overlay">
             <div class="modal-title">전투 승리!</div>
             <div id="result-content" class="result-content"></div>
@@ -1210,7 +1228,7 @@
         
         function triggerHitEffect(targetId, type) {
             const frame = document.getElementById(targetId);
-            frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evasion-action'); void frame.offsetWidth;
+            frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evade-action'); void frame.offsetWidth;
 
             if (isLegendary && (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') && targetId === 'enemy-frame' && type !== 'evade') {
                  const light = document.createElement('div');
@@ -1232,7 +1250,7 @@
             else if (type === 'big') frame.classList.add('hit-big');
             else if (type === 'player_hit') frame.classList.add('player-hit-anim');
             else if (type === 'crit') frame.classList.add('crit-action');
-            else if (type === 'evade') frame.classList.add('evasion-action');
+            else if (type === 'evade') frame.classList.add('evade-action');
         }
 
         function showCritEffect(targetId) {
@@ -1276,10 +1294,10 @@
                     const eImg = document.getElementById(evaMap[base]);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
-                        document.getElementById('player-frame').classList.add('evasion-action');
+                        document.getElementById('player-frame').classList.add('evade-action');
                         setTimeout(() => {
                             eImg.style.display = 'none'; pImg.style.display = 'block';
-                            document.getElementById('player-frame').classList.remove('evasion-action');
+                            document.getElementById('player-frame').classList.remove('evade-action');
                         }, 1000);
                         return;
                     }
@@ -1330,10 +1348,10 @@
                     const eImg = document.getElementById(evaMap[player.job || '전사']);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
-                        document.getElementById('player-frame').classList.add('evasion-action');
+                        document.getElementById('player-frame').classList.add('evade-action');
                         setTimeout(() => {
                             eImg.style.display = 'none'; pImg.style.display = 'block';
-                            document.getElementById('player-frame').classList.remove('evasion-action');
+                            document.getElementById('player-frame').classList.remove('evade-action');
                         }, 1000);
                     }
                 } else {
@@ -2242,61 +2260,69 @@
             if(rageBtn) rageBtn.style.display = 'none';
 
             stopBossBgm();
-            const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
-            const survivalTime = Math.floor((Date.now() - startTime) / 1000);
-            const min = Math.floor(survivalTime / 60);
-            const sec = survivalTime % 60;
 
-            const kills = player.quests.killCount || 0;
-            const midBossKills = player.quests.bossKillCount || 0;
-            const superBossKills = player.quests.superBossKillCount || 0;
-            const normalKills = Math.max(0, kills - midBossKills - superBossKills);
+            // 스코어 계산 중 오버레이 표시
+            const calcOverlay = document.getElementById('score-calculating-overlay');
+            calcOverlay.style.display = 'flex';
 
-            let itemValue = 0;
-            player.inventory.forEach(item => {
-                if (item.type === 'weapon') {
-                    if (item.rarity === 'legendary') itemValue += 5000;
-                    else if (item.rarity === 'epic') itemValue += 2000;
-                } else if (item.type.includes('potion') || item.type.includes('scroll')) {
-                    const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
-                    if (rareItems.includes(item.type)) itemValue += 500;
-                }
-            });
+            setTimeout(() => {
+                const startTime = parseInt(localStorage.getItem('rpg_start_time') || Date.now());
+                const survivalTime = Math.floor((Date.now() - startTime) / 1000);
+                const min = Math.floor(survivalTime / 60);
+                const sec = survivalTime % 60;
 
-            const lvScore = player.level * 1000;
-            const midBossScore = midBossKills * 2000;
-            const superBossScore = superBossKills * 10000;
-            const normalScore = normalKills * 10;
-            const goldScore = Math.floor(player.gold * 0.1);
-            const survivalScore = survivalTime;
-            const coinScore = player.coinScore || 0;
-            const merchantScore = player.merchantUsed ? 1000 : 0;
+                const kills = player.quests.killCount || 0;
+                const midBossKills = player.quests.bossKillCount || 0;
+                const superBossKills = player.quests.superBossKillCount || 0;
+                const normalKills = Math.max(0, kills - midBossKills - superBossKills);
 
-            const totalScore = lvScore + midBossScore + superBossScore + normalScore + goldScore + itemValue + survivalScore + coinScore + merchantScore;
+                let itemValue = 0;
+                player.inventory.forEach(item => {
+                    if (item.type === 'weapon') {
+                        if (item.rarity === 'legendary') itemValue += 5000;
+                        else if (item.rarity === 'epic') itemValue += 2000;
+                    } else if (item.type.includes('potion') || item.type.includes('scroll')) {
+                        const rareItems = ['potion_full', 'potion_focus', 'potion_madness', 'potion_skeleton', 'potion_holy', 'potion_gamble', 'scroll_option'];
+                        if (rareItems.includes(item.type)) itemValue += 500;
+                    }
+                });
 
-            const statsContainer = document.getElementById('go-stats-container');
-            statsContainer.innerHTML = `
-                <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">💀 최종 보스 처치</div><div class="go-val">${superBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${superBossScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">💀 중간 보스 처치</div><div class="go-val">${midBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${midBossScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">🎰 고블린 상인 조우</div><div class="go-val">${player.merchantUsed ? '완료' : '미발견'} <span style="color:#888; font-size:0.8rem;">+${merchantScore.toLocaleString()}</span></div></div>
-                <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
-            `;
+                const lvScore = player.level * 1000;
+                const midBossScore = midBossKills * 2000;
+                const superBossScore = superBossKills * 10000;
+                const normalScore = normalKills * 10;
+                const goldScore = Math.floor(player.gold * 0.1);
+                const survivalScore = survivalTime;
+                const coinScore = player.coinScore || 0;
+                const merchantScore = player.merchantUsed ? 1000 : 0;
 
-            document.querySelector('.gameover-title').innerText = msg;
-            document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
+                const totalScore = lvScore + midBossScore + superBossScore + normalScore + goldScore + itemValue + survivalScore + coinScore + merchantScore;
 
-            sendRankingData(totalScore, survivalTime);
+                const statsContainer = document.getElementById('go-stats-container');
+                statsContainer.innerHTML = `
+                    <div class="go-row"><div class="go-label">🔹 캐릭터 레벨</div><div class="go-val">${player.level} (LV) <span style="color:#888; font-size:0.8rem;">+${lvScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">💀 최종 보스 처치</div><div class="go-val">${superBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${superBossScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">💀 중간 보스 처치</div><div class="go-val">${midBossKills} (마리) <span style="color:#888; font-size:0.8rem;">+${midBossScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">⚔️ 몬스터 사냥</div><div class="go-val">${normalKills} (마리) <span style="color:#888; font-size:0.8rem;">+${normalScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">💰 보유 자산</div><div class="go-val">${player.gold.toLocaleString()} (G) <span style="color:#888; font-size:0.8rem;">+${goldScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">💎 아이템 가치</div><div class="go-val"><span style="color:#888; font-size:0.8rem;">+${itemValue.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">🪙 코인 점수</div><div class="go-val">${coinScore.toLocaleString()} <span style="color:#888; font-size:0.8rem;">+${coinScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">🎰 고블린 상인 조우</div><div class="go-val">${player.merchantUsed ? '완료' : '미발견'} <span style="color:#888; font-size:0.8rem;">+${merchantScore.toLocaleString()}</span></div></div>
+                    <div class="go-row"><div class="go-label">⏳ 생존 보너스</div><div class="go-val">${min}분 ${sec}초 <span style="color:#888; font-size:0.8rem;">+${survivalScore.toLocaleString()}</span></div></div>
+                `;
 
-            localStorage.removeItem('rpg_temp_player');
-            localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
-            localStorage.removeItem('rpg_boss_death_time');
+                document.querySelector('.gameover-title').innerText = msg;
+                document.getElementById('go-score-val').innerText = totalScore.toLocaleString();
 
-            document.getElementById('gameover-modal').style.display = 'flex';
+                sendRankingData(totalScore, survivalTime);
+
+                localStorage.removeItem('rpg_temp_player');
+                localStorage.removeItem('rpg_boss_x'); localStorage.removeItem('rpg_boss_y');
+                localStorage.removeItem('rpg_boss_death_time');
+
+                calcOverlay.style.display = 'none';
+                document.getElementById('gameover-modal').style.display = 'flex';
+            }, 2000); // 2초간 계산 중 메시지 표시
         }
 
         function getWeaponImage(job, rarity) {
