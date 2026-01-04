@@ -2407,7 +2407,7 @@
             const reward = pendingReward;
             if (reward.type === 'weapon') {
                 const newItem = {
-                    name: reward.name + " (+0)",
+                    name: reward.name + " (+" + reward.val + ")",
                     type: 'weapon',
                     desc: `공격력 +${reward.val} (${player.job} 전용)`,
                     val: reward.val,
@@ -2415,7 +2415,7 @@
                     equipped: false,
                     rarity: reward.rarity,
                     rarityColor: reward.rarity === 'epic' ? '#a335ee' : '#2196f3',
-                    enhanceCount: 0,
+                    enhanceCount: reward.val,
                     failCount: 0,
                     options: [],
                     img: reward.img
