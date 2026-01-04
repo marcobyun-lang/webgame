@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DUNGEON RPG - Character Select</title>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cinzel:wght@700&family=Inter:wght@400;600&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #050505;
@@ -743,6 +743,54 @@
             color: var(--accent-gold);
         }
 
+        /* Credits Section */
+        .credits-section {
+            margin-top: 80px; /* 더 아래로 내림 (기존 50px) */
+            padding: 20px;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            color: #555;
+            border-top: 1px solid #222;
+            width: 100%;
+            max-width: 600px;
+        }
+        .credits-title {
+            font-size: 0.9rem; /* 살짝 키움 */
+            letter-spacing: 4px; /* 간격 넓힘 */
+            margin-bottom: 20px; /* 아래 간격 넓힘 */
+            color: #555;
+            text-transform: uppercase;
+        }
+        .credits-names {
+            display: flex;
+            justify-content: center;
+            gap: 40px; /* 간격 넓힘 */
+            font-size: 1.2rem; /* 이름 크기 살짝 키움 */
+            font-weight: bold;
+        }
+        .credit-name {
+            position: relative;
+            transition: all 0.3s;
+        }
+        .credit-name::after {
+            content: "";
+            position: absolute;
+            bottom: -5px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 1px; background: var(--accent-gold);
+            transition: width 0.3s;
+        }
+        .credit-name:hover::after {
+            width: 100%;
+        }
+        .credit-role {
+            display: block;
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 8px; /* 간격 넓힘 */
+            font-family: 'Noto Serif KR', serif;
+            font-weight: bold;
+        }
+
         @media (max-width: 600px) {
             .creation-title { font-size: 2rem; }
             .char-card { width: 150px; }
@@ -758,6 +806,8 @@
             .rank-badge { width: 30px; font-size: 1.1rem; margin-right: 10px; }
             .rank-name { font-size: 1rem; }
             .rank-score-val { font-size: 1.1rem; }
+            .credits-names { gap: 20px; font-size: 1rem; }
+            .credits-section { margin-top: 50px; }
         }
     </style>
 </head>
@@ -875,6 +925,21 @@
                 <div id="ranking-rogue" class="ranking-card mini"></div>
                 <div id="ranking-mage" class="ranking-card mini"></div>
                 <div id="ranking-archer" class="ranking-card mini"></div>
+            </div>
+        </div>
+
+        <!-- Credits Section -->
+        <div class="credits-section">
+            <div class="credits-title">SPECIAL THANKS TO</div>
+            <div class="credits-names">
+                <div class="credit-name" style="color: #82b1ff;">
+                    <span class="credit-role">제작자 아들</span>
+                    변다온
+                </div>
+                <div class="credit-name" style="color: #f48fb1;">
+                    <span class="credit-role">제작자 딸</span>
+                    변유주
+                </div>
             </div>
         </div>
     </div>
