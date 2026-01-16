@@ -630,6 +630,7 @@
                     <div id="p-defense-aura" class="defense-aura"></div>
                     <img id="p-img" class="unit-img">
                     <img id="atk-warrior" src="image/warrior_atk_img.jpg" class="unit-img" style="display:none;">
+                    <video id="v-warrior-alt" src="image/warrior_atk_1.mp4" class="unit-img" style="display:none;"></video>
                     <img id="atk-rogue" src="image/rogue_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-mage" src="image/mage_atk_img.jpg" class="unit-img" style="display:none;">
                     <img id="atk-archer" src="image/archer_atk_img.jpg" class="unit-img" style="display:none;">
@@ -1228,7 +1229,7 @@
         
         function triggerHitEffect(targetId, type) {
             const frame = document.getElementById(targetId);
-            frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evade-action'); void frame.offsetWidth;
+            frame.classList.remove('hit-small', 'hit-big', 'hit-rogue', 'player-hit-anim', 'crit-action', 'evasion-action'); void frame.offsetWidth;
 
             if (isLegendary && (player.job === '마법사' || player.job === '아크메이지' || player.job === '소서러') && targetId === 'enemy-frame' && type !== 'evade') {
                  const light = document.createElement('div');
@@ -1250,7 +1251,7 @@
             else if (type === 'big') frame.classList.add('hit-big');
             else if (type === 'player_hit') frame.classList.add('player-hit-anim');
             else if (type === 'crit') frame.classList.add('crit-action');
-            else if (type === 'evade') frame.classList.add('evade-action');
+            else if (type === 'evade') frame.classList.add('evasion-action');
         }
 
         function showCritEffect(targetId) {
@@ -1294,10 +1295,10 @@
                     const eImg = document.getElementById(evaMap[base]);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
-                        document.getElementById('player-frame').classList.add('evade-action');
+                        document.getElementById('player-frame').classList.add('evasion-action');
                         setTimeout(() => {
                             eImg.style.display = 'none'; pImg.style.display = 'block';
-                            document.getElementById('player-frame').classList.remove('evade-action');
+                            document.getElementById('player-frame').classList.remove('evasion-action');
                         }, 1000);
                         return;
                     }
@@ -1348,10 +1349,10 @@
                     const eImg = document.getElementById(evaMap[player.job || '전사']);
                     if (eImg) {
                         pImg.style.display = 'none'; eImg.style.display = 'block';
-                        document.getElementById('player-frame').classList.add('evade-action');
+                        document.getElementById('player-frame').classList.add('evasion-action');
                         setTimeout(() => {
                             eImg.style.display = 'none'; pImg.style.display = 'block';
-                            document.getElementById('player-frame').classList.remove('evade-action');
+                            document.getElementById('player-frame').classList.remove('evasion-action');
                         }, 1000);
                     }
                 } else {
@@ -1592,9 +1593,18 @@
                 if (Math.random() < enemyEvadeChance && !isFocused) {
                     addLog("<span class='log-evade'>적이 공격을 회피했습니다!</span>");
                     playEvadeSfx();
-                    showDamage('enemy-frame', 0, 'evade');
-                    triggerHitEffect('enemy-frame', 'evade');
-                    update(); check();
+                    say('p', '느려!');
+                    playMotion('', 'player-frame', 'evade');
+                    showDamage('player-frame', 0, 'evade');
+                    playEnemyAttackMotion();
+
+                    if (pStatus.evasionBoost > 0) {
+                        rage = Math.min(maxRage, rage + 20);
+                        addLog("회피 성공! 분노가 <span style='color:orange'>20</span> 충전되었습니다.");
+                    }
+
+                    tickPlayerBuffs();
+                    update(); isActing = false;
                     return;
                 }
 
@@ -1876,7 +1886,8 @@
                     return;
                 } else {
                     let vMap = {
-                        '전사':'v-warrior', '마법사':'v-mage',
+                        '전사': (Math.random() < 0.5 ? 'v-warrior' : 'v-warrior-alt'),
+                        '마법사':'v-mage',
                         '버서커':'v-warrior1', '가디언':'v-warrior1',
                         '아크메이지':'v-mage1', '소서러':'v-mage1'
                     };
